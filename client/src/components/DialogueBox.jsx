@@ -28,11 +28,13 @@ export const DialogueBox = ({
   speakerName,
   displayedText,
   narratorState,
-  speakerKey,
   textEffects,
+  theme,
 }) => (
-  <div className='story-container' aria-live='polite'>
-    <div className={`speaker-name ${speakerKey}`}>{speakerName}</div>
+  <div className={`story-container theme-${theme}`} aria-live='polite'>
+    {speakerName && speakerName !== 'Narrator' && (
+      <h3 className='speaker-name'>{speakerName}</h3>
+    )}
     <p className='story-text'>
       {renderTextWithEffects(displayedText, textEffects)}
       {narratorState === 'narrating' && <span className='cursor'></span>}

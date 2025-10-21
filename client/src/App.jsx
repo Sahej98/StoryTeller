@@ -1,46 +1,77 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useGameState } from './hooks/useGameState.js';
 import { useSoundManager } from './hooks/useSoundManager.js';
-import { storyData, items } from './stories/the_asylum/index.js';
+import { stories } from './stories/index.js';
 import { SFX } from './data/audioData.js';
 import { GlobalStyles } from './components/GlobalStyles.jsx';
 import { Vignette } from './components/Vignette.jsx';
 import { Jumpscare } from './components/Jumpscare.jsx';
 import { StartScreen } from './components/StartScreen.jsx';
 import { GameUI } from './components/GameUI.jsx';
-import { MuteButton } from './components/MuteButton.jsx';
 import { SettingsModal } from './components/SettingsModal.jsx';
-import { HUD } from './components/HUD.jsx';
 import { InventoryModal } from './components/InventoryModal.jsx';
 import { JournalModal } from './components/JournalModal.jsx';
 import { ToBeContinuedScreen } from './components/ToBeContinuedScreen.jsx';
 import { ChapterSelectScreen } from './components/ChapterSelectScreen.jsx';
 import { CautionScreen } from './components/CautionScreen.jsx';
 import { DeathScreen } from './components/DeathScreen.jsx';
-import { Settings } from 'lucide-react';
+import { BackgroundImageFader } from './components/BackgroundImageFader.jsx';
+import { StorySelectScreen } from './components/StorySelectScreen.jsx';
+import { ScanLinesOverlay } from './components/ScanLinesOverlay.jsx';
+import { FilmGrainOverlay } from './components/FilmGrainOverlay.jsx';
 
-const SettingsButton = ({ onClick }) => (
-  <button className='game-button' onClick={onClick} aria-label='Open Settings'>
-    <Settings />
-  </button>
+const SAVE_GAME_KEY = 'interactiveHorrorSave';
+const SETTINGS_KEY = 'storytellerSettings';
+
+const AutosaveIndicator = () => (
+  <div className='autosave-indicator'>Autosaving...</div>
 );
 
-const FilmGrainOverlay = () => <div className='film-grain-overlay'></div>;
-
 export const App = () => {
-  const [appState, setAppState] = useState('startScreen'); // startScreen, chapterSelect, caution, playing, toBeContinued, deathScreen
+  const [appState, setAppState] = useState('startScreen'); // startScreen, storySelect, chapterSelect, caution, playing, toBeContinued, deathScreen, loading
   const [jumpscareActive, setJumpscareActive] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [inventoryVisible, setInventoryVisible] = useState(false);
   const [journalVisible, setJournalVisible] = useState(false);
   const [selectedChapter, setSelectedChapter] = useState(null);
-  const [volumes, setVolumes] = useState({
-    master: 1,
-    bgm: 0.3,
-    sfx: 0.6,
-    narration: 0.8,
+  const [activeBackground, setActiveBackground] = useState(null);
+  const [selectedStoryId, setSelectedStoryId] = useState(null);
+  const [showAutosave, setShowAutosave] = useState(false);
+
+  const [settings, setSettings] = useState(() => {
+    try {
+      const savedSettings = localStorage.getItem(SETTINGS_KEY);
+      const defaults = {
+        master: 1,
+        bgm: 0.3,
+        sfx: 0.6,
+        narration: 0.8,
+        narrationEnabled: true,
+      };
+      return savedSettings
+        ? { ...defaults, ...JSON.parse(savedSettings) }
+        : defaults;
+    } catch {
+      return {
+        master: 1,
+        bgm: 0.3,
+        sfx: 0.6,
+        narration: 0.8,
+        narrationEnabled: true,
+      };
+    }
   });
-  const preMuteMasterVolume = useRef(1);
+
+  const selectedStory = selectedStoryId ? stories[selectedStoryId] : null;
+  const storyTheme = selectedStory ? selectedStory.theme || 'scifi' : 'scifi';
+
+  const onChapterEnd = useCallback(() => {
+    setShowAutosave(true);
+    setTimeout(() => setShowAutosave(false), 2500);
+    setTimeout(() => {
+      goToChapterSelect();
+    }, 100);
+  }, []);
 
   const {
     gameState,
@@ -51,37 +82,56 @@ export const App = () => {
     loadGame,
     hasSaveData,
     loadCheckpoint,
-  } = useGameState();
+  } = useGameState(selectedStoryId, selectedStory, onChapterEnd);
+
   const {
     currentPosition,
-    playerStats,
-    inventory,
-    discoveredLore,
-    flags,
-    highestChapterUnlocked,
-    visitedNodes,
-  } = gameState;
+    playerStats = { sanity: 100, health: 100, stamina: 100, morality: 50 },
+    inventory = [],
+    discoveredLore = new Set(),
+    flags = new Set(),
+    highestChapterUnlocked = 1,
+    visitedNodes = new Set(),
+    characters: discoveredCharacters = new Set(),
+  } = gameState || {};
 
-  const currentNode = storyData[currentPosition.chapter]?.[currentPosition.key];
-  const isLowSanity = playerStats.sanity < 40;
+  const currentNode =
+    selectedStory && currentPosition
+      ? selectedStory.storyData[currentPosition.chapter]?.[currentPosition.key]
+      : null;
+  const isLowSanity = playerStats?.sanity < 40;
+
+  // Persist settings
+  useEffect(() => {
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    } catch (e) {
+      console.error('Could not save settings.', e);
+    }
+  }, [settings]);
+
+  useEffect(() => {
+    if (appState === 'playing') {
+      if (currentNode?.background) {
+        setActiveBackground(currentNode.background);
+      }
+    } else {
+      setActiveBackground(null);
+    }
+  }, [appState, currentNode]);
 
   const { bgmAudioRef, sfxAudioRef, playAmbientSfx, stopAllSfx } =
     useSoundManager({
       currentNode,
-      volumes,
+      volumes: settings,
       gameState: appState,
     });
 
-  const openJournal = () => {
-    setInventoryVisible(false);
-    setJournalVisible(true);
-  };
-
   const triggerJumpscare = (onComplete) => {
     setJumpscareActive(true);
-    if (sfxAudioRef.current && volumes.master > 0) {
+    if (sfxAudioRef.current && settings.master > 0) {
       sfxAudioRef.current.src = SFX.jumpscare;
-      sfxAudioRef.current.volume = volumes.sfx * volumes.master;
+      sfxAudioRef.current.volume = settings.sfx * settings.master;
       sfxAudioRef.current
         .play()
         .catch((e) => console.error('Jumpscare SFX failed', e));
@@ -93,8 +143,15 @@ export const App = () => {
     }, 800);
   };
 
+  const handleStartNewGame = () => setAppState('storySelect');
+
+  const handleStorySelect = (storyId) => {
+    setSelectedStoryId(storyId);
+    setAppState('chapterSelect');
+  };
+
   const goToChapterSelect = () => {
-    loadGame(); // Make sure latest unlocked chapter data is loaded
+    loadGame(true); // silent load to refresh unlocked chapters
     setAppState('chapterSelect');
   };
 
@@ -106,39 +163,15 @@ export const App = () => {
       return;
     }
 
-    const nextPosition =
-      typeof choice.next === 'object'
-        ? choice.next
-        : { chapter: currentPosition.chapter, key: choice.next };
-    const isChapterEnd = nextPosition.chapter !== currentPosition.chapter;
-
     const result = processChoice(choice);
-
     if (result === 'DEATH') {
       setAppState('deathScreen');
       return;
     }
 
-    const targetNodeKey = result;
-
-    if (isChapterEnd) {
-      setTimeout(() => {
-        goToChapterSelect();
-      }, 100);
-      return;
-    }
-
-    const targetNode = storyData[targetNodeKey.chapter]?.[targetNodeKey.key];
-
-    if (targetNode) {
-      const transition = () => {
-        /* State is already updated by processChoice */
-      };
-      if (targetNode.jumpscare) {
-        triggerJumpscare(transition);
-      } else {
-        transition();
-      }
+    const targetNode = selectedStory.storyData[result.chapter]?.[result.key];
+    if (targetNode?.jumpscare) {
+      triggerJumpscare(() => {});
     }
   };
 
@@ -149,40 +182,62 @@ export const App = () => {
 
   const handleChapterSelect = (chapterKey) => {
     setSelectedChapter(chapterKey);
-    setAppState('caution');
+    if (storyTheme === 'horror') {
+      setAppState('caution');
+    } else {
+      handleCautionProceed();
+    }
   };
 
   const handleLoadGame = () => {
-    if (loadGame()) {
-      setAppState('playing');
+    const savedData = localStorage.getItem(SAVE_GAME_KEY);
+    if (savedData) {
+      try {
+        const loadedState = JSON.parse(savedData);
+        if (loadedState.storyId && stories[loadedState.storyId]) {
+          setSelectedStoryId(loadedState.storyId);
+          setAppState('loading');
+        } else {
+          alert('Save data is corrupted or from an unknown story.');
+        }
+      } catch (e) {
+        alert('Could not read save data.');
+        localStorage.removeItem(SAVE_GAME_KEY);
+      }
     }
   };
+
+  useEffect(() => {
+    if (appState === 'loading' && selectedStoryId) {
+      if (loadGame()) {
+        setAppState('playing');
+      } else {
+        setAppState('startScreen');
+      }
+    }
+  }, [appState, selectedStoryId, loadGame]);
 
   const handleCautionProceed = () => {
     if (selectedChapter) {
       startGameAt(selectedChapter);
       setAppState('playing');
-      const startNode = storyData[selectedChapter].start;
-      if (startNode) {
+      const startNode = selectedStory.storyData[selectedChapter].start;
+      if (startNode?.background) {
         const img = new Image();
         img.src = startNode.background;
       }
     }
   };
 
-  const handleVolumeChange = useCallback((type, value) => {
-    const newVolume = parseFloat(value);
-    setVolumes((prev) => ({ ...prev, [type]: newVolume }));
-    if (type === 'master' && newVolume > 0) {
-      preMuteMasterVolume.current = newVolume;
-    }
+  const handleSettingsChange = useCallback((key, value) => {
+    setSettings((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const toggleMute = useCallback(() => {
-    const isCurrentlyMuted = volumes.master === 0;
-    const newMasterVolume = isCurrentlyMuted ? preMuteMasterVolume.current : 0;
-    setVolumes((prev) => ({ ...prev, master: newMasterVolume }));
-  }, [volumes.master]);
+  const handleQuickSave = () => {
+    saveGame(true);
+    setShowAutosave(true);
+    setTimeout(() => setShowAutosave(false), 2500);
+  };
 
   const checkChoiceRequirements = useCallback(
     (choice) => {
@@ -191,22 +246,18 @@ export const App = () => {
         stats,
         inventory: requiredInventory,
         flags: requiredFlags,
+        notFlags: forbiddenFlags,
       } = choice.requires;
-      if (stats) {
-        for (const stat in stats) {
+      if (stats)
+        for (const stat in stats)
           if ((playerStats[stat] || 0) < stats[stat]) return false;
-        }
-      }
-      if (requiredInventory) {
-        for (const item of requiredInventory) {
+      if (requiredInventory)
+        for (const item of requiredInventory)
           if (!inventory.includes(item)) return false;
-        }
-      }
-      if (requiredFlags) {
-        for (const flag of requiredFlags) {
-          if (!flags.has(flag)) return false;
-        }
-      }
+      if (requiredFlags)
+        for (const flag of requiredFlags) if (!flags.has(flag)) return false;
+      if (forbiddenFlags)
+        for (const flag of forbiddenFlags) if (flags.has(flag)) return false;
       return true;
     },
     [playerStats, inventory, flags]
@@ -215,40 +266,58 @@ export const App = () => {
   const availableChoices =
     currentNode?.choices?.filter(checkChoiceRequirements) || [];
 
-  if (!currentNode && appState === 'playing') {
-    return (
-      <div>
-        Error: Story node not found for {currentPosition.chapter}/
-        {currentPosition.key}
-      </div>
-    );
+  if (appState === 'playing' && (!gameState || !currentNode)) {
+    if (gameState && !currentNode)
+      return (
+        <div>
+          Error: Story node not found for {currentPosition.chapter}/
+          {currentPosition.key}
+        </div>
+      );
+    return null;
   }
 
   const viewportClasses = [
     'game-viewport',
-    jumpscareActive ? 'screen-shake' : '',
-    isLowSanity ? 'low-sanity' : '',
-    currentNode?.visualEffect ? `effect-${currentNode.visualEffect}` : '',
+    jumpscareActive && 'screen-shake',
+    isLowSanity && 'low-sanity',
+    currentNode?.visualEffect && `effect-${currentNode.visualEffect}`,
   ]
     .filter(Boolean)
     .join(' ');
 
   const renderContent = () => {
+    if (
+      !selectedStory &&
+      ['playing', 'chapterSelect', 'caution'].includes(appState)
+    ) {
+      setTimeout(() => setAppState('startScreen'), 0);
+      return null;
+    }
+
     switch (appState) {
       case 'startScreen':
         return (
           <StartScreen
-            onStart={goToChapterSelect}
+            onNewGame={handleStartNewGame}
             onLoad={handleLoadGame}
             hasSaveData={hasSaveData}
+          />
+        );
+      case 'storySelect':
+        return (
+          <StorySelectScreen
+            onSelect={handleStorySelect}
+            onBack={() => setAppState('startScreen')}
           />
         );
       case 'chapterSelect':
         return (
           <ChapterSelectScreen
+            storyDetails={selectedStory.storyDetails}
             unlockedChapter={highestChapterUnlocked}
             onSelect={handleChapterSelect}
-            onBack={() => setAppState('startScreen')}
+            onBack={() => setAppState('storySelect')}
           />
         );
       case 'caution':
@@ -261,25 +330,28 @@ export const App = () => {
         return <DeathScreen onRestart={handleRestartFromCheckpoint} />;
       case 'playing':
         return (
-          <>
-            <HUD
-              stats={playerStats}
-              onInventoryClick={() => setInventoryVisible(true)}
-              inventoryCount={inventory.length}
-            />
-            <GameUI
-              currentPosition={currentPosition}
-              volumes={volumes}
-              onChoice={handleChoice}
-              onRestart={() => handleChapterSelect(currentPosition.chapter)}
-              onAmbientSfx={playAmbientSfx}
-              onDialogueEnd={stopAllSfx}
-              availableChoices={availableChoices}
-              timer={currentNode.timer || 0}
-              defaultChoiceIndex={currentNode.defaultChoiceIndex || 0}
-              visitedNodes={visitedNodes}
-            />
-          </>
+          <GameUI
+            storyData={selectedStory.storyData}
+            characters={selectedStory.characters}
+            theme={storyTheme}
+            currentPosition={currentPosition}
+            settings={settings}
+            onChoice={handleChoice}
+            onRestart={() => handleChapterSelect(currentPosition.chapter)}
+            onAmbientSfx={playAmbientSfx}
+            onDialogueEnd={stopAllSfx}
+            availableChoices={availableChoices}
+            timer={currentNode.timer || 0}
+            defaultChoiceIndex={currentNode.defaultChoiceIndex || 0}
+            visitedNodes={visitedNodes}
+            playerStats={playerStats}
+            inventory={inventory}
+            flags={flags}
+            onInventoryClick={() => setInventoryVisible(true)}
+            onJournalClick={() => setJournalVisible(true)}
+            onSettingsClick={() => setSettingsVisible(true)}
+            onSaveClick={handleQuickSave}
+          />
         );
       default:
         return null;
@@ -291,53 +363,52 @@ export const App = () => {
       <GlobalStyles />
       <audio ref={bgmAudioRef} loop />
       <audio ref={sfxAudioRef} />
-      <div
-        className={viewportClasses}
-        style={{
-          backgroundImage:
-            appState === 'playing'
-              ? `url('${currentNode.background}')`
-              : 'none',
-        }}>
+      <div className={viewportClasses}>
+        {activeBackground && (
+          <BackgroundImageFader imageUrl={activeBackground} />
+        )}
         <Vignette isLowSanity={isLowSanity} />
-        <FilmGrainOverlay />
+        {storyTheme === 'horror' && <FilmGrainOverlay />}
+        {storyTheme === 'scifi' && <ScanLinesOverlay />}
 
-        {jumpscareActive && <Jumpscare />}
+        <Jumpscare
+          isVisible={jumpscareActive}
+          characters={selectedStory?.characters}
+        />
         {renderContent()}
 
-        {appState === 'playing' && (
-          <div className='top-right-controls'>
-            <MuteButton isMuted={volumes.master === 0} onToggle={toggleMute} />
-            <SettingsButton onClick={() => setSettingsVisible(true)} />
-          </div>
-        )}
+        {showAutosave && <AutosaveIndicator />}
 
-        <SettingsModal
-          isVisible={settingsVisible}
-          onClose={() => setSettingsVisible(false)}
-          volumes={volumes}
-          onVolumeChange={handleVolumeChange}
-          onSave={saveGame}
-          onRestart={() => {
-            setSettingsVisible(false);
-            restartGame();
-            goToChapterSelect();
-          }}
-        />
-        <InventoryModal
-          isVisible={inventoryVisible}
-          onClose={() => setInventoryVisible(false)}
-          inventory={inventory}
-          itemDefs={items}
-          discoveredLoreCount={discoveredLore.size}
-          onOpenJournal={openJournal}
-        />
-        <JournalModal
-          isVisible={journalVisible}
-          onClose={() => setJournalVisible(false)}
-          discoveredLore={Array.from(discoveredLore)}
-          itemDefs={items}
-        />
+        {selectedStory && (
+          <>
+            <SettingsModal
+              isVisible={settingsVisible}
+              onClose={() => setSettingsVisible(false)}
+              settings={settings}
+              onSettingsChange={handleSettingsChange}
+              onSave={() => saveGame()}
+              onRestart={() => {
+                setSettingsVisible(false);
+                restartGame();
+                goToChapterSelect();
+              }}
+            />
+            <InventoryModal
+              isVisible={inventoryVisible}
+              onClose={() => setInventoryVisible(false)}
+              inventory={inventory}
+              itemDefs={selectedStory.items}
+            />
+            <JournalModal
+              isVisible={journalVisible}
+              onClose={() => setJournalVisible(false)}
+              discoveredLore={Array.from(discoveredLore)}
+              discoveredCharacters={Array.from(discoveredCharacters)}
+              itemDefs={selectedStory.items}
+              characterDefs={selectedStory.characters}
+            />
+          </>
+        )}
       </div>
     </>
   );

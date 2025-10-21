@@ -1,4 +1,5 @@
 import { BGM, SFX } from '../../data/audioData.js';
+import { BG } from './backgrounds.js';
 
 export const chapter1 = {
   // ===================================================================
@@ -6,22 +7,36 @@ export const chapter1 = {
   // ===================================================================
   start: {
     speaker: 'Narrator',
-    text: 'The first thing you feel is a hammering in your skull, a symphony of agony conducted with ice picks. The first thing you taste is copper and bile, thick on your tongue. The first thing you smell is rot, antiseptic, and something metallic, like an abattoir where the drains have backed up.',
-    background:
-      '/images/the_asylum/chapter1/bg1.png',
+    text: 'The first thing you feel is a hammering in your skull, a symphony of agony conducted with ice picks. The first thing you taste is copper and bile.',
+    background: BG.start_room,
     bgm: BGM.ambient,
     ambientSfx: [{ triggerWord: 'hammering', sfx: SFX.headThrob }],
+    choices: [{ text: '...', next: 'start_b' }],
+  },
+  start_b: {
+    speaker: 'Narrator',
+    text: 'The first thing you smell is rot, antiseptic, and something metallic, like an abattoir where the drains have backed up.',
+    background: BG.start_room,
     choices: [{ text: 'Force your eyes open.', next: 'start_2' }],
   },
   start_2: {
     speaker: 'Narrator',
-    text: "Your eyelids peel open with a sticky, tearing sound. You're looking at a stained, peeling ceiling that seems to sweat a greasy film in the dim, flickering light. You are in a rusty hospital bed, the sheets stiff with dried fluids you pray are your own. Your body screams with a deep, cellular pain, as if it's been taken apart and put back together wrong.",
+    text: "Your eyelids peel open with a sticky, tearing sound. You're looking at a stained, peeling ceiling that seems to sweat a greasy film in the dim, flickering light.",
+    background: BG.start_room,
     ambientSfx: [{ triggerWord: 'flickering', sfx: SFX.lightBuzz }],
+    choices: [{ text: '...', next: 'start_2_b' }],
+  },
+  start_2_b: {
+    speaker: 'Narrator',
+    text: "You are in a rusty hospital bed, the sheets stiff with dried fluids. Your body screams with a deep, cellular pain, as if it's been taken apart and put back together wrong. A low moan escapes your lips.",
+    background: BG.start_room,
     choices: [{ text: 'Where... am I?', next: 'start_3' }],
   },
   start_3: {
     speaker: 'You',
-    text: "What... what is this place? My head... I can't remember anything. Not my name, not my face, nothing but a gnawing, black void.",
+    text: "Ugh... what... what is this place? My head... AGH! I can't remember anything. Not my name, not my face... nothing but a gnawing, black void.",
+    background: BG.start_room,
+    textEffects: [{ word: 'AGH!', effect: 'shock' }],
     choices: [
       { text: 'Look at your arms.', next: 'inspectSelf' },
       {
@@ -32,17 +47,24 @@ export const chapter1 = {
   },
   inspectSelf: {
     speaker: 'Narrator',
-    text: 'You raise a trembling hand. Your arms are a ruined canvas of old needle marks, track lines like rail yards of misery, and fresh, weeping bruises the color of a dead sunset. A plastic hospital band is cinched so tight it bites into your flesh. The name is smudged out, replaced with a raw, branded number: 47.',
-    textEffects: [
-      { word: 'branded', effect: 'red' },
-      { word: 'weeping', effect: 'red' },
-    ],
-    effects: { flags: { set: 'is47' }, stats: { sanity: -5 } },
+    text: 'You raise a trembling hand. Your arms are a ruined canvas of old needle marks and fresh, weeping bruises the color of a dead sunset.',
+    background: BG.start_room,
+    textEffects: [{ word: 'weeping', effect: 'red' }],
+    effects: { stats: { sanity: -2 } },
+    choices: [{ text: '...', next: 'inspectSelf_b' }],
+  },
+  inspectSelf_b: {
+    speaker: 'Narrator',
+    text: 'A plastic hospital band is cinched so tight it bites into your flesh. The name is smudged out, replaced with a raw, branded number: 47.',
+    background: BG.start_room,
+    textEffects: [{ word: 'branded', effect: 'red' }],
+    effects: { flags: { set: 'is47' }, stats: { sanity: -3 } },
     choices: [{ text: '47... a brand, not a name.', next: 'inspectSelf_2' }],
   },
   inspectSelf_2: {
     speaker: 'Narrator',
-    text: 'It looks like the number was burned into your skin with a heated tool, cauterizing the flesh into a puckered, angry wound. The flesh around it is red and weeping a clear, sticky fluid, smelling of cooked meat. The pain flares hot and white as you touch it.',
+    text: 'It looks like the number was burned into your skin, cauterizing the flesh into a puckered, angry wound. The flesh around it is red and weeping a clear, sticky fluid.',
+    background: BG.start_room,
     ambientSfx: [{ triggerWord: 'weeping', sfx: SFX.fleshTear }],
     effects: { stats: { health: -5 } },
     choices: [{ text: 'This is wrong. Get up. Now.', next: 'getUp' }],
@@ -50,11 +72,22 @@ export const chapter1 = {
   getUp: {
     speaker: 'You',
     text: "Okay... okay... ignore the pain. Just get up. Find out what's happening. Before whatever did this to me comes back.",
+    background: BG.start_room,
     choices: [{ text: '...', next: 'getUp_2' }],
   },
   getUp_2: {
     speaker: 'Narrator',
-    text: 'You swing your legs over the side of the bed. Your vision tunnels to a pinprick of grey as your body screams in protest. The room is a cell: a single heavy steel door slick with condensation, and a barred window thick with grime that seems to stare back at you.',
+    text: 'You swing your legs over the side of the bed. Your vision tunnels to a pinprick of grey as your body screams in protest.',
+    background: BG.start_room,
+    choices: [{ text: '...', next: 'getUp_2_b' }],
+  },
+  getUp_2_b: {
+    speaker: 'Narrator',
+    text: 'The room is a cell: a single heavy steel door slick with condensation, and a barred window thick with grime that seems to stare back at you.',
+    background: BG.start_room,
+    revisitText:
+      'Standing in my cell again. The door is locked tight, the window looks out onto a stormy courtyard.',
+    revisitSpeaker: 'You',
     choices: [
       { text: 'Check the door.', next: 'checkDoor' },
       { text: 'Look out the window.', next: 'window' },
@@ -62,7 +95,14 @@ export const chapter1 = {
   },
   checkDoor: {
     speaker: 'Narrator',
-    text: 'You pull on the heavy steel handle. It’s locked solid, cold and unforgiving. From the other side, you hear a wet, rhythmic dragging sound, like a butcher hauling a water-logged carcass across a concrete floor.',
+    text: 'You pull on the heavy steel handle. It’s locked solid, cold and unforgiving.',
+    background: BG.start_room,
+    choices: [{ text: '...', next: 'checkDoor_b' }],
+  },
+  checkDoor_b: {
+    speaker: 'Narrator',
+    text: 'From the other side, you hear a wet, rhythmic dragging sound, like a butcher hauling a water-logged carcass across a concrete floor.',
+    background: BG.start_room,
     ambientSfx: [{ triggerWord: 'dragging', sfx: SFX.janitor_drag }],
     revisitText:
       'The door is still locked tight. The silence from the other side is somehow worse now.',
@@ -77,16 +117,34 @@ export const chapter1 = {
   },
   listenDoor: {
     speaker: 'Narrator',
-    text: 'You press your ear to the cold steel. You hear ragged, inhuman breathing, like a bellows full of blood and phlegm. A low, wet gurgle. Then silence. A single, broken fingernail, caked in filth and dried viscera, scratches its way under the door from the other side. It wiggles, questing, twitching like a dying insect before slowly retracting.',
-    jumpscare: true,
-    visualEffect: 'flicker',
+    text: 'You press your ear to the cold steel. You hear ragged, inhuman breathing, like a bellows full of blood and phlegm. A low, wet gurgle. Then silence.',
+    background: BG.start_room,
+    choices: [{ text: '...', next: 'listenDoor_b' }],
+  },
+  listenDoor_b: {
+    speaker: 'Narrator',
+    text: 'A single, broken fingernail, caked in filth and dried viscera, scratches its way under the door from the other side.',
+    background: BG.start_room,
     ambientSfx: [{ triggerWord: 'scratches', sfx: SFX.scratching }],
+    choices: [{ text: '...', next: 'listenDoor_c' }],
+  },
+  listenDoor_c: {
+    speaker: 'Narrator',
+    text: 'It wiggles, questing, twitching like a dying insect before slowly retracting.',
+    background: BG.start_room,
+    jumpscare: true,
+    visualEffect: 'rumble',
     effects: { stats: { sanity: -15 } },
     choices: [{ text: 'WHAT THE HELL WAS THAT?!', next: 'listenDoor_2' }],
   },
   listenDoor_2: {
     speaker: 'You',
-    text: 'No. No way. That thing is right outside. I need a weapon. I need to find another way out. NOW.',
+    text: 'AGHHHH! What the HELL WAS THAT?! No. No way. That thing is right outside. I need a weapon. I need to find another way out. NOW.',
+    background: BG.start_room,
+    textEffects: [
+      { word: 'AGHHHH!', effect: 'shock' },
+      { word: 'NOW.', effect: 'anger' },
+    ],
     choices: [
       { text: 'Search the room frantically.', next: 'searchRoom_prompt' },
       { text: 'There must be another way out. The window.', next: 'window' },
@@ -94,10 +152,18 @@ export const chapter1 = {
   },
   knockDoor: {
     speaker: 'Narrator',
-    text: 'You bang your fists against the steel. The dragging sound stops. A moment of suffocating silence, then a huge, bloodshot EYE appears in the small peephole, wide and unblinking, veined with yellow pus. It stares directly into your soul with a malevolent, hungry intelligence before vanishing.',
+    text: 'You bang your fists against the steel. The dragging sound stops. A moment of suffocating silence follows.',
+    background: BG.start_room,
+    choices: [{ text: '...', next: 'knockDoor_b' }],
+  },
+  knockDoor_b: {
+    speaker: 'Narrator',
+    text: 'Then a huge, bloodshot EYE appears in the small peephole, wide and unblinking, veined with yellow pus. It stares directly into your soul before vanishing.',
+    background: BG.start_room,
     jumpscare: true,
+    visualEffect: 'rumble',
     textEffects: [
-      { word: 'EYE', effect: 'red' },
+      { word: 'EYE', effect: 'shock' },
       { word: 'stares', effect: 'shake' },
     ],
     effects: { stats: { sanity: -10 } },
@@ -107,8 +173,19 @@ export const chapter1 = {
   },
   window: {
     speaker: 'Narrator',
-    text: 'Rain lashes against the grimy, barred glass. In a brilliant flash of lightning, you see a small girl in a white dress standing in the courtyard below, digging in the mud with her bare hands. She stops, and slowly looks up, her face a pale, featureless blur, a canvas of skin with no eyes, no nose, no mouth. A perfect, horrible blank.',
+    npc: 'ghost',
+    background: BG.window_rain,
+    revisitText: 'The courtyard is still there, stormy and bleak.',
+    text: 'Rain lashes against the grimy, barred glass. In a brilliant flash of lightning, you see a small girl in a white dress standing in the courtyard below, digging in the mud.',
     ambientSfx: [{ triggerWord: 'lightning', sfx: SFX.thunder }],
+    choices: [{ text: '...', next: 'window_b' }],
+  },
+  window_b: {
+    speaker: 'Narrator',
+    npc: 'ghost',
+    background: BG.window_rain,
+    visualEffect: 'glitch',
+    text: 'She stops, and slowly looks up. Her face is a pale, featureless blur, a canvas of skin with no eyes, no nose, no mouth. A perfect, horrible blank.',
     textEffects: [
       { word: 'featureless blur', effect: 'whisper' },
       { word: 'horrible blank', effect: 'shake' },
@@ -118,6 +195,7 @@ export const chapter1 = {
   },
   window_2: {
     speaker: 'You',
+    background: BG.window_no_rain,
     text: "Is she... real? A ghost? My mind is playing tricks on me. That can't be real. I need to stop staring and find a way out.",
     choices: [
       { text: 'Search the room.', next: 'searchRoom_prompt' },
@@ -127,12 +205,21 @@ export const chapter1 = {
   searchRoom_prompt: {
     speaker: 'You',
     text: 'Okay, think. There has to be something in this godforsaken room I can use.',
+    background: BG.start_room,
     choices: [{ text: 'Search the room.', next: 'searchRoom' }],
   },
   searchRoom: {
     speaker: 'Narrator',
-    text: "You frantically search the small room. You rip the blood-stiff mattress off the frame, and a cloud of dust and dead skin flakes rises, choking you. Taped underneath is a small, bent key, slick with some kind of oil. On the back of the rusty headboard, someone has carved a desperate message into the metal with a fingernail: 'DON'T TRUST THE GIRL'.",
+    text: 'You rip the blood-stiff mattress off the frame. A cloud of dust and dead skin flakes rises, choking you. Taped underneath is a small, bent key, slick with oil.',
+    background: BG.start_room,
+    revisitText: "I've already searched the bed and found the key.",
     ambientSfx: [{ triggerWord: 'rip', sfx: SFX.paperRustle }],
+    choices: [{ text: '...', next: 'searchRoom_b' }],
+  },
+  searchRoom_b: {
+    speaker: 'Narrator',
+    text: "On the back of the rusty headboard, someone has carved a desperate message into the metal: 'DON'T TRUST THE GIRL'.",
+    background: BG.start_room,
     effects: {
       inventory: { add: ['bedroom_key'] },
       flags: { set: 'foundKey' },
@@ -142,17 +229,23 @@ export const chapter1 = {
   searchRoom_2: {
     speaker: 'You',
     text: "'Don't trust the girl'... She must mean the one in the courtyard. This key is my only way out of here.",
+    background: BG.start_room,
     choices: [{ text: 'Use the key on the door.', next: 'hallwayEntry' }],
   },
   hallwayEntry: {
     speaker: 'Narrator',
-    text: "The key turns with a heavy, grating CLUNK. You step into a long, dark hallway. The lights flicker erratically, casting twitching shadows that look like hanging bodies. To your right is a wrecked nurses' station, the source of a foul, coppery smell. Straight ahead, a strange, low-frequency humming sound vibrates through the floor. To your left, you hear faint, childish laughter. A sign points downstairs to a 'Service Tunnel'.",
-    background:
-      'https://images.unsplash.com/photo-1598214105267-144b574a2b3c?q=80&w=1974&auto=format&fit=crop',
+    text: 'The key turns with a heavy, grating CLUNK. You step into a long, dark hallway. The lights flicker erratically, casting twitching shadows that look like hanging bodies.',
+    background: BG.hallway_start,
     bgm: BGM.tension,
     sfx: SFX.unlock,
+    ambientSfx: [{ triggerWord: 'flicker', sfx: SFX.lightBuzz }],
+    choices: [{ text: '...', next: 'hallwayEntry_b' }],
+  },
+  hallwayEntry_b: {
+    speaker: 'Narrator',
+    text: "To your right is a wrecked nurses' station. Straight ahead, a strange humming vibrates through the floor. To your left, you hear faint, childish laughter.",
+    background: BG.hallway_start,
     ambientSfx: [
-      { triggerWord: 'flicker', sfx: SFX.lightBuzz },
       { triggerWord: 'laughter', sfx: SFX.childLaughter },
       { triggerWord: 'humming', sfx: SFX.lab_drone },
     ],
@@ -178,13 +271,21 @@ export const chapter1 = {
   // ===================================================================
   A_nursesStation: {
     speaker: 'Narrator',
-    text: "The station is a Jackson Pollock of viscera and desperation. Papers are plastered to surfaces with drying blood. A nurse is slumped over a desk, a letter opener buried to the hilt in her spine, her head resting in a congealing pool of her own fluids that drips slowly to the floor. A monitor flashes static. A drawer is labeled 'MAINTENANCE'. A heavy security locker stands in the corner.",
+    text: 'The station is a Jackson Pollock of viscera and desperation. Papers are plastered to surfaces with drying blood.',
+    background: BG.hallway_start,
+    ambientSfx: [{ triggerWord: 'viscera', sfx: SFX.gore }],
+    effects: { stats: { sanity: -2 } },
+    choices: [{ text: '...', next: 'A_nursesStation_b' }],
+  },
+  A_nursesStation_b: {
+    speaker: 'Narrator',
+    text: "A nurse is slumped over a desk, a letter opener in her spine. A monitor flashes static. A drawer is labeled 'MAINTENANCE'. A heavy security locker stands in the corner.",
+    background: BG.hallway_start,
     ambientSfx: [
-      { triggerWord: 'viscera', sfx: SFX.gore },
       { triggerWord: 'static', sfx: SFX.static },
-      { triggerWord: 'drips', sfx: SFX.waterDrip },
+      { triggerWord: 'slumped', sfx: SFX.waterDrip },
     ],
-    effects: { stats: { sanity: -10 } },
+    effects: { stats: { sanity: -8 } },
     revisitText:
       'The dead nurse remains a grim centerpiece in the ruined station. The smell is getting worse.',
     choices: [
@@ -197,9 +298,16 @@ export const chapter1 = {
   },
   A_searchNurse: {
     speaker: 'Narrator',
-    text: 'You cautiously touch her cold shoulder. As you do, her body emits a soft, gassy sigh. Her head lolls sideways with a wet, sucking sound, revealing a keycard pinned to her uniform, soaked in blood. Her dead, milky eyes seem to follow you.',
+    text: 'You cautiously touch her cold shoulder. As you do, her body emits a soft, gassy sigh. Her head lolls sideways with a wet, sucking sound.',
+    background: BG.hallway_start,
     jumpscare: true,
     ambientSfx: [{ triggerWord: 'sucking sound', sfx: SFX.gore }],
+    choices: [{ text: '...', next: 'A_searchNurse_b' }],
+  },
+  A_searchNurse_b: {
+    speaker: 'Narrator',
+    text: 'It reveals a keycard pinned to her uniform, soaked in blood. Her dead, milky eyes seem to follow you.',
+    background: BG.hallway_start,
     effects: { inventory: { add: 'keycard' }, stats: { sanity: -10 } },
     choices: [
       { text: 'What about that letter opener?', next: 'A_searchNurse_2' },
@@ -208,6 +316,7 @@ export const chapter1 = {
   A_searchNurse_2: {
     speaker: 'You',
     text: 'I might need that. This is... grim. But I need to survive. No matter what.',
+    background: BG.hallway_start,
     choices: [
       {
         text: 'Take the letter opener. (Morality -5)',
@@ -221,7 +330,14 @@ export const chapter1 = {
   },
   A_takeLetterOpener: {
     speaker: 'Narrator',
-    text: 'You grip the handle. Your knuckles brush against her cold, clammy skin. You pull the bloody letter opener from her back. It makes a sickening, wet SQUISH as it comes free, followed by the sound of tearing sinew, releasing a fresh wave of the coppery smell of death.',
+    text: 'You grip the handle, your knuckles brushing against her cold, clammy skin. You pull the bloody letter opener from her back.',
+    background: BG.hallway_start,
+    choices: [{ text: '...', next: 'A_takeLetterOpener_b' }],
+  },
+  A_takeLetterOpener_b: {
+    speaker: 'Narrator',
+    text: 'It makes a sickening, wet SQUISH as it comes free, followed by the sound of tearing sinew, releasing a fresh wave of the coppery smell of death.',
+    background: BG.hallway_start,
     ambientSfx: [{ triggerWord: 'SQUISH', sfx: SFX.fleshTear }],
     effects: { inventory: { add: 'letter_opener' }, stats: { morality: -5 } },
     choices: [{ text: 'Okay. I have it.', next: 'A_nursesStation' }],
@@ -229,6 +345,7 @@ export const chapter1 = {
   A_maintDrawer: {
     speaker: 'Narrator',
     text: "It's stuck fast. The wood is swollen and warped with blood and other fluids. You'll need something to pry it open.",
+    background: BG.hallway_start,
     choices: [
       {
         text: 'Use the letter opener.',
@@ -245,14 +362,16 @@ export const chapter1 = {
   },
   A_openDrawerCrowbar: {
     speaker: 'Narrator',
-    text: 'The crowbar makes short work of the drawer, splintering it into pieces. Inside is a rolled-up vent schematic. A path is circled in red, leading from a grate in this hallway into a "Maintenance Corridor". An escape route.',
+    text: 'The crowbar makes short work of the drawer, splintering it into pieces. Inside is a rolled-up vent schematic. An escape route is circled in red.',
+    background: BG.hallway_start,
     sfx: SFX.woodSplinter,
     effects: { inventory: { add: 'elevator_schematic' } },
     choices: [{ text: 'Find that vent grate.', next: 'A_findVent' }],
   },
   A_openDrawer: {
     speaker: 'Narrator',
-    text: 'The letter opener is barely strong enough. You jam it into the seam and pry with all your might. The wood groans and with a loud CRACK of splintering, the drawer pops open. The tip of the letter opener snaps off. Inside is a rolled-up vent schematic, a path circled in red.',
+    text: 'The letter opener is barely strong enough. You jam it into the seam and pry. With a loud CRACK, the drawer pops open, but the tip of the opener snaps off.',
+    background: BG.hallway_start,
     sfx: SFX.woodSplinter,
     effects: {
       inventory: { add: 'elevator_schematic' },
@@ -263,11 +382,18 @@ export const chapter1 = {
   },
   A_checkMonitor: {
     speaker: 'Narrator',
-    text: "The monitor shows a grainy security feed of a padded cell. In the corner, a person is rocking back and forth. They look up at the camera. Their face is twisted in a silent scream. It's you. The date on the screen is from three years ago. The words 'LET ME OUT' appear, scrawled in blood, before the feed cuts to static with a piercing electronic shriek.",
+    text: 'The monitor shows a grainy security feed of a padded cell. In the corner, a person is rocking back and forth. They look up at the camera.',
+    background: BG.hallway_start,
     visualEffect: 'glitch',
     sfx: SFX.static,
+    choices: [{ text: '...', next: 'A_checkMonitor_b' }],
+  },
+  A_checkMonitor_b: {
+    speaker: 'Narrator',
+    text: "Their face is twisted in a silent scream. It's you. The date on the screen is from three years ago. The words 'LET ME OUT' appear before the feed cuts out.",
+    background: BG.hallway_start,
     textEffects: [
-      { word: "It's you.", effect: 'shake' },
+      { word: "It's you.", effect: 'shock' },
       { word: 'LET ME OUT', effect: 'red' },
     ],
     effects: { stats: { sanity: -15 } },
@@ -277,7 +403,8 @@ export const chapter1 = {
   },
   A_examineLocker: {
     speaker: 'Narrator',
-    text: "It's a heavy steel locker. A note taped to it is written in shaky, blood-smeared handwriting: 'Idiot janitor, the code is the date of the incident.' It needs a 4-digit code.",
+    text: "It's a heavy steel locker. A note taped to it is written in shaky, blood-smeared handwriting: 'Idiot janitor, the code is the date of the incident.'",
+    background: BG.hallway_start,
     choices: [
       { text: 'Look for clues about the date.', next: 'A_guessLockerCode' },
       { text: 'Forget it.', next: 'A_nursesStation' },
@@ -285,7 +412,8 @@ export const chapter1 = {
   },
   A_guessLockerCode: {
     speaker: 'Narrator',
-    text: "You find a yellowed, moldy newspaper on the floor nearby, dated October 23, 1987. The headline is stark: 'Freak Electrical Accident at Asylum Claims Janitor; Body Horribly Mutilated'.",
+    text: "You find a yellowed newspaper on the floor nearby, dated October 23, 1987. The headline reads: 'Freak Electrical Accident at Asylum Claims Janitor'.",
+    background: BG.hallway_start,
     effects: { inventory: { add: 'old_newspaper' } },
     choices: [
       { text: 'Enter 1023.', next: 'A_openLocker' },
@@ -296,13 +424,15 @@ export const chapter1 = {
   A_lockerWrongCode: {
     speaker: 'Narrator',
     text: 'ACCESS DENIED. A shrill, brief alarm blares, making you jump out of your skin.',
+    background: BG.hallway_start,
     sfx: SFX.alarm,
     effects: { stats: { stamina: -5 } },
     choices: [{ text: 'Try again.', next: 'A_guessLockerCode' }],
   },
   A_openLocker: {
     speaker: 'Narrator',
-    text: "The code works. The heavy door swings open with a low groan. Inside the locker are a pair of thick rubber gloves, a heavy, rust-stained crowbar, and a small, brass key labeled 'FC-01'.",
+    text: "The code works. The heavy door swings open. Inside are thick rubber gloves, a heavy, rust-stained crowbar, and a small, brass key labeled 'FC-01'.",
+    background: BG.hallway_start,
     sfx: SFX.unlock,
     effects: {
       inventory: { add: ['rubber_gloves', 'crowbar', 'fan_control_key'] },
@@ -311,7 +441,8 @@ export const chapter1 = {
   },
   A_findVent: {
     speaker: 'Narrator',
-    text: "Following the schematic, you find the vent grate low on the wall, half-hidden behind a fallen cabinet. It's large enough to crawl through, but the screws are rusted solid.",
+    text: 'Following the schematic, you find the vent grate low on the wall, half-hidden behind a fallen cabinet. The screws are rusted solid.',
+    background: BG.hallway_start,
     choices: [
       {
         text: 'Use the crowbar to pry it open.',
@@ -323,14 +454,23 @@ export const chapter1 = {
   },
   A_openVent: {
     speaker: 'Narrator',
-    text: 'You wedge the crowbar into the seam. The metal groans and screeches as you put your weight into it, your muscles straining. With a final, loud SHREIK of tortured metal, the grate rips from the wall. The opening leads into a dark, cramped space that stinks of stagnant water and decay.',
-    effects: { stats: { stamina: -15 } },
+    text: 'You wedge the crowbar into the seam. The metal groans and screeches as you put your weight into it, your muscles straining.',
+    background: BG.hallway_start,
+    effects: { stats: { stamina: -10 } },
+    choices: [{ text: '...', next: 'A_openVent_b' }],
+  },
+  A_openVent_b: {
+    speaker: 'Narrator',
+    text: 'With a final, loud SHREIK of tortured metal, the grate rips from the wall. The opening leads into a dark, cramped space that stinks of decay.',
+    background: BG.hallway_start,
+    effects: { stats: { stamina: -5 } },
     ambientSfx: [{ triggerWord: 'SHREIK', sfx: SFX.scraping }],
     choices: [{ text: 'Enter the vents.', next: 'A_ventCrawl_1' }],
   },
   A_ventCrawl_1: {
     speaker: 'Narrator',
-    text: 'You crawl into the suffocating darkness, the metal cold against your skin. The vent is tight, scraping your back. You hear rats skittering just out of sight. The shaft splits. Left or right?',
+    text: 'You crawl into the suffocating darkness, the metal cold against your skin. The vent is tight, scraping your back. The shaft splits. Left or right?',
+    background: BG.maint_corridor,
     sfx: SFX.ventCrawl,
     choices: [
       {
@@ -345,14 +485,24 @@ export const chapter1 = {
   },
   A_ventCrawl_2_deadEnd: {
     speaker: 'Narrator',
-    text: "You crawl towards the dripping. The shaft ends in a grate overlooking a shower room. The floor is covered in blood and clumps of hair. A patient's severed hand lies near the drain, its fingers twitching feebly. There's no way through here.",
+    text: "You crawl towards the dripping. The shaft ends in a grate overlooking a shower room. The floor is covered in blood and hair. A patient's severed hand lies near the drain.",
+    background: BG.maint_corridor,
     effects: { stats: { sanity: -10 } },
     choices: [{ text: 'Go back.', next: 'A_ventCrawl_1' }],
   },
   A_ventCrawl_2_correct: {
     speaker: 'Narrator',
-    text: 'You follow the humming. It leads to another split. One path is blocked by a massive, spinning fan blade, but you see the corridor on the other side. The other path continues into darkness, a foul draft blowing from it.',
+    text: 'You follow the humming. It leads to another split. One path is blocked by a massive, spinning fan blade, but you see the corridor on the other side.',
+    background: BG.maint_corridor,
+    revisitText:
+      'Back at the split in the vent. The fan is still blocking one path.',
     ambientSfx: [{ triggerWord: 'spinning', sfx: SFX.fan_whir }],
+    choices: [{ text: '...', next: 'A_ventCrawl_2_correct_b' }],
+  },
+  A_ventCrawl_2_correct_b: {
+    speaker: 'Narrator',
+    text: 'The other path continues into darkness, a foul draft blowing from it.',
+    background: BG.maint_corridor,
     choices: [
       { text: 'Try to get past the fan.', next: 'A_ventFanFail' },
       { text: 'Explore the dark path.', next: 'A_janitorsLairEntry' },
@@ -360,21 +510,35 @@ export const chapter1 = {
   },
   A_ventFanFail: {
     speaker: 'Narrator',
-    text: "You inch closer to the fan. It's moving too fast, a blur of deadly steel. A loose piece of your clothing gets snagged and is instantly shredded. It's impossible to get past. You need to turn it off.",
+    text: "You inch closer to the fan. It's moving too fast, a blur of deadly steel. A loose piece of your clothing gets snagged and is instantly shredded. You need to turn it off.",
+    background: BG.maint_corridor,
     choices: [{ text: 'Find another way.', next: 'A_ventCrawl_2_correct' }],
   },
   A_janitorsLairEntry: {
     speaker: 'Narrator',
-    text: "The foul draft leads you to a grate. You look down into a small, squalid room. The Janitor's private lair. It's a workshop of human misery. Tools made of sharpened bone hang on the walls. Jars filled with formaldehyde and floating eyeballs line a shelf. In the corner is a bloody workbench. This is where he brings his victims.",
-    background:
-      'https://images.unsplash.com/photo-1615465997999-af32757a665a?q=80&w=1974&auto=format&fit=crop',
+    text: "The foul draft leads you to a grate. You look down into a small, squalid room. The Janitor's private lair. It's a workshop of human misery.",
+    background: BG.janitor_lair,
+    effects: { stats: { sanity: -10 } },
+    choices: [{ text: '...', next: 'A_janitorsLairEntry_b' }],
+  },
+  A_janitorsLairEntry_b: {
+    speaker: 'Narrator',
+    text: 'Tools made of sharpened bone hang on the walls. Jars filled with formaldehyde and floating eyeballs line a shelf. This is where he brings his victims.',
+    background: BG.janitor_lair,
     ambientSfx: [{ triggerWord: 'eyeballs', sfx: SFX.bone_saw }],
-    effects: { stats: { sanity: -20 } },
+    effects: { stats: { sanity: -10 } },
     choices: [{ text: 'Drop down into his lair.', next: 'A_janitorsLair' }],
   },
   A_janitorsLair: {
     speaker: 'Narrator',
-    text: 'You drop silently into the horrifying room. A single door leads out into the maintenance corridor. You can see the Fan Control room across the hall from here. On the workbench, amidst clamps and bloody saws, is a keycard and a syringe filled with a green, viscous fluid.',
+    text: 'You drop silently into the horrifying room. A single door leads out into the maintenance corridor. You can see the Fan Control room across the hall from here.',
+    background: BG.janitor_lair,
+    choices: [{ text: '...', next: 'A_janitorsLair_b' }],
+  },
+  A_janitorsLair_b: {
+    speaker: 'Narrator',
+    text: 'On the workbench, amidst clamps and bloody saws, is a keycard and a syringe filled with a green, viscous fluid.',
+    background: BG.janitor_lair,
     choices: [
       { text: 'Take the syringe.', next: 'A_takeSyringe' },
       { text: 'Take the keycard.', next: 'A_takeLairKeycard' },
@@ -384,28 +548,46 @@ export const chapter1 = {
   A_takeSyringe: {
     speaker: 'Narrator',
     text: "You pick up the syringe. A label reads 'Adrenal Stimulant'. Could be useful in a pinch, but using a dirty needle from this place is a huge risk.",
+    background: BG.janitor_lair,
     effects: { inventory: { add: 'adrenaline_syringe' } },
     choices: [{ text: '...I might need this.', next: 'A_janitorsLair' }],
   },
   A_takeLairKeycard: {
     speaker: 'Narrator',
     text: "You take the keycard. It's labeled 'Junction Box Access'.",
+    background: BG.janitor_lair,
     effects: { inventory: { add: 'junction_keycard' } },
     choices: [{ text: 'This could be important.', next: 'A_janitorsLair' }],
   },
   A_maintCorridor_Entry: {
     speaker: 'Narrator',
-    text: 'You are in a claustrophobic maze of rusting pipes and humming electrical conduits. The air is cold and smells of rust and ozone. You hear a rhythmic, wet dragging sound echoing from deeper within, growing louder, closer.',
-    background:
-      'https://images.unsplash.com/photo-1544697333-913a5e84852f?q=80&w=1974&auto=format&fit=crop',
+    text: 'You are in a claustrophobic maze of rusting pipes and humming electrical conduits. The air is cold and smells of rust and ozone.',
+    background: BG.maint_corridor,
     bgm: BGM.maintenance,
+    choices: [{ text: '...', next: 'A_maintCorridor_Entry_b' }],
+  },
+  A_maintCorridor_Entry_b: {
+    speaker: 'Narrator',
+    text: 'You hear a rhythmic, wet dragging sound echoing from deeper within, growing louder, closer.',
+    background: BG.maint_corridor,
     sfx: SFX.janitor_drag,
     effects: { setCheckpoint: true },
     choices: [{ text: 'I have to face him.', next: 'A_maintCorridor_1' }],
   },
   A_maintCorridor_1: {
     speaker: 'Narrator',
-    text: 'You move deeper. Around a corner, you see him. A hulking Janitor, his face hidden by a stained sackcloth hood, dragging a bloody mop made of what looks like human hair and entrails. He patrols a long stretch of corridor, blocking the way forward. To your left is a dark alcove. To your right, a side room labeled "Junction Box 03". Further down the hall is another door, labeled "Fan Control".',
+    npc: 'janitor',
+    text: 'Around a corner, you see him. A hulking Janitor, his face hidden by a stained sackcloth hood, dragging a bloody mop made of what looks like human hair.',
+    background: BG.maint_corridor,
+    choices: [{ text: '...', next: 'A_maintCorridor_1_b' }],
+  },
+  A_maintCorridor_1_b: {
+    speaker: 'Narrator',
+    text: 'He patrols a long stretch of corridor. To your left is a dark alcove. To your right, a room labeled "Junction Box 03". Further down is a door labeled "Fan Control".',
+    background: BG.maint_corridor,
+    revisitText:
+      'Back in the maintenance corridor. The Janitor is still on his patrol. I need to be careful.',
+    revisitSpeaker: 'You',
     effects: { flags: { set: 'A_sawJanitor' } },
     choices: [
       {
@@ -418,18 +600,52 @@ export const chapter1 = {
         requires: { stats: { stamina: 20 } },
       },
       { text: 'Try to sneak past him now.', next: 'A_sneakFail' },
+      {
+        text: 'Examine a heavily bolted side door.',
+        next: 'A_doorToPathB',
+      },
+    ],
+  },
+  A_doorToPathB: {
+    speaker: 'Narrator',
+    background: BG.maint_corridor,
+    text: "You notice a heavy, rusted door marked 'Hydrotherapy Wing'. It's bolted shut from this side. It would be extremely noisy to open.",
+    choices: [
+      {
+        text: 'Use the crowbar to force it open.',
+        next: 'A_forceDoorToPathB',
+        requires: { inventory: ['crowbar'] },
+      },
+      { text: 'Leave it. Too risky.', next: 'A_maintCorridor_1' },
+    ],
+  },
+  A_forceDoorToPathB: {
+    speaker: 'Narrator',
+    background: BG.maint_corridor,
+    text: "With a deafening series of screeches and groans, you wrench the bolts from the doorframe. The Janitor roars from down the hall, but you're already through, slamming the door behind you. You've switched paths, but he knows where you are now.",
+    sfx: SFX.scraping,
+    effects: { stats: { stamina: -20 }, flags: { set: 'janitor_knows_hydro' } },
+    choices: [
+      { text: "You're in the flooded wing now.", next: 'B_followHumming' },
     ],
   },
   A_watchPatrol: {
     speaker: 'Narrator',
-    text: 'From the shadows, you watch his grim patrol. He drags his mop from one end of the corridor to the other, a slow, predictable route. He lingers at the far end for a few moments, scraping something off the wall, before turning back. You could probably make a dash for one of the side rooms when his back is turned.',
+    text: 'From the shadows, you watch his grim patrol. He drags his mop from one end of the corridor to the other, a slow, predictable route.',
+    background: BG.maint_corridor,
+    choices: [{ text: '...', next: 'A_watchPatrol_b' }],
+  },
+  A_watchPatrol_b: {
+    speaker: 'Narrator',
+    text: 'He lingers at the far end for a few moments, scraping something off the wall, before turning back. You could probably make a dash for a side room.',
+    background: BG.maint_corridor,
     choices: [
       {
-        text: 'Wait for your chance, then run for the Junction Box room. (Costs Stamina)',
+        text: 'Wait, then run for the Junction Box room. (Costs Stamina)',
         next: 'A_runForJunction',
       },
       {
-        text: 'Wait for your chance, then run for the Fan Control room. (Costs Stamina)',
+        text: 'Wait, then run for the Fan Control room. (Costs Stamina)',
         next: 'A_runForFanControl',
       },
       { text: 'Stay hidden.', next: 'A_maintCorridor_1' },
@@ -438,6 +654,7 @@ export const chapter1 = {
   A_runForFanControl: {
     speaker: 'Narrator',
     text: "You wait for him to turn, then sprint down the hall to the Fan Control door, your heart hammering in your chest. You fumble with the handle. It's locked.",
+    background: BG.maint_corridor,
     effects: { stats: { stamina: -10 } },
     choices: [
       {
@@ -453,13 +670,15 @@ export const chapter1 = {
   },
   A_unlockFanControl: {
     speaker: 'Narrator',
-    text: 'The key slides in and turns. You slip inside the room just as you hear the Janitor starting his patrol back. You were almost caught. The door clicks shut behind you.',
+    text: 'The key slides in and turns. You slip inside the room just as you hear the Janitor starting his patrol back. The door clicks shut behind you.',
+    background: BG.maint_corridor,
     sfx: SFX.unlock,
     choices: [{ text: 'That was too close.', next: 'A_fanControlRoom' }],
   },
   A_fanControlRoom: {
     speaker: 'Narrator',
-    text: "The room contains a single, massive control panel for the ventilation fan. The emergency shut-off lever is here, but it's protected by a cage secured with a heavy, rusted bolt. You'll need a tool to get it off.",
+    text: "The room contains a control panel for the ventilation fan. The emergency shut-off lever is here, but it's protected by a cage secured with a heavy, rusted bolt.",
+    background: BG.maint_corridor,
     choices: [
       {
         text: 'Use the crowbar on the bolt. (Costs Stamina)',
@@ -474,26 +693,37 @@ export const chapter1 = {
   },
   A_sneakFail: {
     speaker: 'Narrator',
-    text: 'You try to creep past. A loose pipe shifts under your foot with a loud CLANG. The Janitor stops. He turns his head with a slow, sickening crack of bone. He sees you. He drops his mop and charges, faster than anything that big should move, letting out a guttural, inhuman roar that smells of rot and murder.',
+    text: 'You try to creep past. A loose pipe shifts under your foot with a loud CLANG. The Janitor stops and turns his head with a slow, sickening crack of bone.',
+    background: BG.maint_corridor,
     ambientSfx: [{ triggerWord: 'crack', sfx: SFX.boneSnap }],
-    textEffects: [{ word: 'inhuman roar', effect: 'shake' }],
+    choices: [{ text: '...', next: 'A_sneakFail_b' }],
+  },
+  A_sneakFail_b: {
+    speaker: 'Narrator',
+    text: 'He sees you. He drops his mop and charges, faster than anything that big should move, letting out a guttural, inhuman ROARRRRRRRR....!!!! that smells of rot and murder.',
+    background: BG.maint_corridor,
+    textEffects: [{ word: 'ROARRRRRRRR....!!!!', effect: 'fear' }],
     choices: [
       { text: 'He catches you. The world goes black.', next: 'A_janitorCatch' },
     ],
   },
   A_janitorCatch: {
     isDeath: true,
-    text: "The Janitor's massive, grimy hands close around your throat. He lifts you off the ground, your feet kicking uselessly as he squeezes. Your vision darkens to pinpricks of light, and the last thing you hear is the sound of your own neck snapping.",
+    background: BG.maint_corridor,
+    text: "The Janitor's massive, grimy hands close around your throat. He lifts you off the ground, your feet kicking uselessly as he squeezes. The last thing you hear is the sound of your own neck snapping.",
+    textEffects: [{ word: 'snapping', effect: 'shock' }],
   },
   A_runForJunction: {
     speaker: 'Narrator',
-    text: "You wait for him to turn his back, then sprint for the side room. You throw the door open and slam it shut behind you just as his meaty fist smashes against the other side, shaking the entire frame. You're safe, for now.",
+    text: 'You wait for him to turn his back, then sprint for the side room. You throw the door open and slam it shut behind you just as his meaty fist smashes against it.',
+    background: BG.maint_corridor,
     effects: { stats: { stamina: -15 } },
     choices: [{ text: 'That was too close.', next: 'A_junctionBoxRoom' }],
   },
   A_junctionBoxRoom: {
     speaker: 'Narrator',
-    text: 'The room is filled with humming machinery. A large junction box is on the wall, its panel hanging open. Three thick, sparking cables have come loose from their sockets, showering the floor in arcs of electricity. A faded diagram on the panel shows which cable goes into which socket, labeled A, B, and C.',
+    text: 'The room is filled with humming machinery. A large junction box is on the wall, its panel hanging open. Three thick, sparking cables have come loose.',
+    background: BG.maint_corridor,
     ambientSfx: [{ triggerWord: 'sparking', sfx: SFX.electric }],
     choices: [
       {
@@ -513,40 +743,53 @@ export const chapter1 = {
   },
   A_cableZap: {
     speaker: 'Narrator',
-    text: 'You reach for a cable. A massive jolt of electricity throws you across the room. Your vision goes white, and you smell burning hair and cooking meat. Your own. The pain is blinding and your heart stutters in your chest.',
+    text: 'You reach for a cable. A massive jolt of electricity throws you across the room. Your vision goes white, and you smell burning hair and cooking meat. Your own.',
+    background: BG.maint_corridor,
     sfx: SFX.electric_spark_heavy,
-    textEffects: [{ word: 'pain is blinding', effect: 'red' }],
+    textEffects: [{ word: 'cooking meat. Your own.', effect: 'red' }],
     effects: { stats: { health: -40, sanity: -10 } },
     choices: [{ text: 'Agh... stupid, stupid!', next: 'A_junctionBoxRoom' }],
   },
   A_cableSuccess: {
     speaker: 'Narrator',
-    text: 'The rubber gloves insulate you from the current. You carefully follow the diagram, wrestling each heavy cable back into its corresponding socket. With a deafening CLANG and a shower of sparks, the lights in the corridor flicker and a distant, heavy whirring sound starts up. You restored power to the main vents.',
+    text: 'The rubber gloves insulate you. You wrestle each heavy cable back into its socket. With a deafening CLANG, the lights in the corridor flicker and a distant whirring starts.',
+    background: BG.maint_corridor,
     sfx: SFX.electric_spark_heavy,
     effects: { flags: { set: 'A_powerRestored' } },
     choices: [{ text: 'Time to get out of here.', next: 'A_maintCorridor_1' }],
   },
   A_stopFanSuccess: {
     speaker: 'Narrator',
-    text: 'You wedge the crowbar under the bolt and heave with all your strength. The bolt snaps with a loud CRACK. You throw open the cage and pull the emergency lever down. With a groan of tortured metal, the massive fan blades grind to a halt. The sudden silence is terrifying. And then you hear a bloodcurdling roar from down the corridor. He knows.',
-    effects: { stats: { stamina: -20 } },
+    text: 'You wedge the crowbar under the bolt and heave. The bolt snaps with a loud CRACK. You throw open the cage and pull the emergency lever down.',
+    background: BG.maint_corridor,
+    effects: { stats: { stamina: -15 } },
     ambientSfx: [
       { triggerWord: 'CRACK', sfx: SFX.boneSnap },
-      { triggerWord: 'groan', sfx: SFX.lever_creak_heavy },
+      { triggerWord: 'lever', sfx: SFX.lever_creak_heavy },
     ],
+    choices: [{ text: '...', next: 'A_stopFanSuccess_b' }],
+  },
+  A_stopFanSuccess_b: {
+    speaker: 'Narrator',
+    text: 'With a groan of tortured metal, the massive fan blades grind to a halt. The sudden silence is terrifying. And then you hear a bloodcurdling roar from down the corridor. He knows.',
+    background: BG.maint_corridor,
+    effects: { stats: { stamina: -5 } },
     sfx: SFX.monster_roar,
+    textEffects: [{ word: 'roar', effect: 'anger' }],
     choices: [{ text: "He's coming!", next: 'A_chaseStart' }],
   },
   A_chaseStart: {
     speaker: 'Narrator',
-    text: "Heavy, running footsteps are getting closer, faster than before. The Janitor is coming. You scramble back to the now-motionless fan blades and slip into the main ventilation shaft. There's no turning back now. The darkness swallows you whole.",
+    text: 'Heavy, running footsteps are getting closer. The Janitor is coming. You scramble back to the now-motionless fan blades and slip into the main ventilation shaft.',
+    background: BG.maint_corridor,
     bgm: BGM.descent, // Chase Music
     effects: { setCheckpoint: true },
     choices: [{ text: 'RUN!', next: 'A_chase_1' }],
   },
   A_chase_1: {
     speaker: 'Narrator',
-    text: 'The shaft is pitch black and slick with some foul ooze. You can hear him right behind you, his metal-toed boots clanging on the vent floor, his guttural breathing like a death rattle. The shaft splits. Left or Right?',
+    text: 'The shaft is pitch black and slick with some foul ooze. You can hear him right behind you, his metal-toed boots clanging on the vent floor. The shaft splits. Left or Right?',
+    background: BG.maint_corridor,
     choices: [
       { text: 'Go Left', next: 'A_chase_2_correct' },
       { text: 'Go Right', next: 'A_chase_2_fail' },
@@ -556,13 +799,21 @@ export const chapter1 = {
   },
   A_chase_2_fail: {
     speaker: 'Narrator',
-    text: "You take the right path. It's a dead end. A heavy grate blocks the way. There's nowhere to run. The Janitor's hulking form fills the tunnel behind you, blotting out the light.",
+    text: "You take the right path. It's a dead end. A heavy grate blocks the way. The Janitor's hulking form fills the tunnel behind you, blotting out the light.",
+    background: BG.maint_corridor,
     choices: [{ text: 'Trapped like a rat.', next: 'A_janitorCatch' }],
   },
   A_chase_2_correct: {
     speaker: 'Narrator',
-    text: 'You scramble down the left path. Ahead, a cloud of scalding steam is venting across the shaft, completely blocking the way! You can see an old shutoff valve on the wall just before the steam cloud. His grimy, powerful hand reaches through the darkness, just missing your leg.',
+    text: 'You scramble down the left path. Ahead, a cloud of scalding steam is venting across the shaft, completely blocking the way!',
+    background: BG.maint_corridor,
     ambientSfx: [{ triggerWord: 'steam', sfx: SFX.steam_hiss }],
+    choices: [{ text: '...', next: 'A_chase_2_correct_b' }],
+  },
+  A_chase_2_correct_b: {
+    speaker: 'Narrator',
+    text: 'You can see an old shutoff valve on the wall just before the steam cloud. His grimy hand reaches through the darkness, just missing your leg.',
+    background: BG.maint_corridor,
     choices: [
       {
         text: 'Try to run through the steam. (High Damage)',
@@ -583,18 +834,21 @@ export const chapter1 = {
   A_chase_steam_burn: {
     speaker: 'Narrator',
     text: 'The scalding steam sears your flesh. The pain is unimaginable. You collapse on the other side, vision swimming, your skin bubbling and peeling. The Janitor looms over you.',
+    background: BG.maint_corridor,
     effects: { stats: { health: -80 } },
     choices: [{ text: 'It hurts...', next: 'A_janitorCatch' }],
   },
   A_chase_turn_valve: {
     speaker: 'Narrator',
     text: 'You push yourself to the limit, your lungs burning. You grab the valve and turn with all your might. The steam cuts off with a hiss. You stumble through, exhausted, but alive.',
+    background: BG.maint_corridor,
     effects: { stats: { stamina: -30 } },
     choices: [{ text: 'Keep going!', next: 'A_chase_3' }],
   },
   A_chase_use_syringe: {
     speaker: 'Narrator',
-    text: 'You fumble for the syringe and jam it into your thigh. A jolt of pure fire floods your veins. The world sharpens, your exhaustion vanishes. You sprint through the steam before it can even touch you, a manic grin on your face as you leave the Janitor in your dust.',
+    text: 'You fumble for the syringe and jam it into your thigh. A jolt of pure fire floods your veins. You sprint through the steam before it can even touch you.',
+    background: BG.maint_corridor,
     sfx: SFX.syringe,
     effects: {
       stats: { stamina: 100, sanity: -20 },
@@ -605,6 +859,7 @@ export const chapter1 = {
   A_chase_3: {
     speaker: 'Narrator',
     text: "You see a faint light ahead. It's an exit grate! You can hear his ragged breathing just behind you. He's reaching for you!",
+    background: BG.maint_corridor,
     effects: { stats: { health: -15, stamina: -10 } },
     choices: [
       {
@@ -617,7 +872,8 @@ export const chapter1 = {
   },
   A_escape: {
     speaker: 'Narrator',
-    text: 'You kick the grate with the last of your strength. It flies open, and you spill out into the cold, rain-soaked air of a different part of the asylum grounds. You made it out of the maintenance block. But you are far from free.',
+    text: 'You kick the grate with the last of your strength. It flies open, and you spill out into the cold, rain-soaked air of a different part of the asylum grounds. You made it out.',
+    background: BG.courtyard_rainy,
     bgm: BGM.courtyard,
     sfx: SFX.rain,
     effects: { flags: { set: 'A_completed' }, stats: { stamina: -10 } },
@@ -631,11 +887,16 @@ export const chapter1 = {
   // ===================================================================
   B_followHumming: {
     speaker: 'Narrator',
-    text: "You follow the low, resonant humming to a flooded wing. Ankle-deep, murky water covers the floor, and the air is thick with the smell of mold and decay. The humming seems to come from an old grandfather clock at the far end of the hall. Doors lead to what were once doctors' offices.",
-    background:
-      'https://images.unsplash.com/photo-1594913262039-41a457a3a5f8?q=80&w=2070&auto=format&fit=crop',
+    text: 'You follow the low, resonant humming to a flooded wing. Ankle-deep, murky water covers the floor, and the air is thick with the smell of mold and decay.',
+    background: BG.flooded_wing,
     bgm: BGM.supernatural,
     sfx: SFX.waterDrip,
+    choices: [{ text: '...', next: 'B_followHumming_b' }],
+  },
+  B_followHumming_b: {
+    speaker: 'Narrator',
+    text: "The humming seems to come from an old grandfather clock at the far end of the hall. Doors lead to what were once doctors' offices.",
+    background: BG.flooded_wing,
     revisitText:
       "You are in the flooded wing. The clock still hums, a beacon in the gloom. The water seems to ripple when you aren't looking at it.",
     choices: [
@@ -654,7 +915,14 @@ export const chapter1 = {
   },
   B_clock: {
     speaker: 'Narrator',
-    text: 'The large grandfather clock is the source of the hum. Its face is missing the minute hand and one of the gears. Three slots are carved into its base, shaped like a tape reel, a locket, and a pocket watch. A plaque reads: "Remember our failures, lest they be repeated." You must present the memories of the doctors who died here.',
+    text: 'The clock is the source of the hum. Its face is missing a hand and a gear. Three slots are carved into its base, shaped like a tape reel, a locket, and a watch.',
+    background: BG.flooded_wing,
+    choices: [{ text: '...', next: 'B_clock_b' }],
+  },
+  B_clock_b: {
+    speaker: 'Narrator',
+    text: 'A plaque reads: "Remember our failures, lest they be repeated." You must present the memories of the doctors who died here.',
+    background: BG.flooded_wing,
     choices: [
       {
         text: 'Place the memories in the clock.',
@@ -668,7 +936,8 @@ export const chapter1 = {
   },
   B_craneOffice: {
     speaker: 'Narrator',
-    text: 'The door is charred and melted, the paint bubbled and black. Inside, the room is a blackened husk. A skeleton in a lab coat is fused to a melted steel desk, its jaw open in a silent scream. The air is still hot. A locked medical box sits on a shelf. The desk drawer is melted shut.',
+    text: 'The door is charred and melted. Inside, the room is a blackened husk. A skeleton in a lab coat is fused to a melted steel desk, its jaw open in a silent scream.',
+    background: BG.flooded_wing,
     choices: [
       { text: 'Examine the skeleton.', next: 'B_examineCrane' },
       { text: 'Try to open the desk drawer.', next: 'B_craneDrawer' },
@@ -680,15 +949,31 @@ export const chapter1 = {
     speaker: 'Echo',
     npc: 'echo',
     speakerKey: 'doctor',
-    text: "As you approach, a ghostly, transparent image of Dr. Crane flickers into existence. 'The specimen is unstable! The reaction is... it's too hot!' he screams, as spectral flames engulf him. The heat in the room intensifies, and your skin feels like it's starting to burn. You see something clutched in the skeleton's charred hand.",
+    text: "As you approach, a ghostly image of Dr. Crane flickers into existence. 'The specimen is unstable! The reaction is... it's too hot!' he screams.",
+    background: BG.flooded_wing,
     visualEffect: 'glitch',
     sfx: SFX.ghostly_moan,
+    choices: [{ text: '...', next: 'B_examineCrane_b' }],
+  },
+  B_examineCrane_b: {
+    speaker: 'Echo',
+    npc: 'echo',
+    speakerKey: 'doctor',
+    text: "Spectral flames engulf him. The heat in the room intensifies, and your skin feels like it's starting to burn. You see something in the skeleton's charred hand.",
+    background: BG.flooded_wing,
     effects: { stats: { sanity: -10, health: -5 } },
     choices: [{ text: "Take what's in its hand.", next: 'B_takeTape' }],
   },
   B_takeTape: {
     speaker: 'Narrator',
-    text: "You reach into the skeleton's grasp. The bones are brittle and crumble to dust as you take the object: a single, pristine audio tape, untouched by the flames. As your fingers touch it, you feel an intense wave of heat and hear the man's final, agonized screams in your mind. A memory of fire.",
+    text: "You reach into the skeleton's grasp. The bones crumble to dust as you take the object: a single, pristine audio tape, untouched by the flames.",
+    background: BG.flooded_wing,
+    choices: [{ text: '...', next: 'B_takeTape_b' }],
+  },
+  B_takeTape_b: {
+    speaker: 'Narrator',
+    text: "As you touch it, you feel an intense heat and hear the man's final, agonized screams in your mind. A memory of fire.",
+    background: BG.flooded_wing,
     sfx: SFX.scream,
     effects: { inventory: { add: 'melted_tape' }, stats: { sanity: -10 } },
     choices: [
@@ -698,6 +983,7 @@ export const chapter1 = {
   B_craneDrawer: {
     speaker: 'Narrator',
     text: 'The drawer is a solid mass of melted metal. You might be able to force it with a tool.',
+    background: BG.flooded_wing,
     choices: [
       {
         text: 'Use the crowbar.',
@@ -710,6 +996,7 @@ export const chapter1 = {
   B_openCraneDrawer: {
     speaker: 'Narrator',
     text: 'You jam the crowbar into the warped metal and heave. It opens with a screech, revealing a heavy iron valve handle.',
+    background: BG.flooded_wing,
     sfx: SFX.scraping,
     effects: { inventory: { add: 'valve_handle' } },
     choices: [{ text: 'This looks important.', next: 'B_craneOffice' }],
@@ -717,6 +1004,7 @@ export const chapter1 = {
   B_craneBox: {
     speaker: 'Narrator',
     text: "A small locked box, requiring a key. A note on it says 'Patient 14 - Effects'.",
+    background: BG.flooded_wing,
     choices: [
       {
         text: 'Use the small key.',
@@ -729,12 +1017,20 @@ export const chapter1 = {
   B_openCraneBox: {
     speaker: 'Narrator',
     text: 'The key turns and the box opens. Inside is a single, beautiful silver locket.',
+    background: BG.flooded_wing,
     effects: { inventory: { add: 'drowned_locket' } },
     choices: [{ text: 'Take the locket.', next: 'B_craneOffice' }],
   },
   B_blackwoodOffice: {
     speaker: 'Narrator',
-    text: 'This office is filled with diagrams of hydrotherapy equipment. A huge, glass-walled water tank dominates the room. Submerged at the bottom is the bloated, pale corpse of a patient in a straitjacket. A small, rusty key is tied to her wrist with a piece of string. A large valve on the side of the tank is missing its handle.',
+    text: 'This office is filled with diagrams of hydrotherapy equipment. A huge, glass-walled water tank dominates the room. Submerged at the bottom is a bloated, pale corpse.',
+    background: BG.flooded_wing,
+    choices: [{ text: '...', next: 'B_blackwoodOffice_b' }],
+  },
+  B_blackwoodOffice_b: {
+    speaker: 'Narrator',
+    text: 'A small, rusty key is tied to her wrist with a piece of string. A large valve on the side of the tank is missing its handle.',
+    background: BG.flooded_wing,
     ambientSfx: [{ triggerWord: 'tank', sfx: SFX.waterDrip }],
     choices: [
       {
@@ -748,7 +1044,8 @@ export const chapter1 = {
   },
   B_reachForKey: {
     speaker: 'Narrator',
-    text: "As your hand enters the icy water, the corpse's eyes snap open. They are milky white and filled with hate. A spectral force grabs your arm, trying to pull you in! You scream and scramble back just as its teeth snap shut where your fingers were.",
+    text: "As your hand enters the icy water, the corpse's eyes snap open. A spectral force grabs your arm, trying to pull you in! You scramble back just as its teeth snap shut.",
+    background: BG.flooded_wing,
     jumpscare: true,
     sfx: SFX.water_splash_heavy,
     effects: { stats: { sanity: -15, health: -10 } },
@@ -758,15 +1055,64 @@ export const chapter1 = {
     speaker: 'Echo',
     npc: 'echo',
     speakerKey: 'doctor',
-    text: "You attach the handle and turn. With a groan, the tank begins to drain. As the water recedes, a ghostly Dr. Blackwood appears, holding the patient under. 'The results justify the means,' he whispers, his voice watery and distorted. He holds her until she stops struggling, then vanishes. You take the small key from her wrist.",
+    text: 'You attach the handle and turn. With a groan, the tank begins to drain. A ghostly Dr. Blackwood appears, holding the patient under.',
+    background: BG.flooded_wing,
     sfx: SFX.water_drain,
     visualEffect: 'glitch',
+    choices: [{ text: '...', next: 'B_drainTank_b' }],
+  },
+  B_drainTank_b: {
+    speaker: 'Echo',
+    npc: 'echo',
+    speakerKey: 'doctor',
+    text: "'The results justify the means,' he whispers, his voice watery and distorted. He holds her until she stops struggling, then vanishes.",
+    background: BG.flooded_wing,
+    choices: [
+      { text: 'The tank is empty now.', next: 'B_blackwoodOffice_drained' },
+    ],
+  },
+  B_blackwoodOffice_drained: {
+    speaker: 'Narrator',
+    background: BG.flooded_wing,
+    text: 'The tank is empty, the ghostly vision faded. The small key sits on the wrist of the corpse. At the bottom of the tank, you now see a large maintenance drain.',
+    revisitText:
+      'The tank is empty. The drain at the bottom looks like a possible way down.',
+    choices: [
+      { text: 'Take the small key.', next: 'B_takeSmallKey' },
+      {
+        text: 'Pry open the drain with the crowbar.',
+        next: 'B_drainToPathD',
+        requires: { inventory: ['crowbar'] },
+      },
+      { text: 'Leave.', next: 'B_followHumming' },
+    ],
+  },
+  B_takeSmallKey: {
+    speaker: 'Narrator',
+    background: BG.flooded_wing,
+    text: 'You take the small key from the corpse. Its skin is cold and rubbery.',
     effects: { inventory: { add: 'small_key' }, stats: { sanity: -10 } },
-    choices: [{ text: 'Now for the locket.', next: 'B_craneOffice' }],
+    choices: [{ text: 'Now, where does this go?', next: 'B_craneOffice' }],
+  },
+  B_drainToPathD: {
+    speaker: 'Narrator',
+    background: BG.flooded_wing,
+    text: 'You climb into the empty tank and force the grate open with the crowbar. It leads into a tight, slimy pipe. You slide down, landing in the damp, buzzing service tunnels below.',
+    sfx: SFX.water_drain,
+    choices: [
+      { text: 'You are now in the service tunnels.', next: 'D_tunnel_1' },
+    ],
   },
   B_adlerOffice: {
     speaker: 'Narrator',
-    text: 'The window of this office is shattered. The floor is covered in glass and fallen plaster. A deep, body-shaped crater is in the center of the room, as if someone fell from a great height. At the bottom of the crater, amidst the debris, you see a smashed pocket watch. A small note is pinned to the wall.',
+    text: 'The window of this office is shattered. The floor is covered in glass. A deep, body-shaped crater is in the center of the room, as if someone fell from a great height.',
+    background: BG.flooded_wing,
+    choices: [{ text: '...', next: 'B_adlerOffice_b' }],
+  },
+  B_adlerOffice_b: {
+    speaker: 'Narrator',
+    text: 'At the bottom of the crater, amidst the debris, you see a smashed pocket watch. A small note is pinned to the wall.',
+    background: BG.flooded_wing,
     choices: [
       { text: 'Read the note.', next: 'B_readAdlerNote' },
       { text: 'Take the broken watch.', next: 'B_takeWatch' },
@@ -775,7 +1121,14 @@ export const chapter1 = {
   },
   B_readAdlerNote: {
     speaker: 'Narrator',
-    text: "The note is a research proposal. 'By inducing extreme gravitational trauma (a fall from no less than 50 feet), it should be possible to sever the consciousness from the linear flow of time. I will be the first to witness eternity.' It's signed by Dr. Adler. It seems he tested his theory on himself.",
+    text: "The note is a research proposal. 'By inducing extreme gravitational trauma, it should be possible to sever the consciousness from the linear flow of time.'",
+    background: BG.flooded_wing,
+    choices: [{ text: '...', next: 'B_readAdlerNote_b' }],
+  },
+  B_readAdlerNote_b: {
+    speaker: 'Narrator',
+    text: "'I will be the first to witness eternity.' It's signed by Dr. Adler. It seems he tested his theory on himself.",
+    background: BG.flooded_wing,
     effects: { inventory: { add: 'adler_note' } },
     choices: [{ text: 'He was insane.', next: 'B_adlerOffice' }],
   },
@@ -783,14 +1136,22 @@ export const chapter1 = {
     speaker: 'Echo',
     npc: 'echo',
     speakerKey: 'doctor',
-    text: "You climb into the crater. A ghostly Dr. Adler stands on the shattered window ledge above. 'Time is a cage!' he screams, and leaps. You feel a sudden, terrifying vertigo, the sensation of falling, the rush of wind, the final, bone-shattering impact. A memory of time. You pick up the broken watch.",
+    text: "You climb into the crater. A ghostly Dr. Adler stands on the shattered window ledge above. 'Time is a cage!' he screams, and leaps.",
+    background: BG.flooded_wing,
     sfx: SFX.windHowl,
+    choices: [{ text: '...', next: 'B_takeWatch_b' }],
+  },
+  B_takeWatch_b: {
+    speaker: 'Narrator',
+    text: 'You feel a sudden, terrifying vertigo, the sensation of falling, the rush of wind, the final, bone-shattering impact. A memory of time. You pick up the broken watch.',
+    background: BG.flooded_wing,
     effects: { inventory: { add: 'broken_watch' }, stats: { sanity: -15 } },
     choices: [{ text: 'I have what I need from here.', next: 'B_adlerOffice' }],
   },
   B_clockSolved: {
     speaker: 'Narrator',
-    text: 'You place the three objects into their respective slots. The humming intensifies to a deafening roar. The room shakes, and the water in the hallway begins to boil and steam. The clock chimes once, a deep, sorrowful sound.',
+    text: 'You place the three objects into their respective slots. The humming intensifies to a deafening roar. The room shakes, and the water in the hallway begins to boil.',
+    background: BG.flooded_wing,
     sfx: SFX.puzzleSuccess,
     effects: {
       inventory: { remove: ['melted_tape', 'drowned_locket', 'broken_watch'] },
@@ -799,15 +1160,23 @@ export const chapter1 = {
   },
   B_finalVision: {
     speaker: 'Narrator',
-    text: "The world dissolves into a searing white light. You are no longer in the asylum, but in a pristine lab. The three doctors are arguing around a containment unit holding a pulsating, black mass. 'It's too unstable!' Crane shouts. 'The psychometric readings are off the charts!' Blackwood scoffs, 'We proceed.' Adler just smiles, 'Think of what we'll learn.' The mass ruptures, and a wave of pure psychic energy tears the room, and the doctors, apart. You are thrown back into your own time.",
+    text: 'The world dissolves into a searing white light. You are in a pristine lab. The three doctors are arguing around a containment unit holding a pulsating, black mass.',
+    background: BG.flooded_wing,
     sfx: SFX.reality_warp,
     visualEffect: 'glitch',
+    choices: [{ text: '...', next: 'B_finalVision_b' }],
+  },
+  B_finalVision_b: {
+    speaker: 'Narrator',
+    text: "'It's too unstable!' Crane shouts. 'We proceed,' Blackwood scoffs. The mass ruptures, tearing the room apart. You are thrown back into your own time.",
+    background: BG.flooded_wing,
     effects: { stats: { sanity: -25 } },
     choices: [{ text: 'That... that was the incident.', next: 'B_escape' }],
   },
   B_escape: {
     speaker: 'Narrator',
-    text: "You stand before the clock. The traumatic vision has ended. The front of the clock swings open, revealing not a hidden passage, but a single, ornate key hanging from a hook. It's the key to the main ward exit.",
+    text: 'You stand before the clock. The traumatic vision has ended. The front of the clock swings open, revealing a single, ornate key hanging from a hook.',
+    background: BG.flooded_wing,
     effects: {
       flags: { set: 'B_completed' },
       inventory: { add: 'main_ward_key' },
@@ -825,10 +1194,15 @@ export const chapter1 = {
   // ===================================================================
   C_followLaughter: {
     speaker: 'Narrator',
-    text: "You follow the laughter to the Children's Ward. The hallway is unnervingly clean, the walls painted with cheerful, faded murals of cartoon animals. It's utterly silent now. Doors lead to a Playroom, a Quiet Room, and a Classroom. You feel a profound sense of wrongness here.",
-    background:
-      'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop', // A clean, creepy hotel hallway as placeholder
+    text: "You follow the laughter to the Children's Ward. The hallway is unnervingly clean, the walls painted with cheerful, faded murals of cartoon animals.",
+    background: BG.childrens_ward,
     bgm: BGM.softHaunt,
+    choices: [{ text: '...', next: 'C_followLaughter_b' }],
+  },
+  C_followLaughter_b: {
+    speaker: 'Narrator',
+    text: "It's utterly silent now. Doors lead to a Playroom, a Quiet Room, and a Classroom. You feel a profound sense of wrongness here.",
+    background: BG.childrens_ward,
     revisitText:
       "You are back in the eerily clean hallway of the Children's Ward. Something is deeply wrong here.",
     choices: [
@@ -841,7 +1215,14 @@ export const chapter1 = {
   },
   C_hallwayAnomaly: {
     speaker: 'Narrator',
-    text: 'You look closer at the murals. The cartoon rabbit has eyes that are too human, and they seem to follow you. The painted sun is weeping black tears. One of the floor tiles is perfectly clean, while the others are yellowed with age. You feel a creeping dread. This place is a lie.',
+    text: 'You look closer at the murals. The cartoon rabbit has eyes that are too human, and they seem to follow you. The painted sun is weeping black tears.',
+    background: BG.childrens_ward,
+    choices: [{ text: '...', next: 'C_hallwayAnomaly_b' }],
+  },
+  C_hallwayAnomaly_b: {
+    speaker: 'Narrator',
+    text: 'One of the floor tiles is perfectly clean, while the others are yellowed with age. You feel a creeping dread. This place is a lie.',
+    background: BG.childrens_ward,
     effects: { stats: { sanity: -5 } },
     choices: [
       { text: "I need to find what's real.", next: 'C_followLaughter' },
@@ -849,7 +1230,15 @@ export const chapter1 = {
   },
   C_playroom: {
     speaker: 'Narrator',
-    text: 'The playroom is filled with vintage toys, all neatly arranged. Rocking horses, building blocks, dolls with vacant glass eyes. In the center of the room is a small table with a single, pristine, red apple on it. A music box on a shelf sits closed. One of the dolls is weeping silent, bloody tears.',
+    text: 'The playroom is filled with vintage toys, all neatly arranged. Rocking horses, building blocks, dolls with vacant glass eyes.',
+    background: BG.childrens_ward,
+    revisitText: 'The playroom is just as unsettling as before.',
+    choices: [{ text: '...', next: 'C_playroom_b' }],
+  },
+  C_playroom_b: {
+    speaker: 'Narrator',
+    text: 'In the center of the room is a small table with a single, pristine, red apple on it. A music box on a shelf sits closed. One of the dolls is weeping bloody tears.',
+    background: BG.childrens_ward,
     choices: [
       { text: 'Take the Perfect Apple (Anomaly 1/5).', next: 'C_takeApple' },
       {
@@ -862,7 +1251,8 @@ export const chapter1 = {
   },
   C_takeApple: {
     speaker: 'Narrator',
-    text: 'You pick up the apple. It feels real, but it has no scent. It is an anomaly, a thing of perfect order in a world of decay. The room flickers for a moment, and you see rusted, broken toys and child-sized bloodstains on the floor before it returns to "normal".',
+    text: 'You pick up the apple. It is an anomaly, a thing of perfect order in a world of decay. The room flickers, and you see rusted, broken toys and bloodstains.',
+    background: BG.childrens_ward,
     visualEffect: 'glitch',
     sfx: SFX.glitch,
     effects: {
@@ -873,7 +1263,8 @@ export const chapter1 = {
   },
   C_wipeTears: {
     speaker: 'Narrator',
-    text: "You reach out and wipe the blood from the doll's cheek. It is warm and sticky. The doll's head slowly turns to look at you, its glass eyes now filled with a deep, ancient sorrow. This act of compassion is an anomaly here. The illusion wavers.",
+    text: "You wipe the blood from the doll's cheek. It is warm and sticky. The doll's head slowly turns to look at you, its eyes filled with sorrow. This act is an anomaly here.",
+    background: BG.childrens_ward,
     visualEffect: 'glitch',
     sfx: SFX.glitch,
     effects: { stats: { morality: 5 }, flags: { set: 'C_anomaly2' } },
@@ -881,7 +1272,8 @@ export const chapter1 = {
   },
   C_musicBox: {
     speaker: 'Narrator',
-    text: 'You open the music box. Instead of a sweet melody, it plays a discordant, screeching tune. A tiny, rotten human finger pops up and spins in place of a ballerina. You slam it shut.',
+    text: 'You open the music box. Instead of a melody, it plays a discordant screech. A tiny, rotten human finger pops up and spins. You slam it shut.',
+    background: BG.childrens_ward,
     sfx: SFX.musicBox,
     jumpscare: true,
     effects: { stats: { sanity: -10 } },
@@ -890,13 +1282,22 @@ export const chapter1 = {
   C_playroom_after: {
     speaker: 'Lily',
     text: "'Don't touch my things,' a voice whispers in your ear. You spin around, but no one is there.",
+    background: BG.childrens_ward,
     sfx: SFX.shadow_whisper,
     effects: { stats: { sanity: -5 } },
     choices: [{ text: 'Leave.', next: 'C_checkAnomalies' }],
   },
   C_quietroom: {
     speaker: 'Narrator',
-    text: 'This was a room for calming agitated children. The walls are padded. In the corner is a single, child-sized bed with a perfectly made blanket. A book lies on the pillow. The pages are completely, unnaturally blank.',
+    text: 'This was a room for calming agitated children. The walls are padded. In the corner is a single, child-sized bed with a perfectly made blanket.',
+    background: BG.childrens_ward,
+    revisitText: 'The padded quiet room. The silence is unnerving.',
+    choices: [{ text: '...', next: 'C_quietroom_b' }],
+  },
+  C_quietroom_b: {
+    speaker: 'Narrator',
+    text: 'A book lies on the pillow. The pages are completely, unnaturally blank.',
+    background: BG.childrens_ward,
     choices: [
       { text: 'Take the Blank Book (Anomaly 3/5).', next: 'C_takeBook' },
       { text: 'Look under the bed.', next: 'C_underBed' },
@@ -905,7 +1306,8 @@ export const chapter1 = {
   },
   C_takeBook: {
     speaker: 'Narrator',
-    text: 'You take the book. Its unnatural emptiness feels wrong in your hands. Another anomaly. The padded walls briefly appear torn and stained with dark, dried fluids before the illusion reasserts itself.',
+    text: 'You take the book. Its unnatural emptiness feels wrong. Another anomaly. The padded walls briefly appear torn and stained before the illusion reasserts itself.',
+    background: BG.childrens_ward,
     visualEffect: 'glitch',
     sfx: SFX.glitch,
     effects: { inventory: { add: 'blank_book' }, flags: { set: 'C_anomaly3' } },
@@ -914,6 +1316,7 @@ export const chapter1 = {
   C_quietroom_after: {
     speaker: 'Narrator',
     text: 'The silence in here is now deafening. What now?',
+    background: BG.childrens_ward,
     choices: [
       { text: 'Look under the bed.', next: 'C_underBed' },
       { text: 'Leave.', next: 'C_checkAnomalies' },
@@ -921,15 +1324,24 @@ export const chapter1 = {
   },
   C_underBed: {
     speaker: 'Narrator',
-    text: 'You kneel and look under the bed. Two small, pale hands dart out and grab your face, pulling you towards the darkness. You scream and scramble back. When you look again, there is nothing there.',
+    text: 'You kneel and look under the bed. Two small, pale hands dart out and grab your face, pulling you towards the darkness. You scramble back. Nothing is there.',
+    background: BG.childrens_ward,
     jumpscare: true,
     effects: { stats: { sanity: -15, stamina: -10 } },
     choices: [{ text: 'Never again.', next: 'C_quietroom_after' }],
   },
   C_classroom: {
     speaker: 'Narrator',
-    text: 'An old classroom. Chalk dust hangs in the air. On the blackboard, someone has written "I AM NOT REAL" over and over. A toy clock on the teacher\'s desk is ticking perfectly, its hands moving forward. On a medical tray is a single, gleaming scalpel, untouched by rust or time.',
+    text: 'An old classroom. On the blackboard, someone has written "I AM NOT REAL" over and over. A toy clock on the desk is ticking perfectly.',
+    background: BG.childrens_ward,
+    revisitText: 'The classroom, with its endless scrawl on the blackboard.',
     ambientSfx: [{ triggerWord: 'ticking', sfx: SFX.clock_tick_reverse }],
+    choices: [{ text: '...', next: 'C_classroom_b' }],
+  },
+  C_classroom_b: {
+    speaker: 'Narrator',
+    text: 'On a medical tray is a single, gleaming scalpel, untouched by rust or time.',
+    background: BG.childrens_ward,
     choices: [
       { text: 'Take the Toy Clock (Anomaly 4/5).', next: 'C_takeClock' },
       { text: 'Take the Clean Scalpel (Anomaly 5/5).', next: 'C_takeScalpel' },
@@ -939,7 +1351,8 @@ export const chapter1 = {
   },
   C_takeClock: {
     speaker: 'Narrator',
-    text: "You take the clock. In a place where time feels broken, its perfect function is a deep violation. An anomaly. The children's drawings on the wall morph into terrifying, monstrous shapes for a second.",
+    text: "You take the clock. In a place where time feels broken, its perfect function is a deep violation. An anomaly. The children's drawings on the wall morph for a second.",
+    background: BG.childrens_ward,
     visualEffect: 'glitch',
     sfx: SFX.glitch,
     effects: {
@@ -950,7 +1363,8 @@ export const chapter1 = {
   },
   C_takeScalpel: {
     speaker: 'Narrator',
-    text: 'You take the scalpel. It is surgically clean. Impossible in this filthy place. Anomaly five. The words on the blackboard writhe like worms before settling back into place.',
+    text: 'You take the scalpel. It is surgically clean. Impossible in this filthy place. Anomaly five. The words on the blackboard writhe like worms before settling.',
+    background: BG.childrens_ward,
     visualEffect: 'glitch',
     sfx: SFX.glitch,
     effects: {
@@ -962,6 +1376,7 @@ export const chapter1 = {
   C_classroom_after: {
     speaker: 'Narrator',
     text: 'The classroom feels wrong. You feel watched.',
+    background: BG.childrens_ward,
     choices: [
       { text: 'Look inside the desk.', next: 'C_openDesk' },
       { text: 'Leave.', next: 'C_checkAnomalies' },
@@ -969,13 +1384,15 @@ export const chapter1 = {
   },
   C_openDesk: {
     speaker: 'Narrator',
-    text: "You open the teacher's desk. It is filled to the brim with human teeth. Hundreds of them, of all sizes. A small, child-like skull sits in the middle of them like a macabre jewel.",
+    text: "You open the teacher's desk. It is filled to the brim with human teeth. Hundreds of them. A small, child-like skull sits in the middle like a macabre jewel.",
+    background: BG.childrens_ward,
     effects: { stats: { sanity: -10 } },
     choices: [{ text: 'Slam it shut.', next: 'C_classroom_after' }],
   },
   C_checkAnomalies: {
     speaker: 'Narrator',
     text: 'You feel a shift in the air, a weakening of the illusion.',
+    background: BG.childrens_ward,
     choices: [
       {
         text: 'Continue.',
@@ -996,14 +1413,24 @@ export const chapter1 = {
   C_lilyChaseStart: {
     speaker: 'Lily',
     npc: 'ghost',
-    text: "'You broke my pretty room,' a little girl's voice whispers from right behind you, filled with cold rage. 'You broke all the rules. Now you have to play a new game. It's called HIDE.' You spin around. The hallway is twisting, warping, the murals on the wall screaming as the paint runs like blood. She is gliding towards you, her blank face a mask of fury.",
+    text: "'You broke my pretty room,' she whispers, her voice suddenly dropping to a low, guttural snarl full of cold rage. 'You broke all the rules. Now you have to play a new game... a FOREVER game.'",
+    background: BG.childrens_ward,
+    textEffects: [{ word: 'FOREVER', effect: 'anger' }],
     bgm: BGM.descent,
     sfx: SFX.reality_warp,
+    choices: [{ text: '...', next: 'C_lilyChaseStart_b' }],
+  },
+  C_lilyChaseStart_b: {
+    speaker: 'Lily',
+    npc: 'ghost',
+    text: "'It's called HIDE.' You spin around. The hallway is twisting, warping, the murals on the wall screaming. She is gliding towards you, her blank face a mask of fury.",
+    background: BG.childrens_ward,
     choices: [{ text: 'RUN!', next: 'C_chase_1' }],
   },
   C_chase_1: {
     speaker: 'Narrator',
-    text: 'You run as the clean hallway around you decays in real time, plaster sloughing off to reveal weeping brickwork. Doors slam open and shut on their own. The floor ahead of you becomes the ceiling. You hear her laughter echoing from everywhere at once. You have to escape the twisting hallway!',
+    text: 'You run as the clean hallway around you decays in real time. Doors slam open and shut. The floor ahead of you becomes the ceiling. You hear her laughter everywhere.',
+    background: BG.childrens_ward,
     choices: [
       {
         text: 'Leap across the chasm that just opened in the floor!',
@@ -1020,22 +1447,26 @@ export const chapter1 = {
   C_chase_Leap: {
     speaker: 'Narrator',
     text: 'You leap across the impossible gap, landing hard. But the perspective shifts again, and you find yourself running back the way you came, directly towards her.',
+    background: BG.childrens_ward,
     effects: { stats: { stamina: -20, health: -10 } },
     choices: [{ text: "It's a trap!", next: 'C_lilyCatch' }],
   },
   C_chase_Door: {
     speaker: 'Narrator',
-    text: "You dive through a shimmering doorway. You're in a long, dark corridor that seems to stretch into infinity. You hear her getting closer behind you. At the far end, you see a single, impossibly clean mirror.",
+    text: "You dive through a shimmering doorway. You're in a long, dark corridor that seems to stretch into infinity. At the far end, you see a single, impossibly clean mirror.",
+    background: BG.childrens_ward,
     choices: [{ text: 'Run for the mirror!', next: 'C_mirror' }],
   },
   C_lilyCatch: {
     speaker: 'Lily',
     isDeath: true,
+    background: BG.childrens_ward,
     text: "'You can't run from my world,' she whispers as her icy hands phase through your chest and grip your heart. 'Now you can be one of my pretty things. Forever.'",
   },
   C_mirror: {
     speaker: 'Narrator',
     text: 'You sprint towards the mirror. Her chilling laughter is right behind you. As you reach it, your reflection holds out its hand. Do you take it?',
+    background: BG.childrens_ward,
     choices: [
       { text: "Take your reflection's hand.", next: 'C_mirrorRealm' },
       { text: 'Smash the mirror.', next: 'C_smashMirrorFail' },
@@ -1044,13 +1475,19 @@ export const chapter1 = {
   C_smashMirrorFail: {
     speaker: 'Narrator',
     text: "You try to smash the mirror, but your fist passes through it as if it's water. Lily's ghost emerges from the glass and embraces you in a soul-freezing hug.",
+    background: BG.childrens_ward,
     choices: [{ text: 'Trapped.', next: 'C_lilyCatch' }],
   },
   C_mirrorRealm: {
     speaker: 'Narrator',
-    text: 'You are pulled through the mirror into a twisted, negative version of the ward. The colors are inverted. Gravity feels wrong. Your reflection stands before you, but its face is a featureless mask of rage. This is her anger, given form. In the corner, you see the real Lily, a small, crying, translucent child. You have to reach her.',
-    background:
-      'https://images.unsplash.com/photo-1542337839-5147b3ce8431?q=80&w=2070&auto=format&fit=crop', // Inverted colors background
+    text: 'You are pulled through the mirror into a twisted, negative version of the ward. The colors are inverted. Gravity feels wrong.',
+    background: BG.mirror_realm,
+    choices: [{ text: '...', next: 'C_mirrorRealm_b' }],
+  },
+  C_mirrorRealm_b: {
+    speaker: 'Narrator',
+    text: 'Your reflection stands before you, its face a featureless mask of rage. In the corner, you see the real Lily, a small, crying, translucent child. You have to reach her.',
+    background: BG.mirror_realm,
     choices: [
       { text: 'Confront the angry reflection.', next: 'C_confrontReflection' },
       { text: 'Go to the crying child.', next: 'C_comfortLily' },
@@ -1059,36 +1496,47 @@ export const chapter1 = {
   C_confrontReflection: {
     speaker: 'Narrator',
     text: 'You face the reflection. It lets out a deafening psychic scream, and your mind is torn apart by pure, undiluted rage.',
+    background: BG.mirror_realm,
     effects: { stats: { sanity: -100 } },
     choices: [{ text: 'Your mind breaks.', next: 'C_lilyCatch' }],
   },
   C_comfortLily: {
     speaker: 'Narrator',
-    text: 'You ignore the monster and go to the crying child. You reach out, not with aggression, but with pity. "It\'s okay," you whisper. As you touch her, the angry reflection shrieks and shatters like glass. The world rights itself.',
+    text: 'You ignore the monster and go to the crying child. You reach out, not with aggression, but with pity. "It\'s okay," you whisper.',
+    background: BG.mirror_realm,
+    effects: { stats: { morality: 10 } },
+    choices: [{ text: '...', next: 'C_comfortLily_b' }],
+  },
+  C_comfortLily_b: {
+    speaker: 'Narrator',
+    text: 'As you touch her, the angry reflection shrieks and shatters like glass. The world rights itself.',
+    background: BG.mirror_realm,
     sfx: SFX.mirror_shatter,
-    effects: { stats: { morality: 15 } },
+    effects: { stats: { morality: 5 } },
     choices: [{ text: "It's over...", next: 'C_escape' }],
   },
   C_escape: {
     speaker: 'Lily',
-    text: "'Thank you,' whispers the small, peaceful spirit of Lily, before fading away. You find yourself standing in a dusty, unused storage closet. She has freed you from her nightmare. You've escaped, but the memory of her rage chills you to the bone.",
+    background: BG.storage_closet,
+    text: "'Thank you,' whispers the small, peaceful spirit of Lily, before fading away. You find yourself standing in a dusty, unused storage closet. She has freed you. One door leads back to the Children's Ward, and a smaller one is marked 'Maintenance Access'.",
     effects: { flags: { set: 'C_completed' } },
     choices: [
+      { text: 'Go to Maintenance Access.', next: 'A_maintCorridor_Entry' },
+      { text: "Return to the Children's Ward.", next: 'C_followLaughter' },
       {
-        text: 'Find a way out of here.',
+        text: 'This wing is a dead end. Move on.',
         next: { chapter: 'chapter2', key: 'start' },
       },
     ],
   },
 
   // ===================================================================
-  // PATH D — THE HIVE (Survival/Action) - MASSIVELY EXPANDED
+  // PATH D — THE HIVE (Survival/Action) - DIALOGUE TREE EXPANSION
   // ===================================================================
   D_serviceStairs: {
     speaker: 'Narrator',
-    text: 'You descend a set of rickety iron stairs into a service tunnel. The air is damp and smells of rust and something else... something sickly sweet, like rotting meat and honey. The only light comes from sparking electrical panels on the wall.',
-    background:
-      'https://images.unsplash.com/photo-1518600983133-273a35b1d973?q=80&w=2070&auto=format&fit=crop',
+    text: 'You descend a set of rickety iron stairs into a service tunnel. The air is damp and smells of rust and something else... something sickly sweet, like rotting meat and honey.',
+    background: BG.service_tunnel,
     bgm: BGM.lab,
     sfx: SFX.electric,
     revisitText:
@@ -1100,69 +1548,181 @@ export const chapter1 = {
   },
   D_tunnel_1: {
     speaker: 'Narrator',
-    npc: 'finch',
-    text: "You find a man slumped against the wall, clutching a gruesome wound in his side. It's not a simple cut; the flesh around it is pulsating and growing crystalline, pulsating structures. He's wearing a researcher's lab coat. 'Don't... don't go any further,' he rasps, coughing up blood. 'It's a hive now... Subject 32... it... broke containment. It's in the vents... listening.'",
+    npc: 'harris',
+    text: 'You find a man slumped against the wall, clutching a gruesome wound in his side. The flesh around it is pulsating and growing crystalline structures.',
+    background: BG.service_tunnel,
     choices: [
-      { text: '"What is Subject 32?"', next: 'D_askAbout32' },
-      {
-        text: 'Use the adrenaline syringe on him. (Morality +10)',
-        next: 'D_helpFinchSyringe',
-        requires: { inventory: ['adrenaline_syringe'] },
-      },
-      { text: 'Leave him and press on. (Morality -10)', next: 'D_leaveFinch' },
+      { text: 'Approach the wounded man.', next: 'D_harris_dialogue_start' },
     ],
   },
-  D_helpFinchSyringe: {
-    speaker: 'Finch',
-    npc: 'finch',
-    text: "You inject him with the stimulant. He gasps, color returning to his face. 'Gods... thank you. My name is Finch. The creature... it's drawn to sound, but fears intense cold. The pumping station has a coolant system... you might be able to use it. Here, take this.' He hands you his keycard.",
+  D_harris_dialogue_start: {
+    speaker: 'Harris',
+    npc: 'harris',
+    background: BG.service_tunnel,
+    revisitText:
+      "Harris is looking worse. He's muttering about the coolant system and something called Subject 32.",
+    text: "'Don't... don't go any further,' he rasps, coughing up blood. 'It's a hive now... Subject 32... it... broke containment. It's in the vents... listening.'",
+    textEffects: [
+      {
+        word: "'Don't... don't go any further,' he rasps, coughing up blood. 'It's a hive now... Subject 32... it... broke containment. It's in the vents... listening.'",
+        effect: 'tremble',
+      },
+    ],
+    choices: [
+      { text: '"Who are you? Are you okay?"', next: 'D_harris_compassion' },
+      {
+        text: '"A hive? What are you talking about?"',
+        next: 'D_harris_direct',
+      },
+      { text: '"I don\'t have time for this."', next: 'D_harris_leave' },
+    ],
+  },
+  D_harris_compassion: {
+    speaker: 'Harris',
+    npc: 'harris',
+    background: BG.service_tunnel,
+    text: "My name's Harris... a researcher. That... thing did this to me. It's a monster, Subject 32... it fears intense cold.",
+    effects: {
+      relationships: { harris: 10 },
+      stats: { morality: 5 },
+      flags: { set: 'met_harris' },
+    },
+    choices: [{ text: '...', next: 'D_harris_compassion_b' }],
+  },
+  D_harris_compassion_b: {
+    speaker: 'Harris',
+    npc: 'harris',
+    background: BG.service_tunnel,
+    text: "The pumping station... coolant system... please, I have a keycard. It'll get you through the security office. Help me, and it's yours.",
+    choices: [
+      {
+        text: '"I\'ll help you, but what can I do?"',
+        next: 'D_harris_accept_help',
+      },
+      { text: '"Just give me the keycard."', next: 'D_harris_demand_card' },
+    ],
+  },
+  D_harris_direct: {
+    speaker: 'Harris',
+    npc: 'harris',
+    background: BG.service_tunnel,
+    text: "It's an experiment... gone wrong. It made this place a nest. Listens for sound. I'm not going to make it... in my pocket... keycard... take it. Stop it...",
+    effects: { relationships: { harris: -5 } },
+    choices: [
+      {
+        text: 'Take the keycard from his pocket.',
+        next: 'D_harris_take_card_direct',
+      },
+      { text: '(Leave him)', next: 'D_harris_leave' },
+    ],
+  },
+  D_harris_leave: {
+    speaker: 'Narrator',
+    text: 'You step over the dying man, ignoring his pleas. Your survival is all that matters.',
+    background: BG.service_tunnel,
+    effects: { stats: { morality: -10 }, relationships: { harris: -20 } },
+    choices: [{ text: 'Continue down the tunnel.', next: 'D_tunnel_2' }],
+  },
+  D_harris_accept_help: {
+    speaker: 'Harris',
+    text: "'Thank you... there's an adrenal stimulant... in the security office... it might be enough to get me on my feet. Please, hurry.'",
+    background: BG.service_tunnel,
+    choices: [{ text: '"I\'ll be back."', next: 'D_tunnel_2' }],
+  },
+  D_harris_demand_card: {
+    speaker: 'Narrator',
+    npc: 'harris',
+    text: 'He glares at you, his wounded body trembling with a flash of anger, then his expression sags with defeat.',
+    background: BG.service_tunnel,
+    effects: { stats: { morality: -5 }, relationships: { harris: -10 } },
+    choices: [{ text: '...', next: 'D_harris_demand_card_b' }],
+  },
+  D_harris_demand_card_b: {
+    speaker: 'Harris',
+    npc: 'harris',
+    text: "'Fine... just take it. In my pocket. Now go... leave me to die.'",
+    background: BG.service_tunnel,
+    choices: [
+      {
+        text: 'Take the keycard and leave.',
+        next: 'D_harris_take_card_direct',
+      },
+    ],
+  },
+  D_harris_take_card_direct: {
+    speaker: 'Narrator',
+    text: 'You take the keycard from the dying researcher. He gives one last shuddering breath and his eyes go vacant.',
+    background: BG.service_tunnel,
+    effects: { inventory: { add: 'researcher_keycard' } },
+    choices: [{ text: 'Continue into the hive.', next: 'D_tunnel_2' }],
+  },
+  D_tunnel_2: {
+    speaker: 'Narrator',
+    text: 'The tunnel opens into a larger area. The walls are covered in a pulsating, organic webbing that seems to breathe.',
+    background: BG.service_tunnel,
+    ambientSfx: [{ triggerWord: 'pulsating', sfx: SFX.flesh_squirming }],
+    choices: [{ text: '...', next: 'D_tunnel_2_b' }],
+  },
+  D_tunnel_2_b: {
+    speaker: 'Narrator',
+    text: 'To your right is a security office. Straight ahead, a thick tendril blocks the path to the Pumping Station. A chittering sound comes from the vents.',
+    background: BG.service_tunnel,
+    ambientSfx: [
+      { triggerWord: 'chittering', sfx: SFX.monster_breathing_close },
+    ],
+    revisitText:
+      'You are back at the entrance to the hive. The security office is to your right. The tendril blocks the way forward.',
+    choices: [
+      { text: 'Try to get past the tendril.', next: 'D_tendrilBlock' },
+      { text: 'Check the security office.', next: 'D_securityOffice' },
+      { text: 'Climb a rickety ladder upwards.', next: 'D_ladderToPathA' },
+      {
+        text: 'Go back to the wounded researcher.',
+        next: 'D_returnToHarris',
+        requires: { notFlags: ['D_helpedFinch'] },
+      },
+    ],
+  },
+  D_ladderToPathA: {
+    speaker: 'Narrator',
+    background: BG.service_tunnel,
+    text: "You climb the rusty ladder to a ceiling hatch. Pushing it open, you emerge into the wreckage of the Nurses' Station, the smell of blood thick in the air. You've found a shortcut into another part of the asylum.",
+    choices: [{ text: 'This looks... busy.', next: 'A_nursesStation' }],
+  },
+  D_returnToHarris: {
+    speaker: 'Narrator',
+    npc: 'harris',
+    text: 'You return to where you left Harris. He is still barely conscious, his breathing shallow.',
+    background: BG.service_tunnel,
+    choices: [
+      {
+        text: 'Use the Adrenaline Syringe.',
+        next: 'D_administerSyringe',
+        requires: { inventory: ['adrenaline_syringe'] },
+      },
+      { text: '"I haven\'t found anything yet."', next: 'D_tunnel_2' },
+    ],
+  },
+  D_administerSyringe: {
+    speaker: 'Harris',
+    npc: 'harris',
+    text: "You inject him with the stimulant. He gasps, color returning to his face. 'Gods... thank you. My name is Harris. Here, take this.' He hands you his keycard.",
+    background: BG.service_tunnel,
     effects: {
       inventory: { remove: 'adrenaline_syringe' },
       inventory: { add: 'researcher_keycard' },
       stats: { morality: 10 },
-      flags: { set: 'D_helpedFinch' },
+      relationships: { harris: 20 },
+      flags: { set: ['D_helpedFinch', 'met_harris'] },
     },
-    choices: [{ text: '"I\'ll see what I can do."', next: 'D_tunnel_2' }],
-  },
-  D_askAbout32: {
-    speaker: 'Finch',
-    npc: 'finch',
-    text: "'An experiment... a psych-reactive agent fused with alien biology... it went wrong. It grows... it learns... it made this place its nest. It took the others. Their bodies are part of the walls now. It will take you too. The bulkhead door to the central labs is the only way out, but it has no power.'",
-    choices: [{ text: 'Ask another question.', next: 'D_tunnel_1_afterAsk' }],
-  },
-  D_tunnel_1_afterAsk: {
-    speaker: 'Narrator',
-    text: 'The wounded researcher, Finch, looks at you with pleading eyes.',
     choices: [
-      {
-        text: 'Use the adrenaline syringe on him. (Morality +10)',
-        next: 'D_helpFinchSyringe',
-        requires: { inventory: ['adrenaline_syringe'] },
-      },
-      { text: 'Leave him and press on. (Morality -10)', next: 'D_leaveFinch' },
-    ],
-  },
-  D_leaveFinch: {
-    speaker: 'Narrator',
-    text: 'You step over the dying man, ignoring his pleas. Your survival is all that matters.',
-    effects: { stats: { morality: -10 } },
-    choices: [{ text: 'Continue down the tunnel.', next: 'D_tunnel_2' }],
-  },
-  D_tunnel_2: {
-    speaker: 'Narrator',
-    text: 'The tunnel opens into a larger area. The walls are covered in a pulsating, organic webbing that seems to breathe. To your right is a small security office. Straight ahead, the path is blocked by a thick, vein-like tendril. Past that is the Pumping Station. The silence is broken by a wet, chittering sound from the vents above.',
-    ambientSfx: [
-      { triggerWord: 'chittering', sfx: SFX.monster_breathing_close },
-      { triggerWord: 'pulsating', sfx: SFX.flesh_squirming },
-    ],
-    choices: [
-      { text: 'Try to get past the tendril.', next: 'D_tendrilBlock' },
-      { text: 'Check the security office.', next: 'D_securityOffice' },
+      { text: '"Glad I could help. Let\'s get moving."', next: 'D_tunnel_2' },
     ],
   },
   D_tendrilBlock: {
     speaker: 'Narrator',
     text: 'The tendril is thick and rubbery. It pulses with a faint inner light. You need something to get through it.',
+    background: BG.service_tunnel,
     choices: [
       {
         text: 'Cut it with the clean scalpel.',
@@ -1174,36 +1734,49 @@ export const chapter1 = {
   },
   D_cutTendril: {
     speaker: 'Narrator',
-    text: "You slice into the tendril. It lets out a psychic shriek that pierces your skull, and sprays you with acidic ichor. The path is clear, but the pain is intense, and you know you've alerted the entire hive to your presence.",
+    text: "You slice into the tendril. It lets out a psychic shriek that pierces your skull, and sprays you with acidic ichor. The path is clear, but you've alerted the hive.",
+    background: BG.service_tunnel,
     sfx: SFX.fleshTear,
     effects: { stats: { health: -15, sanity: -10 } },
     choices: [{ text: 'Enter the Pumping Station.', next: 'D_pumpingStation' }],
   },
   D_securityOffice: {
     speaker: 'Narrator',
-    text: 'The office is ransacked, covered in the same organic webbing. A terminal on a desk is still active. You also see a heavy iron pipe on the floor, and a canister of corrosive coolant under the desk.',
+    text: 'The office is ransacked. A terminal is still active. You also see a heavy iron pipe on the floor, and a canister of corrosive coolant under the desk.',
+    background: BG.service_tunnel,
     choices: [
       { text: 'Use the terminal.', next: 'D_useTerminal' },
       { text: 'Take the iron pipe.', next: 'D_takePipe' },
       { text: 'Take the coolant canister.', next: 'D_takeCoolant' },
+      { text: 'Search for medical supplies.', next: 'D_findSyringe' },
       { text: 'Leave.', next: 'D_tunnel_2' },
     ],
+  },
+  D_findSyringe: {
+    speaker: 'Narrator',
+    text: "You find a first-aid kit under a desk. Inside is a single syringe of 'Adrenal Stimulant'.",
+    background: BG.service_tunnel,
+    effects: { inventory: { add: 'adrenaline_syringe' } },
+    choices: [{ text: 'This could be useful.', next: 'D_securityOffice' }],
   },
   D_takePipe: {
     speaker: 'Narrator',
     text: 'You pick up the heavy iron pipe. It feels solid and reassuring in your hands.',
+    background: BG.service_tunnel,
     effects: { inventory: { add: 'metal_pipe' } },
     choices: [{ text: 'A decent weapon.', next: 'D_securityOffice' }],
   },
   D_takeCoolant: {
     speaker: 'Narrator',
     text: 'You take the canister. A warning label shows it can melt through organic material. It feels volatile.',
+    background: BG.service_tunnel,
     effects: { inventory: { add: 'coolant_canister' } },
     choices: [{ text: 'This could be very useful.', next: 'D_securityOffice' }],
   },
   D_useTerminal: {
     speaker: 'Narrator',
     text: "The terminal displays two options: 'Read Logs' and 'System Power Control'.",
+    background: BG.service_tunnel,
     choices: [
       { text: 'Read Logs.', next: 'D_readTerminal' },
       { text: 'Access Power Control.', next: 'D_powerPuzzle' },
@@ -1212,13 +1785,21 @@ export const chapter1 = {
   },
   D_readTerminal: {
     speaker: 'Narrator',
-    text: "Last log: 'It's learned to mimic sounds. Lured Jenkins to his death with what sounded like his daughter crying. We have to activate the pump purge. Overload the system. It's the only way to flush it out of the main chamber. The manual for the bulkhead is in here somewhere. Power must be rerouted from Life Support to the Bulkhead.'",
+    text: "Last log: 'It's learned to mimic sounds. Lured Jenkins to his death. We have to activate the pump purge. Overload the system. It's the only way.'",
+    background: BG.service_tunnel,
     effects: { inventory: { add: 'researcher_log' } },
     choices: [{ text: 'I know what I need to do.', next: 'D_useTerminal' }],
   },
   D_powerPuzzle: {
     speaker: 'Narrator',
-    text: "You access the power grid. Main power is flowing to 'Life Support'. You need to divert it to the 'Bulkhead Door'. However, the 'Emergency Containment' protocol is drawing auxiliary power and must be disabled first.",
+    text: "You access the power grid. Main power is flowing to 'Life Support'. You need to divert it to the 'Bulkhead Door'.",
+    background: BG.service_tunnel,
+    choices: [{ text: '...', next: 'D_powerPuzzle_b' }],
+  },
+  D_powerPuzzle_b: {
+    speaker: 'Narrator',
+    text: "However, the 'Emergency Containment' protocol is drawing auxiliary power and must be disabled first.",
+    background: BG.service_tunnel,
     choices: [
       { text: 'Divert power to Bulkhead.', next: 'D_powerPuzzle_fail' },
       { text: 'Disable Emergency Containment.', next: 'D_powerPuzzle_step2' },
@@ -1228,12 +1809,14 @@ export const chapter1 = {
   D_powerPuzzle_fail: {
     speaker: 'Narrator',
     text: 'ERROR. Cannot divert main power while auxiliary protocols are active. A loud alarm blares, and you hear the creature screech from the next room.',
+    background: BG.service_tunnel,
     sfx: SFX.alarm,
     choices: [{ text: 'Try again.', next: 'D_powerPuzzle' }],
   },
   D_powerPuzzle_step2: {
     speaker: 'Narrator',
     text: 'Emergency Containment disabled. The lights in the tunnel dim. You can now divert main power.',
+    background: BG.service_tunnel,
     choices: [
       {
         text: 'Divert power from Life Support to Bulkhead Door.',
@@ -1243,7 +1826,15 @@ export const chapter1 = {
   },
   D_pumpingStation: {
     speaker: 'Narrator',
-    text: 'You enter the pumping station. The central chamber has a grated floor over a deep reservoir of murky water. The creature, a pulsating mass of bone and flesh with too many limbs, is clinging to the ceiling above the main power conduit. You need to get past it to reach the pump controls on the far wall.',
+    text: 'You enter the pumping station. The central chamber has a grated floor over a deep reservoir of murky water.',
+    background: BG.service_tunnel,
+    choices: [{ text: '...', next: 'D_pumpingStation_b' }],
+  },
+  D_pumpingStation_b: {
+    speaker: 'Narrator',
+    npc: 'monster',
+    text: 'The creature, a pulsating mass of bone and flesh, is clinging to the ceiling. You need to get past it to reach the pump controls on the far wall.',
+    background: BG.service_tunnel,
     sfx: SFX.flesh_squirming,
     choices: [
       { text: 'Try to sneak past it.', next: 'D_sneakPast' },
@@ -1258,16 +1849,19 @@ export const chapter1 = {
   D_sneakPast: {
     speaker: 'Narrator',
     text: 'You try to creep along the wall. It twitches. A long, bony limb snaps down, impaling the floor where you were a second ago. It sees you.',
+    background: BG.service_tunnel,
     choices: [{ text: 'FIGHT!', next: 'D_fightCreature' }],
   },
   D_distractCreature: {
     speaker: 'Narrator',
     text: 'You bang the pipe against the railing. The creature screeches and drops to the other side of the room to investigate the sound. This is your chance!',
+    background: BG.service_tunnel,
     choices: [{ text: 'Run for the pump controls!', next: 'D_activatePump' }],
   },
   D_useCoolant: {
     speaker: 'Narrator',
-    text: 'You throw the canister. It bursts on the creature, which lets out an unearthly shriek as the corrosive liquid dissolves its flesh. It thrashes wildly, wounded and enraged, but it gives you an opening.',
+    text: 'You throw the canister. It bursts on the creature, which shrieks as the liquid dissolves its flesh. It thrashes wildly, wounded but enraged, giving you an opening.',
+    background: BG.service_tunnel,
     sfx: SFX.monster_roar,
     effects: {
       inventory: { remove: 'coolant_canister' },
@@ -1278,6 +1872,7 @@ export const chapter1 = {
   D_fightCreature: {
     speaker: 'Narrator',
     text: 'It drops from the ceiling and lunges at you, a nightmare of clicking bone and dripping flesh.',
+    background: BG.service_tunnel,
     choices: [
       {
         text: 'Swing the pipe at its head.',
@@ -1290,29 +1885,35 @@ export const chapter1 = {
   D_fightDodge: {
     speaker: 'Narrator',
     text: "You try to dodge, but it's too fast. A sharp, bony talon rips through your side. The pain is immense, and the world starts to go grey.",
+    background: BG.service_tunnel,
     effects: { stats: { health: -100 } },
     choices: [{ text: "It's over.", next: 'D_creatureDeath' }],
   },
   D_fightWin: {
     speaker: 'Narrator',
     text: 'You swing the heavy pipe with all your might. It connects with a sickening CRUNCH. The creature stumbles back, momentarily stunned. You see your chance!',
+    background: BG.service_tunnel,
+    textEffects: [{ word: 'CRUNCH', effect: 'shock' }],
     sfx: SFX.boneSnap,
     effects: { stats: { stamina: -20 } },
     choices: [{ text: 'Run for the pump controls!', next: 'D_activatePump' }],
   },
   D_creatureDeath: {
     isDeath: true,
-    text: 'The creature pins you to the grated floor. You look down through the grate into the dark water below as its claws tear you apart. Your last sensation is the feeling of your own warm blood raining down into the reservoir.',
+    background: BG.service_tunnel,
+    text: 'The creature pins you to the grated floor. You look down into the dark water below as its claws tear you apart. Your last sensation is your own blood raining down.',
   },
   D_activatePump: {
     speaker: 'Narrator',
-    text: "You reach the controls and hit the 'Emergency Purge' button. A klaxon blares. WARNING: CHAMBER FLOOD IN 30 SECONDS. A massive pump whines to life. You have to get out of here NOW, before you're washed away with it!",
+    text: "You reach the controls and hit 'Emergency Purge'. A klaxon blares. WARNING: CHAMBER FLOOD IN 30 SECONDS. You have to get out NOW!",
+    background: BG.service_tunnel,
     sfx: SFX.pumpWhine,
     choices: [{ text: 'Get out of the pump room!', next: 'D_pumpEscape' }],
   },
   D_pumpEscape: {
     speaker: 'Narrator',
-    text: "Water begins to gush into the chamber. The creature is being pulled towards the drain, but it's thrashing and trying to crawl towards you! You have to run!",
+    text: "Water gushes into the chamber. The creature is being pulled towards the drain, but it's thrashing and trying to crawl towards you! You have to run!",
+    background: BG.service_tunnel,
     choices: [
       {
         text: 'Sprint for the exit! (Costs Stamina)',
@@ -1326,13 +1927,22 @@ export const chapter1 = {
   },
   D_drownDeath: {
     isDeath: true,
-    text: "You're not fast enough. The torrent of water slams you against a wall, and the chamber fills completely. You are trapped, washed away into the dark depths with the monster.",
+    background: BG.service_tunnel,
+    text: "You're not fast enough. The torrent of water slams you against a wall, and the chamber fills completely. You are trapped, washed away with the monster.",
   },
   D_powerOn: {
     speaker: 'Narrator',
-    text: "You make it out of the chamber just as the floodgate slams shut. You're soaked and exhausted, but alive. You make your way back to the security office and reroute the power. A confirmation message flashes: BULKHEAD POWER ONLINE. Alarms blare as you hear the heavy groan of the main bulkhead door unlocking. Then, a furious, enraged roar echoes from the flooded chamber. It survived. And it's coming for you.",
+    text: "You make it out just as the floodgate slams shut. You're soaked, but alive. You make it back and reroute the power. A confirmation flashes: BULKHEAD POWER ONLINE.",
+    background: BG.service_tunnel,
     sfx: SFX.alarm,
     bgm: BGM.descent,
+    choices: [{ text: '...', next: 'D_powerOn_b' }],
+  },
+  D_powerOn_b: {
+    speaker: 'Narrator',
+    text: "Then, a furious, enraged ROAR!!!! echoes from the flooded chamber. It survived. And it's coming for you.",
+    background: BG.service_tunnel,
+    textEffects: [{ word: 'ROAR!!!!', effect: 'anger' }],
     effects: {
       flags: { set: 'D_powerRestored' },
       setCheckpoint: true,
@@ -1342,7 +1952,8 @@ export const chapter1 = {
   },
   D_chaseBegin: {
     speaker: 'Narrator',
-    text: "You burst out of the security office. The creature, dripping and mangled, is crawling on the ceiling, moving impossibly fast, its limbs scraping against the concrete. It's between you and the bulkhead door.",
+    text: "You burst out of the security office. The creature, dripping and mangled, is crawling on the ceiling, moving impossibly fast. It's between you and the bulkhead door.",
+    background: BG.service_tunnel,
     choices: [
       { text: 'Run straight for the door!', next: 'D_chase_1' },
       {
@@ -1355,23 +1966,21 @@ export const chapter1 = {
   D_chase_diversion: {
     speaker: 'Narrator',
     text: 'You throw the pipe down a side tunnel. The creature, distracted by the sound, scuttles off to investigate. You run for the bulkhead door.',
+    background: BG.service_tunnel,
     effects: { stats: { stamina: -10 } },
     choices: [
       {
         text: 'Almost there!',
-        next: 'D_checkOnFinch',
+        next: 'D_checkOnHarris',
         requires: { flags: ['D_helpedFinch'] },
       },
-      {
-        text: 'Almost there!',
-        next: 'D_escapeAlone',
-        requires: { notFlags: ['D_helpedFinch'] },
-      },
+      { text: 'Almost there!', next: 'D_escapeAlone' },
     ],
   },
   D_chase_1: {
     speaker: 'Narrator',
     text: 'You sprint towards the door. The creature drops from the ceiling in front of you, blocking your path. Its maw opens, revealing rows of needle-like teeth.',
+    background: BG.service_tunnel,
     choices: [
       {
         text: 'Slide under its legs! (Costs Stamina)',
@@ -1386,33 +1995,34 @@ export const chapter1 = {
   D_chase_slide: {
     speaker: 'Narrator',
     text: 'You slide through the muck on the floor, under its thrashing limbs. You scramble to your feet and keep running for the door.',
+    background: BG.service_tunnel,
     effects: { stats: { stamina: -25 } },
     choices: [
       {
         text: 'Keep running!',
-        next: 'D_checkOnFinch',
+        next: 'D_checkOnHarris',
         requires: { flags: ['D_helpedFinch'] },
       },
-      {
-        text: 'Keep running!',
-        next: 'D_escapeAlone',
-        requires: { notFlags: ['D_helpedFinch'] },
-      },
+      { text: 'Keep running!', next: 'D_escapeAlone' },
     ],
   },
-  D_checkOnFinch: {
+  D_checkOnHarris: {
     speaker: 'Narrator',
-    text: 'You run back to where you left Finch. He\'s on his feet, looking stronger. "The door... it\'s open," you tell him. "I heard the commotion. Let\'s go!" Behind you, you hear the creature getting closer.',
-    choices: [{ text: 'Escape with Finch.', next: 'D_escape' }],
+    npc: 'harris',
+    text: 'You run back towards the stairs. Harris, on his feet, sees you. "The door... it\'s open," you yell. "I heard it. Let\'s go!" Behind you, the creature gets closer.',
+    background: BG.service_tunnel,
+    choices: [{ text: 'Escape with Harris.', next: 'D_escape' }],
   },
   D_escapeAlone: {
     speaker: 'Narrator',
-    text: "You don't look back. You run for the now-open bulkhead door and seal it behind you. If Finch was still alive, he isn't anymore. You hear a faint scream from the tunnel before it's cut off by the thick steel.",
+    text: "You don't look back. You run for the now-open bulkhead door and seal it behind you. You hear a faint scream from the tunnel before it's cut off by the thick steel.",
+    background: BG.service_tunnel,
     choices: [{ text: 'You did what you had to do.', next: 'D_escape' }],
   },
   D_escape: {
     speaker: 'Narrator',
-    text: "You find yourself in a sterile, white laboratory corridor. You are out of the service tunnels, but have entered the heart of the asylum's research wing. The true horror may have only just begun.",
+    text: "You find yourself in a sterile, white laboratory corridor. You are out of the service tunnels, but have entered the heart of the asylum's research wing.",
+    background: BG.lab_corridor,
     effects: { flags: { set: 'D_completed' } },
     choices: [
       {

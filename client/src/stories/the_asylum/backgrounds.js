@@ -1,0 +1,39 @@
+export const BG = {
+  start_room: '/images/the_asylum/chapter1/start_room.png',
+  window_rain:
+    'https://images.unsplash.com/photo-1597813233895-398d5fb4c25f?q=80&w=1974&auto=format&fit=crop',
+  window_no_rain:
+    'https://images.unsplash.com/photo-1586769036952-140935515c0e?q=80&w=2070&auto=format&fit=crop',
+  hallway_start:
+    'https://images.unsplash.com/photo-1598214105267-144b574a2b3c?q=80&w=1974&auto=format&fit=crop',
+  janitor_lair:
+    'https://images.unsplash.com/photo-1615465997999-af32757a665a?q=80&w=1974&auto=format&fit=crop',
+  maint_corridor:
+    'https://images.unsplash.com/photo-1544697333-913a5e84852f?q=80&w=1974&auto=format&fit=crop',
+  flooded_wing:
+    'https://images.unsplash.com/photo-1594913262039-41a457a3a5f8?q=80&w=2070&auto=format&fit=crop',
+  childrens_ward:
+    'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop',
+  mirror_realm:
+    'https://images.unsplash.com/photo-1542337839-5147b3ce8431?q=80&w=2070&auto=format&fit=crop',
+  service_tunnel:
+    'https://images.unsplash.com/photo-1518600983133-273a35b1d973?q=80&w=2070&auto=format&fit=crop',
+  courtyard_rainy:
+    'https://images.unsplash.com/photo-1542351482-520a75904de7?q=80&w=1974&auto=format&fit=crop',
+  storage_closet:
+    'https://images.unsplash.com/photo-1582736200239-a1b2a1a02970?q=80&w=1974&auto=format&fit=crop',
+  lab_corridor:
+    'https://images.unsplash.com/photo-1628833446548-631c3a647c43?q=80&w=1974&auto=format&fit=crop',
+  west_wing_entrance:
+    'https://images.unsplash.com/photo-1506102811-232-13a846c4b288?q=80&w=2070&auto=format&fit=crop',
+  morgue:
+    'https://images.unsplash.com/photo-1615413722218-3920a8d6a?q=80&w=2062&auto=format&fit=crop',
+  admin_wing:
+    'https://images.unsplash.com/photo-1549488344-cbb6c144eda4?q=80&w=2070&auto=format&fit=crop',
+  records_room:
+    'https://images.unsplash.com/photo-1580492518864-4c127425974b?q=80&w=1974&auto=format&fit=crop',
+  directors_office:
+    'https://images.unsplash.com/photo-1618001408542-a36363574636?q=80&w=1964&auto=format&fit=crop',
+  secret_passage:
+    'https://images.unsplash.com/photo-1518291341432-864f2585973e?q=80&w=1974&auto=format&fit=crop',
+};

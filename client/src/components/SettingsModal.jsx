@@ -16,46 +16,72 @@ const VolumeSlider = ({ label, value, onChange }) => (
   </div>
 );
 
+const ToggleSwitch = ({ label, checked, onChange }) => (
+  <div className='settings-toggle'>
+    <label htmlFor={`toggle-${label}`}>{label}</label>
+    <input
+      id={`toggle-${label}`}
+      type='checkbox'
+      role='switch'
+      checked={checked}
+      onChange={onChange}
+    />
+  </div>
+);
+
 export const SettingsModal = ({
   isVisible,
   onClose,
-  volumes,
-  onVolumeChange,
+  settings,
+  onSettingsChange,
   onSave,
   onRestart,
 }) => {
   if (!isVisible) return null;
 
   return (
-    <div className='settings-modal-overlay' onClick={onClose}>
-      <div className='settings-panel' onClick={(e) => e.stopPropagation()}>
-        <h2>Audio Settings</h2>
+    <div className='modal-overlay' onClick={onClose}>
+      <div className='modal-panel' onClick={(e) => e.stopPropagation()}>
+        <h2>Settings</h2>
+        <ToggleSwitch
+          label='Enable Narration'
+          checked={settings.narrationEnabled}
+          onChange={(e) =>
+            onSettingsChange('narrationEnabled', e.target.checked)
+          }
+        />
         <VolumeSlider
           label='Master'
-          value={volumes.master}
-          onChange={(e) => onVolumeChange('master', e.target.value)}
+          value={settings.master}
+          onChange={(e) =>
+            onSettingsChange('master', parseFloat(e.target.value))
+          }
         />
         <VolumeSlider
           label='Music'
-          value={volumes.bgm}
-          onChange={(e) => onVolumeChange('bgm', e.target.value)}
+          value={settings.bgm}
+          onChange={(e) => onSettingsChange('bgm', parseFloat(e.target.value))}
         />
         <VolumeSlider
           label='Sound Effects'
-          value={volumes.sfx}
-          onChange={(e) => onVolumeChange('sfx', e.target.value)}
+          value={settings.sfx}
+          onChange={(e) => onSettingsChange('sfx', parseFloat(e.target.value))}
         />
         <VolumeSlider
           label='Narration'
-          value={volumes.narration}
-          onChange={(e) => onVolumeChange('narration', e.target.value)}
+          value={settings.narration}
+          onChange={(e) =>
+            onSettingsChange('narration', parseFloat(e.target.value))
+          }
         />
-        <div className='settings-actions'>
-          <button className='settings-button save' onClick={onSave}>
-            Save Game
+        <div className='modal-actions'>
+          <button className='modal-button' onClick={onRestart}>
+            {' '}
+            Restart Story{' '}
           </button>
-          <button className='settings-button' onClick={onRestart}>
-            Restart
+          <button className='modal-button primary' onClick={onSave}>
+            {' '}
+            Save Game{' '}
           </button>
         </div>
       </div>

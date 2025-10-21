@@ -6,6 +6,8 @@ export const ChoicesModal = ({
   onRestart,
   timer,
   defaultChoiceIndex,
+  isFadingOut,
+  theme,
 }) => {
   const timerRef = useRef(null);
 
@@ -33,8 +35,12 @@ export const ChoicesModal = ({
     onChoice(choice);
   };
 
+  const modalClasses = `choices-modal ${
+    isFadingOut ? 'fade-out' : ''
+  } theme-${theme}`;
+
   return (
-    <div className='choices-modal'>
+    <div className={modalClasses}>
       <div className='choices-container'>
         {choices && choices.length > 0 ? (
           choices.map((choice, index) => (

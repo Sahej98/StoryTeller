@@ -1,6 +1,7 @@
 // src/data/audioData.js
 
 export const BGM = {
+  // Horror / General
   ambient: '/audio/bg/ambient.mp3',
   tension: '/audio/bg/tension.mp3',
   courtyard: '/audio/bg/courtyard.mp3',
@@ -9,13 +10,20 @@ export const BGM = {
   descent: '/audio/bg/descent_madness.mp3', // For the sanity-draining path
   maintenance: '/audio/bg/maintenance_drone.mp3', // Path A
   supernatural: '/audio/bg/supernatural_dread.mp3', // Path B
+  // Sci-Fi
+  scifi_ambient: '/audio/bg/scifi_ambient_drone.mp3',
+  scifi_tension: '/audio/bg/scifi_tension_alert.mp3',
+  // Fantasy
+  fantasy_ambient: '/audio/bg/fantasy_swamp_ambient.mp3',
+  fantasy_combat: '/audio/bg/fantasy_combat_drums.mp3',
 };
 
 export const SFX = {
+  // Horror / General
   doorCreak: '/audio/sfx/door-creak.mp3',
   whisper: '/audio/sfx/whisper.mp3',
   heartbeat: '/audio/sfx/heartbeat.mp3',
-  jumpscare: '/audio/sfx/jumpscare_intense.mp3', // Made more intense
+  jumpscare: '/audio/sfx/jumpscare_intense.mp3',
   scratching: '/audio/sfx/scratching.mp3',
   footsteps: '/audio/sfx/footsteps.mp3',
   scream: '/audio/sfx/scream.mp3',
@@ -76,4 +84,16 @@ export const SFX = {
   bone_saw: '/audio/sfx/bone_saw.mp3',
   water_splash_heavy: '/audio/sfx/water_splash_heavy.mp3',
   reality_warp: '/audio/sfx/reality_warp.mp3',
+  // Sci-Fi
+  airlock_hiss: '/audio/sfx/airlock_hiss.mp3',
+  computer_beep: '/audio/sfx/computer_beep_soft.mp3',
+  plasma_cutter: '/audio/sfx/plasma_cutter_hiss.mp3',
+  ship_groan: '/audio/sfx/ship_groan_metal.mp3',
+  power_up: '/audio/sfx/power_up_hum.mp3',
+  // Fantasy
+  sword_draw: '/audio/sfx/sword_draw_sheath.mp3',
+  sword_clash: '/audio/sfx/sword_clash_metal.mp3',
+  magic_chime: '/audio/sfx/magic_chime_sparkle.mp3',
+  golem_smash: '/audio/sfx/golem_smash_rock.mp3',
+  goblin_giggle: '/audio/sfx/goblin_giggle_short.mp3',
 };

@@ -4,18 +4,18 @@
 export const characters = {
   player: {
     name: 'You',
-    sprite: 'https://i.imgur.com/8a1ZGnL.png', // Placeholder for player sprite
+    sprite: '/images/the_asylum/main_char_sprite.png', // Placeholder for player sprite
   },
   ghost: {
     name: 'Lily',
-    sprite: 'https://i.imgur.com/Y1pE2iA.png', // Placeholder for ghost child sprite
+    sprite: '/images/the_asylum/lily_char_sprite.png', // Placeholder for ghost child sprite
   },
   doctor: {
     name: 'Dr. Finch',
     sprite: 'https://i.imgur.com/bT1xZ9g.png', // Placeholder for sinister doctor
   },
-  finch: {
-    name: 'Finch',
+  harris: {
+    name: 'Harris',
     sprite: 'https://i.imgur.com/g8iL3hH.png', // Wounded man
   },
   echo: {
@@ -25,6 +25,14 @@ export const characters = {
   figure: {
     name: '???',
     sprite: 'https://i.imgur.com/3o1s8Q3.png', // Placeholder for shadowy figure/monster
+  },
+  janitor: {
+    name: 'The Janitor',
+    sprite: 'https://i.imgur.com/8aZ5Y7r.png',
+  },
+  monster: {
+    name: 'Subject 32',
+    sprite: 'https://i.imgur.com/u1s3G8q.png',
   },
 };
 
