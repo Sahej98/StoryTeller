@@ -1,4 +1,5 @@
 import React from 'react';
+import { ChevronDown } from 'lucide-react';
 
 const renderTextWithEffects = (text, effects = []) => {
   if (!effects || !effects.length) return text;
@@ -39,5 +40,10 @@ export const DialogueBox = ({
       {renderTextWithEffects(displayedText, textEffects)}
       {narratorState === 'narrating' && <span className='cursor'></span>}
     </p>
+    {narratorState === 'finished' && (
+      <div className='continue-indicator' aria-hidden='true'>
+        <ChevronDown />
+      </div>
+    )}
   </div>
 );

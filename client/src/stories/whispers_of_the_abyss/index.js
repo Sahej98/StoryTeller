@@ -1,5 +1,5 @@
 import { characters, items } from './common.js';
-import { chapter1 } from './chapter1.js';
+import { chapter1 } from './chapter1/index.js';
 
 export const storyDetails = {
   title: 'Whispers of the Abyss',
@@ -9,6 +9,8 @@ export const storyDetails = {
       number: 1,
       description:
         'Lost and without memory, you awaken in a cursed swamp. An ancient evil stirs, and a mysterious voice is your only guide.',
+      flavorText:
+        'Lost and without memory, you awaken in a cursed swamp where an ancient evil stirs. Your story begins here.',
     },
   },
 };

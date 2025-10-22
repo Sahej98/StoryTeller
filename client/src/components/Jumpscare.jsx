@@ -1,18 +1,46 @@
 import React from 'react';
 
-export const Jumpscare = ({ isVisible, characters }) => {
-  // Return null if not visible or if the required ghost character doesn't exist for the story
-  if (!isVisible || !characters?.ghost) {
+export const Jumpscare = ({ config, characters }) => {
+  if (!config) {
     return null;
   }
 
+  const { type, character, text, image } = config;
+
+  const renderContent = () => {
+    switch (type) {
+      case 'sprite': {
+        const spriteChar = characters?.[character];
+        if (!spriteChar?.sprite) return null;
+        return (
+          <img
+            src={spriteChar.sprite}
+            className='jumpscare-sprite'
+            alt='A horrifying figure appears suddenly'
+          />
+        );
+      }
+      case 'image':
+        if (!image) return null;
+        return (
+          <img
+            src={image}
+            className='jumpscare-sprite'
+            alt='A horrifying image appears suddenly'
+          />
+        );
+      case 'text':
+        return <h1 className='jumpscare-text'>{text}</h1>;
+      case 'glitch':
+        return <div className='jumpscare-glitch-effect'></div>;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className='jumpscare-overlay' aria-live='assertive'>
-      <img
-        src={characters.ghost.sprite}
-        className='jumpscare-sprite'
-        alt='A horrifying ghost appears suddenly'
-      />
+      {renderContent()}
     </div>
   );
 };

@@ -20,7 +20,6 @@ export const useTypewriter = ({
   onFinished,
   onAmbientSfx,
   isReady,
-  onDialogueEnd,
   speakerKey,
 }) => {
   const [displayedText, setDisplayedText] = useState('');
@@ -60,16 +59,10 @@ export const useTypewriter = ({
 
   const handleFinish = useCallback(() => {
     setNarratorState('finished');
-    if (onDialogueEnd) onDialogueEnd();
-
-    const hasChoices = node.choices && node.choices.length > 0;
-    const delay = hasChoices ? 200 : 0;
-    setTimeout(() => {
-      if (onFinishedRef.current) {
-        onFinishedRef.current();
-      }
-    }, delay);
-  }, [node, onDialogueEnd]);
+    if (onFinishedRef.current) {
+      onFinishedRef.current();
+    }
+  }, []);
 
   const skip = useCallback(() => {
     if (narratorState === 'narrating') {
@@ -132,8 +125,6 @@ export const useTypewriter = ({
       utterance.onboundary = (event) => {
         if (event.name === 'word') {
           let endIndex = event.charIndex + event.charLength;
-          // Greedily consume any trailing punctuation and spaces after a word
-          // until we hit the next letter/number. This makes punctuation appear with the word.
           while (
             endIndex < fullText.length &&
             !/[a-zA-Z0-9\u00C0-\u017F]/.test(fullText[endIndex])
@@ -184,7 +175,6 @@ export const useTypewriter = ({
     stopNarration,
     onAmbientSfx,
     volumes,
-    onDialogueEnd,
     speakerKey,
     handleFinish,
     narrationEnabled,

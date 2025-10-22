@@ -1,39 +1,65 @@
+
+
 export const BG = {
   start_room: '/images/the_asylum/chapter1/start_room.png',
-  window_rain:
-    'https://images.unsplash.com/photo-1597813233895-398d5fb4c25f?q=80&w=1974&auto=format&fit=crop',
-  window_no_rain:
-    'https://images.unsplash.com/photo-1586769036952-140935515c0e?q=80&w=2070&auto=format&fit=crop',
-  hallway_start:
-    'https://images.unsplash.com/photo-1598214105267-144b574a2b3c?q=80&w=1974&auto=format&fit=crop',
-  janitor_lair:
-    'https://images.unsplash.com/photo-1615465997999-af32757a665a?q=80&w=1974&auto=format&fit=crop',
-  maint_corridor:
-    'https://images.unsplash.com/photo-1544697333-913a5e84852f?q=80&w=1974&auto=format&fit=crop',
-  flooded_wing:
-    'https://images.unsplash.com/photo-1594913262039-41a457a3a5f8?q=80&w=2070&auto=format&fit=crop',
-  childrens_ward:
-    'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop',
-  mirror_realm:
-    'https://images.unsplash.com/photo-1542337839-5147b3ce8431?q=80&w=2070&auto=format&fit=crop',
-  service_tunnel:
-    'https://images.unsplash.com/photo-1518600983133-273a35b1d973?q=80&w=2070&auto=format&fit=crop',
-  courtyard_rainy:
-    'https://images.unsplash.com/photo-1542351482-520a75904de7?q=80&w=1974&auto=format&fit=crop',
-  storage_closet:
-    'https://images.unsplash.com/photo-1582736200239-a1b2a1a02970?q=80&w=1974&auto=format&fit=crop',
-  lab_corridor:
-    'https://images.unsplash.com/photo-1628833446548-631c3a647c43?q=80&w=1974&auto=format&fit=crop',
-  west_wing_entrance:
-    'https://images.unsplash.com/photo-1506102811-232-13a846c4b288?q=80&w=2070&auto=format&fit=crop',
-  morgue:
-    'https://images.unsplash.com/photo-1615413722218-3920a8d6a?q=80&w=2062&auto=format&fit=crop',
-  admin_wing:
-    'https://images.unsplash.com/photo-1549488344-cbb6c144eda4?q=80&w=2070&auto=format&fit=crop',
-  records_room:
-    'https://images.unsplash.com/photo-1580492518864-4c127425974b?q=80&w=1974&auto=format&fit=crop',
-  directors_office:
-    'https://images.unsplash.com/photo-1618001408542-a36363574636?q=80&w=1964&auto=format&fit=crop',
-  secret_passage:
-    'https://images.unsplash.com/photo-1518291341432-864f2585973e?q=80&w=1974&auto=format&fit=crop',
+  window_rain: 'https://images.unsplash.com/photo-1597813233895-398d5fb4c25f?q=80&w=1974&auto=format&fit=crop',
+  window_no_rain: 'https://images.unsplash.com/photo-1586769036952-140935515c0e?q=80&w=2070&auto=format&fit=crop',
+  hallway_start: 'https://images.unsplash.com/photo-1598214105267-144b574a2b3c?q=80&w=1974&auto=format&fit=crop',
+  janitor_lair: 'https://images.unsplash.com/photo-1615465997999-af32757a665a?q=80&w=1974&auto=format&fit=crop',
+  maint_corridor: 'https://images.unsplash.com/photo-1544697333-913a5e84852f?q=80&w=1974&auto=format&fit=crop',
+  flooded_wing: 'https://images.unsplash.com/photo-1594913262039-41a4515f8?q=80&w=2070&auto=format&fit=crop',
+  childrens_ward: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop',
+  mirror_realm: 'https://images.unsplash.com/photo-1542337839-5147b3ce8431?q=80&w=2070&auto=format&fit=crop',
+  service_tunnel: 'https://images.unsplash.com/photo-1518600983133-273a35b1d973?q=80&w=2070&auto=format&fit=crop',
+  courtyard_rainy: 'https://images.unsplash.com/photo-1542351482-520a75904de7?q=80&w=1974&auto=format&fit=crop',
+  storage_closet: 'https://images.unsplash.com/photo-1582736200239-a1b2a1a02970?q=80&w=1974&auto=format&fit=crop',
+  lab_corridor: 'https://images.unsplash.com/photo-1628833446548-631c3a647c43?q=80&w=1974&auto=format&fit=crop',
+  
+  // Chapter 2
+  west_wing_entrance: 'https://images.unsplash.com/photo-1506102811-232-13a846c4b288?q=80&w=2070&auto=format&fit=crop',
+  morgue_receiving: 'https://images.unsplash.com/photo-1615413722218-3920a8d6a?q=80&w=2062&auto=format&fit=crop',
+  morgue_autopsy: 'https://images.unsplash.com/photo-1581092448348-7d5810840243?q=80&w=2070&auto=format&fit=crop',
+  morgue_cold_storage: 'https://images.unsplash.com/photo-1533694245763-6d042a22d7a2?q=80&w=1974&auto=format&fit=crop',
+  morgue_crematorium: 'https://images.unsplash.com/photo-1542871793-16783642b319?q=80&w=1964&auto=format&fit=crop',
+  morgue_embalming: 'https://images.unsplash.com/photo-1581092448348-7d5810840243?q=80&w=2070&auto=format&fit=crop',
+  morgue_coroner_office: 'https://images.unsplash.com/photo-1517994112540-009c47756b82?q=80&w=1964&auto=format&fit=crop',
+  morgue_pathology: 'https://images.unsplash.com/photo-1581094371911-395e1e70390b?q=80&w=2070&auto=format&fit=crop',
+  morgue_coroner_study: 'https://images.unsplash.com/photo-1587329805217-353931145108?q=80&w=1964&auto=format&fit=crop',
+  morgue_specimen_archives: 'https://images.unsplash.com/photo-1581092919342-9983a21a0527?q=80&w=2070&auto=format&fit=crop',
+  morgue_waste_disposal: 'https://images.unsplash.com/photo-1518600983133-273a35b1d973?q=80&w=2070&auto=format&fit=crop',
+  morgue_bio_resonance_lab: 'https://images.unsplash.com/photo-1581093593402-05a3ab117865?q=80&w=2070&auto=format&fit=crop', 
+  rec_therapy_upper: 'https://images.unsplash.com/photo-1505928329693-5ec94a31745e?q=80&w=2070&auto=format&fit=crop',
+  rec_therapy_lower: 'https://images.unsplash.com/photo-1577985051132-15446a06bdd6?q=80&w=1974&auto=format&fit=crop',
+  rec_therapy_projection: 'https://images.unsplash.com/photo-1587621047743-a6214f04c643?q=80&w=1974&auto=format&fit=crop',
+  rec_therapy_art: 'https://images.unsplash.com/photo-1541753869943-346a5b489379?q=80&w=1966&auto=format&fit=crop',
+  rec_therapy_music: 'https://images.unsplash.com/photo-1520523839592-bd5ba6b81de3?q=80&w=2070&auto=format&fit=crop',
+  rec_therapy_hydrotherapy: 'https://images.unsplash.com/photo-1594913262039-41a4515f8?q=80&w=2070&auto=format&fit=crop',
+  rec_therapy_observation: 'https://images.unsplash.com/photo-1533759413921-6b3a9806869d?q=80&w=1964&auto=format&fit=crop',
+  rec_therapy_lockers: 'https://images.unsplash.com/photo-1580130379624-3a069143ad92?q=80&w=1964&auto=format&fit=crop',
+  rec_therapy_sauna: 'https://images.unsplash.com/photo-1587907577888-75574345155f?q=80&w=1974&auto=format&fit=crop', 
+  rec_therapy_painting_storage: 'https://images.unsplash.com/photo-1582736200239-a1b2a1a02970?q=80&w=1974&auto=format&fit=crop',
+  infirmary_main: 'https://images.unsplash.com/photo-1587329805217-353931145108?q=80&w=1964&auto=format&fit=crop',
+  infirmary_pharmacy: 'https://images.unsplash.com/photo-1584515933487-779824d27167?q=80&w=2070&auto=format&fit=crop',
+  infirmary_recovery: 'https://images.unsplash.com/photo-1579882899421-a47146595a2e?q=80&w=1964&auto=format&fit=crop',
+  infirmary_surgery: 'https://images.unsplash.com/photo-1551076805-e1869033e561?q=80&w=1974&auto=format&fit=crop',
+  infirmary_xray: 'https://images.unsplash.com/photo-1581093199992-076f23c93bab?q=80&w=2070&auto=format&fit=crop',
+  infirmary_sterilization: 'https://images.unsplash.com/photo-1581092919342-9983a21a0527?q=80&w=2070&auto=format&fit=crop',
+  infirmary_lounge: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop',
+  lab_control_room: 'https://images.unsplash.com/photo-1581093593402-05a3ab117865?q=80&w=2070&auto=format&fit=crop',
+  lab_specimen_storage: 'https://images.unsplash.com/photo-1581092919342-9983a21a0527?q=80&w=2070&auto=format&fit=crop',
+  lab_deprivation_chamber: 'https://images.unsplash.com/photo-1533759413921-6b3a9806869d?q=80&w=1964&auto=format&fit=crop',
+  lab_sublevel: 'https://images.unsplash.com/photo-1544697333-913a5e84852f?q=80&w=1974&auto=format&fit=crop',
+  lab_sublevel_terminal: 'https://images.unsplash.com/photo-1555431189-0fabf2207b97?q=80&w=1974&auto=format&fit=crop',
+  lab_sublevel_holding: 'https://images.unsplash.com/photo-1628833446548-631c3a647c43?q=80&w=1974&auto=format&fit=crop',
+  lab_behavioral: 'https://images.unsplash.com/photo-1587907577888-75574345155f?q=80&w=1974&auto=format&fit=crop',
+  lab_cryo_bay: 'https://images.unsplash.com/photo-1597769914292-18115a3f3c14?q=80&w=2070&auto=format&fit=crop', 
+  
+  // Chapter 3+
+  admin_wing: 'https://images.unsplash.com/photo-1549488344-cbb6c144eda4?q=80&w=2070&auto=format&fit=crop',
+  records_room: 'https://images.unsplash.com/photo-1580492518864-4c127425974b?q=80&w=1974&auto=format&fit=crop',
+  directors_office: 'https://images.unsplash.com/photo-1618001408542-a36363574636?q=80&w=1964&auto=format&fit=crop',
+  secret_passage: 'https://images.unsplash.com/photo-1518291341432-864f2585973e?q=80&w=1974&auto=format&fit=crop',
+  security_office: 'https://images.unsplash.com/photo-1587907577888-75574345155f?q=80&w=1974&auto=format&fit=crop',
+  personnel_wing: 'https://images.unsplash.com/photo-1554904253-22d86a1acec4?q=80&w=2070&auto=format&fit=crop',
+  directors_study: 'https://images.unsplash.com/photo-1612422513340-69279634e565?q=80&w=1974&auto=format&fit=crop',
 };

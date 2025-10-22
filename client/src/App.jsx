@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useGameState } from './hooks/useGameState.js';
 import { useSoundManager } from './hooks/useSoundManager.js';
 import { stories } from './stories/index.js';
@@ -19,6 +19,7 @@ import { BackgroundImageFader } from './components/BackgroundImageFader.jsx';
 import { StorySelectScreen } from './components/StorySelectScreen.jsx';
 import { ScanLinesOverlay } from './components/ScanLinesOverlay.jsx';
 import { FilmGrainOverlay } from './components/FilmGrainOverlay.jsx';
+import { StatChangeIndicator } from './components/StatChangeIndicator.jsx';
 
 const SAVE_GAME_KEY = 'interactiveHorrorSave';
 const SETTINGS_KEY = 'storytellerSettings';
@@ -29,7 +30,7 @@ const AutosaveIndicator = () => (
 
 export const App = () => {
   const [appState, setAppState] = useState('startScreen'); // startScreen, storySelect, chapterSelect, caution, playing, toBeContinued, deathScreen, loading
-  const [jumpscareActive, setJumpscareActive] = useState(false);
+  const [jumpscareConfig, setJumpscareConfig] = useState(null);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [inventoryVisible, setInventoryVisible] = useState(false);
   const [journalVisible, setJournalVisible] = useState(false);
@@ -37,6 +38,8 @@ export const App = () => {
   const [activeBackground, setActiveBackground] = useState(null);
   const [selectedStoryId, setSelectedStoryId] = useState(null);
   const [showAutosave, setShowAutosave] = useState(false);
+  const [statNotifications, setStatNotifications] = useState([]);
+  const oneShotAudioRef = useRef(null);
 
   const [settings, setSettings] = useState(() => {
     try {
@@ -95,6 +98,39 @@ export const App = () => {
     characters: discoveredCharacters = new Set(),
   } = gameState || {};
 
+  const prevStatsRef = useRef(playerStats);
+
+  useEffect(() => {
+    if (playerStats) {
+      const changes = {};
+      for (const stat in playerStats) {
+        const diff =
+          playerStats[stat] -
+          (prevStatsRef.current?.[stat] || playerStats[stat]);
+        if (diff !== 0) {
+          changes[stat] = diff;
+        }
+      }
+
+      if (Object.keys(changes).length > 0) {
+        const newNotifications = Object.entries(changes).map(
+          ([stat, change]) => ({
+            id: Date.now() + Math.random(),
+            stat,
+            change,
+          })
+        );
+        setStatNotifications((prev) => [...prev, ...newNotifications]);
+      }
+
+      prevStatsRef.current = playerStats;
+    }
+  }, [playerStats]);
+
+  const removeNotification = (id) => {
+    setStatNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
   const currentNode =
     selectedStory && currentPosition
       ? selectedStory.storyData[currentPosition.chapter]?.[currentPosition.key]
@@ -127,20 +163,25 @@ export const App = () => {
       gameState: appState,
     });
 
-  const triggerJumpscare = (onComplete) => {
-    setJumpscareActive(true);
-    if (sfxAudioRef.current && settings.master > 0) {
-      sfxAudioRef.current.src = SFX.jumpscare;
-      sfxAudioRef.current.volume = settings.sfx * settings.master;
-      sfxAudioRef.current
+  const triggerJumpscare = (config, onComplete) => {
+    if (!config) {
+      if (onComplete) onComplete();
+      return;
+    }
+    setJumpscareConfig(config);
+    const sfxToPlay = config.sfx ? SFX[config.sfx] : SFX.jumpscare;
+    if (settings.master > 0 && settings.sfx > 0 && sfxToPlay) {
+      oneShotAudioRef.current = new Audio(sfxToPlay);
+      oneShotAudioRef.current.volume = settings.sfx * settings.master;
+      oneShotAudioRef.current
         .play()
         .catch((e) => console.error('Jumpscare SFX failed', e));
     }
 
     setTimeout(() => {
-      setJumpscareActive(false);
-      onComplete();
-    }, 800);
+      setJumpscareConfig(null);
+      if (onComplete) onComplete();
+    }, config.duration || 900);
   };
 
   const handleStartNewGame = () => setAppState('storySelect');
@@ -171,7 +212,7 @@ export const App = () => {
 
     const targetNode = selectedStory.storyData[result.chapter]?.[result.key];
     if (targetNode?.jumpscare) {
-      triggerJumpscare(() => {});
+      triggerJumpscare(targetNode.jumpscare, () => {});
     }
   };
 
@@ -279,7 +320,7 @@ export const App = () => {
 
   const viewportClasses = [
     'game-viewport',
-    jumpscareActive && 'screen-shake',
+    jumpscareConfig && 'screen-shake',
     isLowSanity && 'low-sanity',
     currentNode?.visualEffect && `effect-${currentNode.visualEffect}`,
   ]
@@ -302,6 +343,7 @@ export const App = () => {
             onNewGame={handleStartNewGame}
             onLoad={handleLoadGame}
             hasSaveData={hasSaveData}
+            onSettingsClick={() => setSettingsVisible(true)}
           />
         );
       case 'storySelect':
@@ -364,6 +406,16 @@ export const App = () => {
       <audio ref={bgmAudioRef} loop />
       <audio ref={sfxAudioRef} />
       <div className={viewportClasses}>
+        <div className='stat-change-container'>
+          {statNotifications.map((notif) => (
+            <StatChangeIndicator
+              key={notif.id}
+              {...notif}
+              onComplete={removeNotification}
+            />
+          ))}
+        </div>
+
         {activeBackground && (
           <BackgroundImageFader imageUrl={activeBackground} />
         )}
@@ -372,7 +424,7 @@ export const App = () => {
         {storyTheme === 'scifi' && <ScanLinesOverlay />}
 
         <Jumpscare
-          isVisible={jumpscareActive}
+          config={jumpscareConfig}
           characters={selectedStory?.characters}
         />
         {renderContent()}

@@ -15,7 +15,7 @@ export const characters = {
   golem: {
     name: 'Mud Golem',
     sprite: 'https://i.imgur.com/VOHg2Fv.png',
-  },
+  }
 };
 
 // Items
@@ -25,27 +25,23 @@ export const items = {
     description: 'A heavy iron amulet, warm to the touch. The clasp is broken.',
     lore: {
       title: 'Faded Inscription',
-      content:
-        "Barely legible markings are etched into the back. You can make out a single word: '...PROTECTION...'",
-    },
+      content: "Barely legible markings are etched into the back. You can make out a single word: '...PROTECTION...'",
+    }
   },
   swamp_moss: {
     name: 'Glimmer Moss',
-    description:
-      'A clump of moss that gives off a faint, pulsating green light. It smells of ozone and damp earth.',
+    description: 'A clump of moss that gives off a faint, pulsating green light. It smells of ozone and damp earth.',
   },
   goblin_shiv: {
-    name: 'Goblin Shiv',
-    description:
-      'A crude, sharp piece of scrap metal wrapped in leather strips. It smells terrible.',
+      name: 'Goblin Shiv',
+      description: 'A crude, sharp piece of scrap metal wrapped in leather strips. It smells terrible.'
   },
   strange_mushroom: {
     name: 'Rubbery Mushroom',
-    description: 'A strange, rubbery mushroom. It feels oddly warm.',
+    description: 'A strange, rubbery mushroom. It feels oddly warm.'
   },
   glowing_stone: {
     name: 'Glowing Stone',
-    description:
-      'A small stone that pulses with a soft, green light. It was inside the mud creature.',
-  },
+    description: 'A small stone that pulses with a soft, green light. It was inside the mud creature.'
+  }
 };

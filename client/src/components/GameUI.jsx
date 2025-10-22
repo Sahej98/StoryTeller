@@ -32,27 +32,36 @@ export const GameUI = ({
     choicesVisible: false,
     choicesFadingOut: false,
   });
+  const [dialogueFadingOut, setDialogueFadingOut] = useState(false);
   const preloadedImages = useRef(new Set());
   const choiceHandlerRef = useRef(null);
 
   const currentNode = storyData[currentPosition.chapter][currentPosition.key];
 
-  const handleNarrationFinish = useCallback(() => {
-    const isAutoProceed =
-      availableChoices?.length === 1 && availableChoices[0].text === '...';
+  const handleContinueClick = () => {
+    if (narratorState === 'narrating') {
+      skip();
+    } else if (
+      narratorState === 'finished' &&
+      !uiState.choicesVisible &&
+      !dialogueFadingOut
+    ) {
+      setDialogueFadingOut(true);
 
-    if (isAutoProceed) {
-      // Hide the current dialogue before proceeding. This uses the fade-out animation.
-      setUiState((prev) => ({ ...prev, dialogueVisible: false }));
-      // Wait for the fade-out to finish before changing scenes.
       setTimeout(() => {
-        onChoice(availableChoices[0]);
-      }, 500); // Match the CSS transition duration for .dialogue-wrapper
-    } else {
-      // Otherwise, show the choices.
-      setUiState((prev) => ({ ...prev, choicesVisible: true }));
+        const isAutoProceed =
+          availableChoices?.length === 1 && availableChoices[0].text === '...';
+
+        setUiState((prev) => ({ ...prev, dialogueVisible: false }));
+
+        if (isAutoProceed) {
+          onChoice(availableChoices[0]);
+        } else {
+          setUiState((prev) => ({ ...prev, choicesVisible: true }));
+        }
+      }, 500);
     }
-  }, [availableChoices, onChoice]);
+  };
 
   const hasRevisitText =
     visitedNodes.has(`${currentPosition.chapter}/${currentPosition.key}`) &&
@@ -76,9 +85,8 @@ export const GameUI = ({
     node: currentNode,
     volumes: settings,
     narrationEnabled: settings.narrationEnabled,
-    onFinished: handleNarrationFinish,
-    onDialogueEnd,
-    onAmbientSfx,
+    onFinished: onDialogueEnd,
+    onAmbientSfx: onAmbientSfx,
     isReady: uiState.dialogueVisible,
     speakerKey: getSpeakerKey(),
   });
@@ -88,20 +96,18 @@ export const GameUI = ({
 
     choiceHandlerRef.current = () => onChoice(choice);
 
-    // Hide BOTH choices and dialogue to prevent flicker on scene change
     setUiState({
       dialogueVisible: false,
-      choicesVisible: false,
+      choicesVisible: true,
       choicesFadingOut: true,
     });
 
-    // Wait for fade-out animation to complete before loading the next node
     setTimeout(() => {
       if (choiceHandlerRef.current) {
         choiceHandlerRef.current();
         choiceHandlerRef.current = null;
       }
-    }, 500); // Match CSS transition duration
+    }, 500);
   };
 
   useEffect(() => {
@@ -110,6 +116,7 @@ export const GameUI = ({
       choicesVisible: false,
       choicesFadingOut: false,
     });
+    setDialogueFadingOut(false);
     const isInitialScene =
       currentPosition.chapter === 'chapter1' && currentPosition.key === 'start';
     const delay = isInitialScene ? 1500 : 500;
@@ -160,18 +167,28 @@ export const GameUI = ({
   const speakerInfo = characters[speakerKey];
   let speakerName = speakerInfo ? speakerInfo.name : speakerKey;
 
-  // Logic to show '???' for undiscovered characters
   if (speakerKey === 'harris' && !flags.has('met_harris')) {
     speakerName = '???';
   }
 
+  if (speakerName !== '???') {
+    speakerName = speakerName.charAt(0).toUpperCase() + speakerName.slice(1);
+  }
+
   return (
     <>
+      {(narratorState === 'narrating' ||
+        (narratorState === 'finished' &&
+          !uiState.choicesVisible &&
+          !dialogueFadingOut)) && (
+        <div className='continue-click-area' onClick={handleContinueClick} />
+      )}
+
       <div
         className={`dialogue-wrapper ${
-          !uiState.dialogueVisible ? 'hidden' : ''
+          !uiState.dialogueVisible || dialogueFadingOut ? 'hidden' : ''
         }`}
-        aria-hidden={!uiState.dialogueVisible}>
+        aria-hidden={!uiState.dialogueVisible || dialogueFadingOut}>
         {isPlayerInScene ? (
           <CharacterSprite
             sprite={characters.player.sprite}
@@ -224,13 +241,13 @@ export const GameUI = ({
       )}
 
       <ControlBar
+        theme={theme}
         stats={playerStats}
         inventoryCount={inventory.length}
         onInventoryClick={onInventoryClick}
         onJournalClick={onJournalClick}
         onSettingsClick={onSettingsClick}
         onSaveClick={onSaveClick}
-        onSkipClick={skip}
       />
     </>
   );

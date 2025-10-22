@@ -23,7 +23,7 @@ export const SFX = {
   doorCreak: '/audio/sfx/door-creak.mp3',
   whisper: '/audio/sfx/whisper.mp3',
   heartbeat: '/audio/sfx/heartbeat.mp3',
-  jumpscare: '/audio/sfx/jumpscare_intense.mp3',
+  jumpscare: '/audio/sfx/jumpscare.mp3',
   scratching: '/audio/sfx/scratching.mp3',
   footsteps: '/audio/sfx/footsteps.mp3',
   scream: '/audio/sfx/scream.mp3',
