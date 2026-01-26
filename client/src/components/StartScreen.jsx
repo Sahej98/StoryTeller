@@ -1,39 +1,73 @@
-import React from 'react';
+import {
+  BookOpen,
+  Edit3,
+  LogOut,
+  Settings,
+  FolderOpen,
+  Users,
+} from 'lucide-react';
 
 export const StartScreen = ({
   onNewGame,
   onLoad,
   hasSaveData,
   onSettingsClick,
+  onEditorClick,
+  onLogout,
+  isAdmin,
+  onUserManagementClick,
 }) => (
-  <>
-    <div
-      className='start-screen-background'
-      style={{
-        backgroundImage: `url('https://images.unsplash.com/photo-1598214105267-144b574a2b3c?q=80&w=1974&auto=format&fit=crop')`,
-      }}></div>
-    <div className='start-screen-vignette'></div>
-    <div className='start-screen-container'>
-      <div className='start-screen-title-container'>
-        <h1 className='start-screen-title'>Storyteller</h1>
+  <div className='start-screen-container'>
+    <div className='start-screen-branding'>
+      <div className='start-screen-logo'>
+        <img
+          src='/images/logo.png'
+          alt='Storyteller Logo'
+          className='start-screen-main-logo'
+        />
+        <h1 className='start-screen-logo-title'>Storyteller</h1>
+        <p className='start-screen-logo-subtitle'>Your Adventure Begins</p>
       </div>
-      <div className='start-screen-menu-container'>
-        {hasSaveData && (
-          <button className='start-screen-menu-item' onClick={onLoad}>
-            Continue
-          </button>
-        )}
-        <button className='start-screen-menu-item' onClick={onNewGame}>
-          New Story
-        </button>
-        <button className='start-screen-menu-item' onClick={onSettingsClick}>
-          Settings
-        </button>
-        <button className='start-screen-menu-item' disabled>
-          Quit
-        </button>
-      </div>
-      <div></div>
     </div>
-  </>
+    <div className='start-screen-menu-panel'>
+      <div className='start-screen-menu'>
+        <button className='start-menu-button primary' onClick={onNewGame}>
+          <BookOpen size={18} /> New Story
+        </button>
+        <button
+          className='start-menu-button'
+          onClick={onLoad}
+          disabled={!hasSaveData}>
+          <FolderOpen size={18} /> Continue
+        </button>
+        {isAdmin && (
+          <>
+            <button
+              className='start-menu-button'
+              onClick={() => onEditorClick()}>
+              <Edit3 size={18} /> Create Story
+            </button>
+            <button
+              className='start-menu-button'
+              onClick={onUserManagementClick}>
+              <Users size={18} /> User Management
+            </button>
+          </>
+        )}
+
+        <div className='start-screen-divider'></div>
+
+        <div className='start-screen-secondary-actions'>
+          <button
+            className='start-menu-button secondary'
+            onClick={onSettingsClick}>
+            <Settings size={18} /> Settings
+          </button>
+          <button className='start-menu-button secondary' onClick={onLogout}>
+            <LogOut size={18} /> Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 );

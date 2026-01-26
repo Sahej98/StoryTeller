@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 const InventoryItem = ({ def }) => (
   <li className='inventory-item'>
@@ -7,19 +8,28 @@ const InventoryItem = ({ def }) => (
   </li>
 );
 
-export const InventoryModal = ({ isVisible, onClose, inventory, itemDefs }) => {
-  if (!isVisible) return null;
-
+export const InventoryModal = ({ onClose, inventory, itemDefs }) => {
   return (
-    <div className='modal-overlay' onClick={onClose}>
-      <div className='modal-panel' onClick={(e) => e.stopPropagation()}>
+    <motion.div
+      className='modal-overlay'
+      onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}>
+      <motion.div
+        className='modal-panel'
+        onClick={(e) => e.stopPropagation()}
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ type: 'spring', damping: 18, stiffness: 250 }}>
         <h2>Inventory</h2>
         {inventory && inventory.length > 0 ? (
           <ul className='inventory-modal-list'>
             {inventory.map((itemKey) =>
               itemDefs[itemKey] ? (
                 <InventoryItem key={itemKey} def={itemDefs[itemKey]} />
-              ) : null
+              ) : null,
             )}
           </ul>
         ) : (
@@ -27,7 +37,7 @@ export const InventoryModal = ({ isVisible, onClose, inventory, itemDefs }) => {
             Your pockets are empty.
           </p>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };

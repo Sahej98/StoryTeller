@@ -1,6 +1,13 @@
 import { useEffect, useRef, useCallback } from 'react';
 
-export const useSoundManager = ({ currentNode, volumes, gameState }) => {
+export const useSoundManager = ({
+  currentNode,
+  volumes,
+  gameState,
+  hasInteracted,
+  BGM,
+  SFX,
+}) => {
   const bgmAudioRef = useRef(null);
   const sfxAudioRef = useRef(null);
   const currentBgm = useRef(null);
@@ -62,70 +69,130 @@ export const useSoundManager = ({ currentNode, volumes, gameState }) => {
   }, [masterVolume]);
 
   useEffect(() => {
-    if (gameState !== 'playing') {
-      if (bgmAudioRef.current && !bgmAudioRef.current.paused) {
-        fade(bgmAudioRef, 0, 500, () => bgmAudioRef.current.pause());
-      }
-      return;
-    }
+    if (!BGM || !SFX) return; // Wait for data to be loaded
 
     const FADE_DURATION = 1000;
+    const menuStates = [
+      'auth',
+      'startScreen',
+      'storySelect',
+      'chapterSelect',
+      'editor',
+    ];
+    const isMenuState = menuStates.includes(gameState);
+    const isPlayingState = gameState === 'playing';
 
     if (bgmAudioRef.current) {
+      if (
+        hasInteracted &&
+        bgmAudioRef.current.paused &&
+        bgmAudioRef.current.src
+      ) {
+        bgmAudioRef.current
+          .play()
+          .catch((e) => console.error('Deferred audio play failed', e));
+      }
+
       const targetBgmVolume = volumes.bgm * masterVolume;
 
-      if (currentNode.bgm && currentBgm.current !== currentNode.bgm) {
+      if (isPlayingState && currentNode) {
+        // In-game BGM logic
         const newBgm = currentNode.bgm;
-        currentBgm.current = newBgm;
+        if (newBgm && currentBgm.current !== newBgm) {
+          currentBgm.current = newBgm;
 
-        if (bgmAudioRef.current.src && !bgmAudioRef.current.paused) {
-          fade(bgmAudioRef, 0, FADE_DURATION, () => {
+          if (
+            bgmAudioRef.current.src &&
+            !bgmAudioRef.current.paused &&
+            bgmAudioRef.current.volume > 0
+          ) {
+            fade(bgmAudioRef, 0, FADE_DURATION, () => {
+              bgmAudioRef.current.src = newBgm;
+              if (hasInteracted) {
+                bgmAudioRef.current
+                  .play()
+                  .catch((e) => console.error('BGM play failed', e));
+              }
+              fade(bgmAudioRef, targetBgmVolume, FADE_DURATION);
+            });
+          } else {
             bgmAudioRef.current.src = newBgm;
-            bgmAudioRef.current
-              .play()
-              .catch((e) => console.error('BGM play failed', e));
+            bgmAudioRef.current.volume = 0;
+            if (hasInteracted) {
+              bgmAudioRef.current
+                .play()
+                .catch((e) => console.error('BGM play failed', e));
+            }
             fade(bgmAudioRef, targetBgmVolume, FADE_DURATION);
+          }
+        } else if (
+          currentNode.hasOwnProperty('bgm') &&
+          !newBgm &&
+          bgmAudioRef.current.src &&
+          !bgmAudioRef.current.paused
+        ) {
+          fade(bgmAudioRef, 0, FADE_DURATION, () => {
+            bgmAudioRef.current.pause();
+            bgmAudioRef.current.src = '';
+            currentBgm.current = null;
           });
-        } else {
-          bgmAudioRef.current.src = newBgm;
-          bgmAudioRef.current.volume = 0;
-          bgmAudioRef.current
-            .play()
-            .catch((e) => console.error('BGM play failed', e));
-          fade(bgmAudioRef, targetBgmVolume, FADE_DURATION);
+        } else if (!bgmFadeInterval.current) {
+          bgmAudioRef.current.volume = targetBgmVolume;
         }
-      } else if (
-        currentNode.hasOwnProperty('bgm') &&
-        !currentNode.bgm &&
-        bgmAudioRef.current.src &&
-        !bgmAudioRef.current.paused
-      ) {
-        fade(bgmAudioRef, 0, FADE_DURATION, () => {
-          bgmAudioRef.current.pause();
-          bgmAudioRef.current.src = '';
-          currentBgm.current = null;
-        });
-      } else if (!bgmFadeInterval.current) {
-        bgmAudioRef.current.volume = targetBgmVolume;
+      } else if (isMenuState) {
+        // Menu BGM logic
+        const menuBgm = BGM.menu;
+        if (currentBgm.current !== menuBgm) {
+          const playMenuTheme = () => {
+            bgmAudioRef.current.src = menuBgm;
+            currentBgm.current = menuBgm;
+            bgmAudioRef.current.loop = true;
+            if (hasInteracted) {
+              bgmAudioRef.current
+                .play()
+                .catch((e) => console.error('Menu BGM failed', e));
+              fade(bgmAudioRef, targetBgmVolume, FADE_DURATION);
+            }
+          };
+
+          if (
+            bgmAudioRef.current.src &&
+            !bgmAudioRef.current.paused &&
+            bgmAudioRef.current.volume > 0
+          ) {
+            fade(bgmAudioRef, 0, FADE_DURATION / 2, playMenuTheme);
+          } else {
+            bgmAudioRef.current.volume = 0;
+            playMenuTheme();
+          }
+        } else if (!bgmFadeInterval.current) {
+          bgmAudioRef.current.volume = targetBgmVolume;
+        }
+      } else {
+        // Other states (loading, death screen, etc.)
+        if (bgmAudioRef.current && !bgmAudioRef.current.paused) {
+          fade(bgmAudioRef, 0, FADE_DURATION / 2, () => {
+            bgmAudioRef.current.pause();
+            currentBgm.current = null;
+          });
+        }
       }
     }
 
     if (sfxAudioRef.current) {
       sfxAudioRef.current.volume = volumes.sfx * masterVolume;
-      if (currentNode.sfx) {
+      if (isPlayingState && currentNode?.sfx && hasInteracted) {
         sfxAudioRef.current.src = currentNode.sfx;
         sfxAudioRef.current
           .play()
           .catch((e) => console.error('SFX play failed', e));
-      } else {
-        sfxAudioRef.current.pause();
       }
     }
-  }, [currentNode, volumes, masterVolume, gameState, fade]);
+  }, [currentNode, volumes, masterVolume, gameState, fade, hasInteracted, BGM, SFX]);
 
   const playAmbientSfx = useCallback(
     (sfxUrl, delay = 0) => {
-      if (masterVolume === 0) return;
+      if (masterVolume === 0 || !hasInteracted) return;
 
       const playSound = () => {
         const audio = new Audio(sfxUrl);
@@ -137,7 +204,7 @@ export const useSoundManager = ({ currentNode, volumes, gameState }) => {
         activeAmbientSounds.current.push(audio);
         audio.onended = () => {
           activeAmbientSounds.current = activeAmbientSounds.current.filter(
-            (a) => a !== audio
+            (a) => a !== audio,
           );
         };
       };
@@ -148,7 +215,7 @@ export const useSoundManager = ({ currentNode, volumes, gameState }) => {
         playSound();
       }
     },
-    [volumes, masterVolume]
+    [volumes, masterVolume, hasInteracted],
   );
 
   const stopAllSfx = useCallback(() => {

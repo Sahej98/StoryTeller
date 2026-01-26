@@ -7,7 +7,6 @@ export const ChoicesModal = ({
   timer,
   defaultChoiceIndex,
   isFadingOut,
-  theme,
 }) => {
   const timerRef = useRef(null);
 
@@ -15,7 +14,7 @@ export const ChoicesModal = ({
     if (timer > 0) {
       timerRef.current = setTimeout(() => {
         const defaultChoice = choices[defaultChoiceIndex] || choices[0];
-        if (defaultChoice) {
+        if (defaultChoice && !defaultChoice.isDisabled) {
           onChoice(defaultChoice);
         }
       }, timer * 1000);
@@ -35,9 +34,7 @@ export const ChoicesModal = ({
     onChoice(choice);
   };
 
-  const modalClasses = `choices-modal ${
-    isFadingOut ? 'fade-out' : ''
-  } theme-${theme}`;
+  const modalClasses = `choices-modal ${isFadingOut ? 'fade-out' : ''}`;
 
   return (
     <div className={modalClasses}>
@@ -48,8 +45,11 @@ export const ChoicesModal = ({
               key={index}
               className='choice-button'
               onClick={() => handleChoiceClick(choice)}
-              aria-label={`Choice ${index + 1}: ${choice.text}`}>
-              {choice.text}
+              disabled={choice.isDisabled}
+              aria-label={`Choice ${index + 1}: ${choice.text}${
+                choice.isDisabled ? ' (Requirement not met)' : ''
+              }`}>
+              <span className='choice-text'>{choice.text}</span>
               {timer > 0 && index === 0 && (
                 <div
                   className='choice-timer-bar'

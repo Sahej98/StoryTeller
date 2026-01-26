@@ -3,29 +3,33 @@ import { useTypewriter } from '../hooks/useTypewriter.js';
 import { CharacterSprite } from './CharacterSprite.jsx';
 import { DialogueBox } from './DialogueBox.jsx';
 import { ChoicesModal } from './ChoicesModal.jsx';
-import { ControlBar } from './ControlBar.jsx';
+import { HUD } from './HUD.jsx';
 
 export const GameUI = ({
-  storyData,
   characters,
-  currentPosition,
   settings,
   onChoice,
   onRestart,
   onAmbientSfx,
   onDialogueEnd,
-  availableChoices,
-  timer,
-  defaultChoiceIndex,
-  visitedNodes,
-  theme,
   playerStats,
   inventory,
-  flags,
   onInventoryClick,
   onJournalClick,
   onSettingsClick,
   onSaveClick,
+  onHomeClick,
+  lastAction,
+  updatedStats,
+  // New props from server view model
+  currentNode,
+  processedChoices,
+  speakerKey,
+  speakerName,
+  textToDisplay,
+  isPlayerInScene,
+  npcToDisplay,
+  voiceMap,
 }) => {
   const [uiState, setUiState] = useState({
     dialogueVisible: false,
@@ -35,8 +39,6 @@ export const GameUI = ({
   const [dialogueFadingOut, setDialogueFadingOut] = useState(false);
   const preloadedImages = useRef(new Set());
   const choiceHandlerRef = useRef(null);
-
-  const currentNode = storyData[currentPosition.chapter][currentPosition.key];
 
   const handleContinueClick = () => {
     if (narratorState === 'narrating') {
@@ -50,35 +52,18 @@ export const GameUI = ({
 
       setTimeout(() => {
         const isAutoProceed =
-          availableChoices?.length === 1 && availableChoices[0].text === '...';
+          processedChoices?.length === 1 && processedChoices[0].text === '...';
 
         setUiState((prev) => ({ ...prev, dialogueVisible: false }));
 
         if (isAutoProceed) {
-          onChoice(availableChoices[0]);
+          onChoice(processedChoices[0]);
         } else {
           setUiState((prev) => ({ ...prev, choicesVisible: true }));
         }
       }, 500);
     }
   };
-
-  const hasRevisitText =
-    visitedNodes.has(`${currentPosition.chapter}/${currentPosition.key}`) &&
-    currentNode.revisitText;
-  const textToDisplay = hasRevisitText
-    ? currentNode.revisitText
-    : currentNode.text;
-
-  const getSpeakerKey = useCallback(() => {
-    const key =
-      hasRevisitText && currentNode.revisitSpeaker
-        ? currentNode.revisitSpeaker
-        : currentNode.speaker;
-    if (!key) return 'narrator';
-    if (key === 'You') return 'player';
-    return key.toLowerCase();
-  }, [currentNode, hasRevisitText]);
 
   const { displayedText, narratorState, skip } = useTypewriter({
     fullText: textToDisplay,
@@ -88,7 +73,8 @@ export const GameUI = ({
     onFinished: onDialogueEnd,
     onAmbientSfx: onAmbientSfx,
     isReady: uiState.dialogueVisible,
-    speakerKey: getSpeakerKey(),
+    speakerKey: speakerKey,
+    voiceMap,
   });
 
   const handleChoiceClick = (choice) => {
@@ -110,6 +96,32 @@ export const GameUI = ({
     }, 500);
   };
 
+  const lastActionRef = useRef(null);
+  useEffect(() => {
+    if (
+      !lastAction ||
+      (lastActionRef.current && lastAction.time === lastActionRef.current.time)
+    ) {
+      return;
+    }
+    lastActionRef.current = lastAction;
+
+    const { action } = lastAction;
+
+    if (action === 'continue') {
+      handleContinueClick();
+    } else if (action.startsWith('choice')) {
+      const choiceIndex = parseInt(action.replace('choice', ''), 10) - 1;
+      if (
+        uiState.choicesVisible &&
+        processedChoices[choiceIndex] &&
+        !processedChoices[choiceIndex].isDisabled
+      ) {
+        handleChoiceClick(processedChoices[choiceIndex]);
+      }
+    }
+  }, [lastAction, processedChoices, uiState.choicesVisible]);
+
   useEffect(() => {
     setUiState({
       dialogueVisible: false,
@@ -117,63 +129,30 @@ export const GameUI = ({
       choicesFadingOut: false,
     });
     setDialogueFadingOut(false);
+
+    // Check if current node exists to prevent errors on chapter end
+    if (!currentNode) return;
+
     const isInitialScene =
-      currentPosition.chapter === 'chapter1' && currentPosition.key === 'start';
+      currentNode?.choices?.length > 0 &&
+      currentNode.choices[0].next === 'start_b'; // Heuristic for first node
     const delay = isInitialScene ? 1500 : 500;
     const timer = setTimeout(() => {
       setUiState((prev) => ({ ...prev, dialogueVisible: true }));
     }, delay);
     return () => clearTimeout(timer);
-  }, [currentPosition]);
+  }, [currentNode]);
 
   useEffect(() => {
-    if (currentNode.choices) {
+    if (currentNode?.choices) {
       currentNode.choices.forEach((choice) => {
         if (!choice.next) return;
-        let nextChapterData = storyData[currentPosition.chapter];
-        let nextKey = choice.next;
-        let nextNodeDef = choice.next;
-
-        if (typeof nextNodeDef === 'object' && nextNodeDef.chapter) {
-          nextChapterData = storyData[nextNodeDef.chapter];
-          nextKey = nextNodeDef.key;
-        }
-
-        const nextNode = nextChapterData?.[nextKey];
-        if (
-          nextNode &&
-          nextNode.background &&
-          !preloadedImages.current.has(nextNode.background)
-        ) {
-          const img = new Image();
-          img.src = nextNode.background;
-          preloadedImages.current.add(nextNode.background);
-        }
+        // Preloading logic can be simplified or removed, as backgrounds are part of currentNode
+        // If we want to preload for *next* nodes, this requires more data from server.
+        // For now, we'll keep it simple as the server-driven model reduces look-ahead needs.
       });
     }
-  }, [currentNode.choices, currentPosition.chapter, storyData]);
-
-  const isPlayerInScene =
-    currentNode.speaker === 'player' ||
-    !!currentNode.npc ||
-    currentNode.speaker === 'You';
-  const npcToDisplay = Array.isArray(currentNode.npc)
-    ? currentNode.npc
-    : currentNode.npc
-    ? [currentNode.npc]
-    : [];
-
-  const speakerKey = getSpeakerKey();
-  const speakerInfo = characters[speakerKey];
-  let speakerName = speakerInfo ? speakerInfo.name : speakerKey;
-
-  if (speakerKey === 'harris' && !flags.has('met_harris')) {
-    speakerName = '???';
-  }
-
-  if (speakerName !== '???') {
-    speakerName = speakerName.charAt(0).toUpperCase() + speakerName.slice(1);
-  }
+  }, [currentNode?.choices]);
 
   return (
     <>
@@ -191,10 +170,10 @@ export const GameUI = ({
         aria-hidden={!uiState.dialogueVisible || dialogueFadingOut}>
         {isPlayerInScene ? (
           <CharacterSprite
-            sprite={characters.player.sprite}
+            sprite={characters?.player?.sprite}
             name='Player'
             className='player'
-            isActive={getSpeakerKey() === 'player'}
+            isActive={speakerKey === 'player'}
           />
         ) : (
           <div style={{ gridColumn: 1 }}></div>
@@ -204,8 +183,7 @@ export const GameUI = ({
           speakerName={speakerName}
           displayedText={displayedText}
           narratorState={narratorState}
-          textEffects={currentNode.textEffects}
-          theme={theme}
+          textEffects={currentNode?.textEffects}
         />
 
         <div
@@ -214,16 +192,16 @@ export const GameUI = ({
             display: 'flex',
             justifyContent: 'flex-start',
           }}>
-          {npcToDisplay.map((npcKey) =>
+          {(npcToDisplay || []).map((npcKey) =>
             characters[npcKey] ? (
               <CharacterSprite
                 key={npcKey}
                 sprite={characters[npcKey].sprite}
                 name={characters[npcKey].name}
                 className='npc'
-                isActive={getSpeakerKey() === npcKey}
+                isActive={speakerKey === npcKey}
               />
-            ) : null
+            ) : null,
           )}
         </div>
       </div>
@@ -231,23 +209,23 @@ export const GameUI = ({
       {(uiState.choicesVisible || uiState.choicesFadingOut) && (
         <ChoicesModal
           isFadingOut={uiState.choicesFadingOut}
-          choices={availableChoices}
+          choices={processedChoices}
           onChoice={handleChoiceClick}
           onRestart={onRestart}
-          timer={timer}
-          defaultChoiceIndex={defaultChoiceIndex}
-          theme={theme}
+          timer={currentNode?.timer || 0}
+          defaultChoiceIndex={currentNode?.defaultChoiceIndex || 0}
         />
       )}
 
-      <ControlBar
-        theme={theme}
-        stats={playerStats}
+      <HUD
+        playerStats={playerStats}
         inventoryCount={inventory.length}
         onInventoryClick={onInventoryClick}
         onJournalClick={onJournalClick}
         onSettingsClick={onSettingsClick}
         onSaveClick={onSaveClick}
+        onHomeClick={onHomeClick}
+        updatedStats={updatedStats}
       />
     </>
   );

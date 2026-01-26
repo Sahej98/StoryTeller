@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-export const Jumpscare = ({ config, characters }) => {
+export const Jumpscare = ({ config, characters, onComplete }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onComplete();
+    }, 1000); // Duration of the longest jumpscare animation
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
   if (!config) {
     return null;
   }

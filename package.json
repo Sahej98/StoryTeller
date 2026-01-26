@@ -1,0 +1,31 @@
+{
+  "name": "storyteller",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "cd server && nodemon server.js",
+    "client": "cd client && npm run dev",
+    "seed": "cd server && node seed.js",
+    "build-client": "cd client && npm i",
+    "build-server": "cd server && npm i",
+    "build": "concurrently \"npm run build-client\" \"npm run build-server\"",
+    "start": "concurrently \"npm run client\" \"npm run server\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sahej98/StoryTeller.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Sahej98/StoryTeller/issues"
+  },
+  "homepage": "https://github.com/Sahej98/StoryTeller#readme",
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 
 const JournalEntry = ({ entry }) => (
   <li className='journal-entry'>
@@ -7,35 +8,62 @@ const JournalEntry = ({ entry }) => (
   </li>
 );
 
-const CharacterEntry = ({ character }) => (
-  <li className='journal-entry'>
-    <h3 className='journal-title'>{character.name}</h3>
-    {/* We can add character descriptions to common.js later */}
-  </li>
-);
+const CharacterEntry = ({ character, relationshipValue }) => {
+  const getRelationshipText = (value) => {
+    if (value > 50) return 'Devoted';
+    if (value > 20) return 'Positive';
+    if (value >= -20) return 'Neutral';
+    if (value > -50) return 'Negative';
+    return 'Hostile';
+  };
+
+  return (
+    <li className='journal-entry'>
+      <div className='journal-character-header'>
+        <h3 className='journal-title'>{character.name}</h3>
+        <span
+          className='journal-relationship-status'
+          data-status={getRelationshipText(relationshipValue).toLowerCase()}>
+          {getRelationshipText(relationshipValue)}
+        </span>
+      </div>
+      {/* We can add character descriptions to common.js later */}
+    </li>
+  );
+};
 
 export const JournalModal = ({
-  isVisible,
   onClose,
   discoveredLore,
   discoveredCharacters,
+  relationships,
   itemDefs,
   characterDefs,
 }) => {
-  if (!isVisible) return null;
-
   const [activeTab, setActiveTab] = useState('lore');
 
-  const loreEntries = discoveredLore
+  const loreEntries = (discoveredLore || [])
     .map((key) => itemDefs[key]?.lore)
     .filter(Boolean);
-  const characterEntries = discoveredCharacters
-    .map((key) => characterDefs[key])
-    .filter(Boolean);
+
+  const characterEntries = (discoveredCharacters || [])
+    .map((key) => (characterDefs[key] ? { key, ...characterDefs[key] } : null))
+    .filter((char) => char && char.name && char.key !== 'player');
 
   return (
-    <div className='modal-overlay' onClick={onClose}>
-      <div className='modal-panel' onClick={(e) => e.stopPropagation()}>
+    <motion.div
+      className='modal-overlay'
+      onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}>
+      <motion.div
+        className='modal-panel'
+        onClick={(e) => e.stopPropagation()}
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ type: 'spring', damping: 18, stiffness: 250 }}>
         <h2>Journal</h2>
         <div className='journal-tabs'>
           <button
@@ -68,8 +96,12 @@ export const JournalModal = ({
         {activeTab === 'characters' &&
           (characterEntries.length > 0 ? (
             <ul className='journal-entry-list'>
-              {characterEntries.map((char, index) => (
-                <CharacterEntry key={index} character={char} />
+              {characterEntries.map((char) => (
+                <CharacterEntry
+                  key={char.key}
+                  character={char}
+                  relationshipValue={relationships?.[char.key] || 0}
+                />
               ))}
             </ul>
           ) : (
@@ -77,7 +109,7 @@ export const JournalModal = ({
               You haven't met anyone yet.
             </p>
           ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };

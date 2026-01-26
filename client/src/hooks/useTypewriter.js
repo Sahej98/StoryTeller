@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { voiceMap } from '../data/voiceData.js';
 
 // Helper functions outside component
 const findVoice = (voices, preferences) => {
@@ -21,6 +20,7 @@ export const useTypewriter = ({
   onAmbientSfx,
   isReady,
   speakerKey,
+  voiceMap,
 }) => {
   const [displayedText, setDisplayedText] = useState('');
   const [narratorState, setNarratorState] = useState('idle');
@@ -77,7 +77,7 @@ export const useTypewriter = ({
     setDisplayedText('');
     firedTriggersRef.current.clear();
 
-    if (!isReady || !node || !fullText) {
+    if (!isReady || !node || !fullText || !voiceMap) {
       setNarratorState('idle');
       return;
     }
@@ -150,7 +150,7 @@ export const useTypewriter = ({
     } else {
       // --- Typewriter Logic ---
       let charIndex = 0;
-      const typewriterSpeed = 40;
+      const typewriterSpeed = 60 - volumes.textSpeed * 50;
       typewriterIntervalRef.current = window.setInterval(() => {
         if (charIndex < fullText.length) {
           const currentText = fullText.substring(0, charIndex + 1);
@@ -178,6 +178,7 @@ export const useTypewriter = ({
     speakerKey,
     handleFinish,
     narrationEnabled,
+    voiceMap,
   ]);
 
   return { displayedText, narratorState, skip };
