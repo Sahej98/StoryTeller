@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Plus,
   Trash2,
@@ -20,6 +20,8 @@ import {
   AlertTriangle,
   Clock,
   Skull,
+  Languages,
+  Volume2,
 } from 'lucide-react';
 import { TemplateModal } from './TemplateModal.jsx';
 import { templates } from '../data/editorTemplates.js';
@@ -29,6 +31,7 @@ const NEW_STORY_TEMPLATE = {
   title: 'My First Story',
   description: 'A short tutorial story created in the Storyteller editor.',
   accentColor: '#FFFFFF',
+  language: 'en',
   published: false,
   thumbnail: 'https://images.unsplash.com/photo-1519681393784-d120267933ba',
   cautionScreen: {
@@ -72,7 +75,7 @@ const NEW_STORY_TEMPLATE = {
       },
       character_node: {
         speaker: 'old_man',
-        text: 'Hello there, traveler. To make me speak, my key "old_man" was put in the "Speaker Key". Go to the "Characters" tab to create your own characters!',
+        text: 'Hello there, traveler. To make me speak, my key "old_man" was put in the "Speaker Key". Go to the "Characters" tab to create your own characters and assign them voices!',
         choices: [{ text: 'Interesting!', next: 'item_node' }],
       },
       item_node: {
@@ -110,26 +113,71 @@ const NEW_STORY_TEMPLATE = {
       },
     },
   },
+  voices: {},
   characters: {
-    player: { name: 'You', sprite: '/images/the_asylum/main_char_sprite.png' },
+    player: {
+      name: 'You',
+      sprite: '/images/the_asylum/main_char_sprite.png',
+      lore: 'The protagonist of this tale.',
+      voiceKey: '',
+    },
     old_man: {
       name: 'Old Man',
       sprite: 'https://i.imgur.com/8aZ5Y7r.png',
+      lore: 'A mysterious inhabitant of the asylum.',
+      voiceKey: '',
     },
     ally: {
       name: 'Ally',
       sprite: '',
+      lore: 'A companion found during the journey.',
+      voiceKey: '',
+    },
+    stranger: {
+      name: 'Stranger',
+      sprite: '',
+      lore: 'A wary stranger.',
+      voiceKey: '',
     },
   },
   items: {
     tutorial_key: {
       name: 'Tutorial Key',
       description: 'A key used in the tutorial story.',
+      image: 'https://cdn-icons-png.flaticon.com/512/3233/3233005.png',
     },
-    rusty_key: { name: 'Rusty Key', description: 'An old, rusty key.' },
+    rusty_key: {
+      name: 'Rusty Key',
+      description: 'An old, rusty key.',
+      image: '',
+    },
     holy_relic: {
       name: 'Holy Relic',
       description: 'A sacred object that glows faintly.',
+      image: '',
+    },
+    lore_diary: {
+      name: 'Old Diary',
+      description: 'A diary filled with secrets. Click to read in inventory.',
+      image: '',
+      lore: {
+        title: 'First Entry',
+        content:
+          "The walls are watching me. I see faces in the patterns on the wallpaper. They whisper my name when I try to sleep. The doctor says it's my imagination, but I know better. This place is alive, and it is hungry.",
+      },
+    },
+    allys_key: {
+      name: "Ally's Key",
+      description: 'A small, silver key given to you by your ally.',
+      image: '',
+    },
+    ancient_orb: {
+      name: 'Ancient Orb',
+      description: 'A mysterious orb that hums with a faint power.',
+    },
+    cursed_dagger: {
+      name: 'Cursed Dagger',
+      description: 'A wicked-looking dagger that feels cold to the touch.',
     },
   },
 };
@@ -212,6 +260,11 @@ const TEXT_EFFECT_OPTIONS = [
   'anger',
   'fear',
   'tremble',
+  'rainbow',
+  'fire',
+  'glitch',
+  'ghostly',
+  'gold',
 ];
 const JUMPSCARE_TYPES = ['image', 'sprite', 'text', 'glitch'];
 
@@ -221,6 +274,7 @@ export const StoryEditor = ({
   onSave,
   gameData,
   showAlert,
+  systemVoices,
 }) => {
   const [story, setStory] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -233,6 +287,58 @@ export const StoryEditor = ({
   const [isDirty, setIsDirty] = useState(false);
   const [lastAddedTemplateKeys, setLastAddedTemplateKeys] = useState([]);
   const originalStory = useRef(null);
+
+  const categorizedVoices = useMemo(() => {
+    if (!systemVoices || systemVoices.length === 0) {
+      return { female: [], male: [], other: [] };
+    }
+    const femaleIndicators = [
+      'female',
+      'woman',
+      'girl',
+      'zira',
+      'samantha',
+      'fiona',
+      'moira',
+      'karen',
+      'tessa',
+      'eva',
+      'katja',
+      'iveta',
+      'anna',
+    ];
+    const maleIndicators = [
+      'male',
+      'man',
+      'boy',
+      'david',
+      'daniel',
+      'alex',
+      'fred',
+      'tom',
+      'mark',
+      'lee',
+      'oliver',
+      'ryan',
+    ];
+
+    const female = [];
+    const male = [];
+    const other = [];
+
+    systemVoices.forEach((voice) => {
+      const name = voice.name.toLowerCase();
+      if (femaleIndicators.some((ind) => name.includes(ind))) {
+        female.push(voice);
+      } else if (maleIndicators.some((ind) => name.includes(ind))) {
+        male.push(voice);
+      } else {
+        other.push(voice);
+      }
+    });
+
+    return { female, male, other };
+  }, [systemVoices]);
 
   useEffect(() => {
     const initializeStory = async () => {
@@ -620,6 +726,66 @@ export const StoryEditor = ({
       (currentNode.ambientSfx || []).filter((_, i) => i !== index),
     );
 
+  // --- Voice Management ---
+  const addVoice = () => {
+    showAlert(
+      'Enter a unique key for the new voice profile (e.g., deep_voice).',
+      'default',
+      'New Voice',
+      (key) => {
+        if (
+          !key ||
+          (story.voices && story.voices[key]) ||
+          (gameData.voiceMap && gameData.voiceMap[key])
+        ) {
+          showAlert('Invalid or duplicate voice key.', 'error', 'Error');
+          return;
+        }
+        updateStory((prev) => {
+          const next = JSON.parse(JSON.stringify(prev));
+          if (!next.voices) next.voices = {};
+          next.voices[key] = { names: '', pitch: 1, rate: 1, lang: '' };
+          return next;
+        });
+      },
+      null,
+      { label: 'Voice Key' },
+    );
+  };
+
+  const updateVoice = (key, field, value) => {
+    updateStory((prev) => {
+      const next = JSON.parse(JSON.stringify(prev));
+      if (field === 'pitch' || field === 'rate') {
+        next.voices[key][field] = parseFloat(value) || 1;
+      } else {
+        next.voices[key][field] = value;
+      }
+      return next;
+    });
+  };
+
+  const deleteVoice = (key) => {
+    showAlert(
+      `Are you sure you want to delete voice "${key}"?`,
+      'error',
+      'Confirm Deletion',
+      () => {
+        updateStory((prev) => {
+          const next = JSON.parse(JSON.stringify(prev));
+          delete next.voices[key];
+          // Also remove this voice from any characters using it
+          for (const charKey in next.characters) {
+            if (next.characters[charKey].voiceKey === key) {
+              next.characters[charKey].voiceKey = '';
+            }
+          }
+          return next;
+        });
+      },
+    );
+  };
+
   const addCharacter = () => {
     showAlert(
       'Enter a unique key for the new character (e.g., new_char).',
@@ -632,7 +798,12 @@ export const StoryEditor = ({
         }
         updateStory((prev) => {
           const next = JSON.parse(JSON.stringify(prev));
-          next.characters[key] = { name: 'New Character', sprite: '' };
+          next.characters[key] = {
+            name: 'New Character',
+            sprite: '',
+            lore: '',
+            voiceKey: '',
+          };
           return next;
         });
       },
@@ -687,6 +858,7 @@ export const StoryEditor = ({
           next.items[key] = {
             name: 'New Item',
             description: '',
+            image: '',
             lore: { title: '', content: '' },
           };
           return next;
@@ -736,6 +908,8 @@ export const StoryEditor = ({
       </div>
     );
   }
+
+  const allVoiceKeys = { ...gameData.voiceMap, ...story.voices };
 
   return (
     <div className='editor-container'>
@@ -817,8 +991,9 @@ export const StoryEditor = ({
                 </div>
               </h4>
               <div className='node-list' style={{ flex: 1, overflowY: 'auto' }}>
-                {Object.keys(story.storyData[activeChapterKey] || {}).map(
-                  (key) => (
+                {Object.keys(story.storyData[activeChapterKey] || {})
+                  .sort()
+                  .map((key) => (
                     <div
                       key={key}
                       className={`list-item ${activeNodeKey === key ? 'active' : ''}`}
@@ -845,8 +1020,7 @@ export const StoryEditor = ({
                         </button>
                       </div>
                     </div>
-                  ),
-                )}
+                  ))}
               </div>
             </div>
           </div>
@@ -873,6 +1047,7 @@ export const StoryEditor = ({
                 <div className='tab-group'>
                   {[
                     { id: 'settings', label: 'Settings', icon: SettingsIcon },
+                    { id: 'voices', label: 'Voices', icon: Volume2 },
                     { id: 'characters', label: 'Characters', icon: Users },
                     { id: 'items', label: 'Items', icon: Box },
                   ].map((tab) => (
@@ -921,18 +1096,30 @@ export const StoryEditor = ({
                         }
                       />
                     </div>
-                    <div className='field-group'>
-                      <label>Accent Color</label>
-                      <div className='color-picker-container'>
-                        <div className='color-swatch-wrapper'>
-                          <div
-                            className='color-swatch'
-                            style={{
-                              backgroundColor: story.accentColor || '#FFFFFF',
-                            }}></div>
+                    <div className='field-row'>
+                      <div className='field-group'>
+                        <label>Accent Color</label>
+                        <div className='color-picker-container'>
+                          <div className='color-swatch-wrapper'>
+                            <div
+                              className='color-swatch'
+                              style={{
+                                backgroundColor: story.accentColor || '#FFFFFF',
+                              }}></div>
+                            <input
+                              type='color'
+                              className='color-picker-input'
+                              value={story.accentColor || '#FFFFFF'}
+                              onChange={(e) =>
+                                updateStory({
+                                  ...story,
+                                  accentColor: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
                           <input
-                            type='color'
-                            className='color-picker-input'
+                            type='text'
                             value={story.accentColor || '#FFFFFF'}
                             onChange={(e) =>
                               updateStory({
@@ -940,20 +1127,20 @@ export const StoryEditor = ({
                                 accentColor: e.target.value,
                               })
                             }
+                            placeholder='#FFFFFF'
+                            style={{ flex: 1 }}
                           />
                         </div>
-                        <input
-                          type='text'
-                          value={story.accentColor || '#FFFFFF'}
+                      </div>
+                      <div className='field-group'>
+                        <label>Primary Language</label>
+                        <select
+                          value={story.language || 'en'}
                           onChange={(e) =>
-                            updateStory({
-                              ...story,
-                              accentColor: e.target.value,
-                            })
-                          }
-                          placeholder='#FFFFFF'
-                          style={{ flex: 1 }}
-                        />
+                            updateStory({ ...story, language: e.target.value })
+                          }>
+                          <option value='en'>English</option>
+                        </select>
                       </div>
                     </div>
                     <div className='field-group'>
@@ -1024,6 +1211,106 @@ export const StoryEditor = ({
                     )}
                   </div>
                 )}
+                {activeStorySubTab === 'voices' && (
+                  <div className='editor-card'>
+                    <div
+                      className='choices-header'
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '1rem',
+                      }}>
+                      <h5
+                        className='card-title'
+                        style={{ margin: 0, border: 'none' }}>
+                        Custom Voice Profiles
+                      </h5>
+                      <button
+                        onClick={addVoice}
+                        className='themed-button secondary small'>
+                        <Plus size={14} /> Add Voice
+                      </button>
+                    </div>
+                    {Object.entries(story.voices || {}).map(([key, voice]) => (
+                      <div key={key} className='choice-builder'>
+                        <div className='choice-builder-header'>
+                          <h6>{key}</h6>
+                          <button
+                            className='btn-danger'
+                            onClick={() => deleteVoice(key)}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                        <div className='field-group'>
+                          <label>System Voice</label>
+                          <select
+                            value={voice.names}
+                            onChange={(e) =>
+                              updateVoice(key, 'names', e.target.value)
+                            }>
+                            <option value=''>-- Select a Voice --</option>
+                            {categorizedVoices.female.length > 0 && (
+                              <optgroup label='Female Voices'>
+                                {categorizedVoices.female.map((v) => (
+                                  <option key={v.name} value={v.name}>
+                                    {v.name} ({v.lang})
+                                  </option>
+                                ))}
+                              </optgroup>
+                            )}
+                            {categorizedVoices.male.length > 0 && (
+                              <optgroup label='Male Voices'>
+                                {categorizedVoices.male.map((v) => (
+                                  <option key={v.name} value={v.name}>
+                                    {v.name} ({v.lang})
+                                  </option>
+                                ))}
+                              </optgroup>
+                            )}
+                            {categorizedVoices.other.length > 0 && (
+                              <optgroup label='Other Voices'>
+                                {categorizedVoices.other.map((v) => (
+                                  <option key={v.name} value={v.name}>
+                                    {v.name} ({v.lang})
+                                  </option>
+                                ))}
+                              </optgroup>
+                            )}
+                          </select>
+                        </div>
+                        <div className='field-row'>
+                          <div className='field-group'>
+                            <label>Pitch ({voice.pitch})</label>
+                            <input
+                              type='range'
+                              min='0.1'
+                              max='2'
+                              step='0.1'
+                              value={voice.pitch}
+                              onChange={(e) =>
+                                updateVoice(key, 'pitch', e.target.value)
+                              }
+                            />
+                          </div>
+                          <div className='field-group'>
+                            <label>Rate ({voice.rate})</label>
+                            <input
+                              type='range'
+                              min='0.1'
+                              max='2'
+                              step='0.1'
+                              value={voice.rate}
+                              onChange={(e) =>
+                                updateVoice(key, 'rate', e.target.value)
+                              }
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 {activeStorySubTab === 'characters' && (
                   <div className='editor-card'>
                     <div
@@ -1050,11 +1337,13 @@ export const StoryEditor = ({
                         <div key={key} className='choice-builder'>
                           <div className='choice-builder-header'>
                             <h6>{key}</h6>
-                            <button
-                              className='btn-danger'
-                              onClick={() => deleteCharacter(key)}>
-                              <Trash2 size={16} />
-                            </button>
+                            {key !== 'player' && (
+                              <button
+                                className='btn-danger'
+                                onClick={() => deleteCharacter(key)}>
+                                <Trash2 size={16} />
+                              </button>
+                            )}
                           </div>
                           <div className='field-row'>
                             <div className='field-group'>
@@ -1075,6 +1364,33 @@ export const StoryEditor = ({
                                 }
                               />
                             </div>
+                          </div>
+                          <div className='field-group'>
+                            <label>Voice Profile</label>
+                            <select
+                              value={char.voiceKey || ''}
+                              onChange={(e) =>
+                                updateCharacter(key, 'voiceKey', e.target.value)
+                              }>
+                              <option value=''>(Default Narrator)</option>
+                              {Object.keys(allVoiceKeys)
+                                .sort()
+                                .map((voiceKey) => (
+                                  <option key={voiceKey} value={voiceKey}>
+                                    {voiceKey}
+                                  </option>
+                                ))}
+                            </select>
+                          </div>
+                          <div className='field-group'>
+                            <label>Journal Biography / Lore</label>
+                            <textarea
+                              value={char.lore || ''}
+                              placeholder="Tell the player about this character's history..."
+                              onChange={(e) =>
+                                updateCharacter(key, 'lore', e.target.value)
+                              }
+                            />
                           </div>
                         </div>
                       ),
@@ -1112,14 +1428,26 @@ export const StoryEditor = ({
                             <Trash2 size={16} />
                           </button>
                         </div>
-                        <div className='field-group'>
-                          <label>Name</label>
-                          <input
-                            value={item.name}
-                            onChange={(e) =>
-                              updateItem(key, 'name', e.target.value)
-                            }
-                          />
+                        <div className='field-row'>
+                          <div className='field-group'>
+                            <label>Name</label>
+                            <input
+                              value={item.name}
+                              onChange={(e) =>
+                                updateItem(key, 'name', e.target.value)
+                              }
+                            />
+                          </div>
+                          <div className='field-group'>
+                            <label>Inventory Image URL</label>
+                            <input
+                              value={item.image || ''}
+                              placeholder='PNG or JPEG of the item...'
+                              onChange={(e) =>
+                                updateItem(key, 'image', e.target.value)
+                              }
+                            />
+                          </div>
                         </div>
                         <div className='field-group'>
                           <label>Description</label>
@@ -1488,23 +1816,57 @@ export const StoryEditor = ({
                                 }
                               />
                             </div>
-                            <div className='field-group'>
-                              <label>Next Node Key</label>
-                              <select
-                                value={choice.next || ''}
-                                onChange={(e) =>
-                                  updateChoice(i, 'next', e.target.value)
-                                }>
-                                <option value=''>(End Chapter)</option>
-                                <option value='END_STORY'>(End Story)</option>
-                                {Object.keys(
-                                  story.storyData[activeChapterKey] || {},
-                                ).map((k) => (
-                                  <option key={k} value={k}>
-                                    {k}
+                            <div className='field-row'>
+                              <div className='field-group'>
+                                <label>Next Node Key</label>
+                                <select
+                                  value={choice.next || ''}
+                                  onChange={(e) =>
+                                    updateChoice(i, 'next', e.target.value)
+                                  }>
+                                  <option value=''>(End Chapter)</option>
+                                  <option value='END_STORY'>(End Story)</option>
+                                  {Object.keys(
+                                    story.storyData[activeChapterKey] || {},
+                                  ).map((k) => (
+                                    <option key={k} value={k}>
+                                      {k}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div className='field-group'>
+                                <label>Visibility</label>
+                                <select
+                                  value={choice.visibilityCondition || ''}
+                                  onChange={(e) =>
+                                    updateChoice(
+                                      i,
+                                      'visibilityCondition',
+                                      e.target.value || undefined,
+                                    )
+                                  }
+                                  disabled={
+                                    !choice.requires ||
+                                    Object.keys(choice.requires).length === 0
+                                  }
+                                  title={
+                                    !choice.requires ||
+                                    Object.keys(choice.requires).length === 0
+                                      ? 'Visibility conditions require at least one requirement to be set.'
+                                      : ''
+                                  }>
+                                  <option value=''>
+                                    Visible (Disabled if unmet)
                                   </option>
-                                ))}
-                              </select>
+                                  <option value='hide_if_unmet'>
+                                    Hidden if requirements unmet
+                                  </option>
+                                  <option value='hide_if_met'>
+                                    Hidden if requirements met
+                                  </option>
+                                </select>
+                              </div>
                             </div>
                             <div className='field-row'>
                               <div className='field-group'>
@@ -1860,7 +2222,9 @@ export const StoryEditor = ({
                                     Object.keys(gameData.SFX)
                                       .sort()
                                       .map((sfxKey) => (
-                                        <option key={sfxKey} value={sfxKey}>
+                                        <option
+                                          key={sfxKey}
+                                          value={gameData.SFX[sfxKey]}>
                                           {sfxKey}
                                         </option>
                                       ))}

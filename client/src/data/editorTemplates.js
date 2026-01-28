@@ -67,6 +67,179 @@ export const templates = {
                 }
             }
         },
+        LORE_ITEM_DISCOVERY: {
+            description: "A sequence where the player finds an item with a readable lore entry. The 'lore_diary' item is pre-configured in new stories to have lore.",
+            nodes: {
+                lore_item_find: {
+                    speaker: 'Narrator',
+                    text: 'On a dusty table, you find an old, leather-bound diary. It looks like it might contain some secrets.',
+                    effects: { inventory: { add: 'lore_diary' } },
+                    choices: [{ text: 'Take the diary.', next: 'lore_item_info' }],
+                },
+                lore_item_info: {
+                    speaker: 'Narrator',
+                    text: 'You can now read the diary by opening your inventory and clicking on it.',
+                    choices: [{ text: 'Continue...', next: '' }],
+                },
+            },
+        },
+        NPC_GIVES_ITEM: {
+            description: 'A common interaction where an NPC gives a key item to the player.',
+            nodes: {
+                npc_gives_item_start: {
+                    speaker: 'ally',
+                    text: '"It\'s dangerous to go alone. Here, take this."',
+                    choices: [
+                        { text: 'Take the item.', next: 'npc_gives_item_end', effects: { inventory: { add: 'allys_key' } } },
+                    ],
+                },
+                npc_gives_item_end: {
+                    speaker: 'Narrator',
+                    text: 'You received the "Ally\'s Key".',
+                    choices: [{ text: 'Continue...', next: '' }],
+                },
+            },
+        },
+        GIVE_ITEM_TO_NPC: {
+            description: 'A quest-like interaction where the player must give a required item to an NPC to progress.',
+            nodes: {
+                give_item_start: {
+                    speaker: 'old_man',
+                    text: '"Bring me the Holy Relic, and I will show you the way."',
+                    choices: [
+                        {
+                            text: 'Give him the Holy Relic.',
+                            next: 'give_item_success',
+                            requires: { inventory: ['holy_relic'] },
+                            effects: { inventory: { remove: 'holy_relic' } },
+                        },
+                        { text: '"I don\'t have it yet."', next: 'give_item_fail' },
+                    ],
+                },
+                give_item_success: {
+                    speaker: 'old_man',
+                    text: '"Thank you. The path you seek is now open."',
+                    choices: [{ text: 'Continue...', next: '' }],
+                },
+                give_item_fail: {
+                    speaker: 'old_man',
+                    text: '"Return when you have what I seek."',
+                    choices: [{ text: 'Continue...', next: '' }],
+                },
+            },
+        },
+        RIDDLE_PASSWORD: {
+            description: 'A classic text-based riddle where the player must choose the correct answer to proceed.',
+            nodes: {
+                riddle_start: {
+                    speaker: 'Narrator',
+                    text: 'A stone door speaks: "I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?"',
+                    choices: [
+                        { text: 'A dream.', next: 'riddle_fail' },
+                        { text: 'A map.', next: 'riddle_success' },
+                        { text: 'A book.', next: 'riddle_fail' },
+                    ],
+                },
+                riddle_success: {
+                    speaker: 'Narrator',
+                    text: 'The stone door rumbles open.',
+                    choices: [{ text: 'Continue...', next: '' }],
+                },
+                riddle_fail: {
+                    speaker: 'Narrator',
+                    text: 'A low groan is heard, but the door remains shut.',
+                    choices: [{ text: 'Try again.', next: 'riddle_start' }],
+                },
+            },
+        },
+        LOOPING_HALLWAY: {
+            description: 'A psychological horror trope. The player walks down a hallway only to end up back where they started. The loop breaks after 3 attempts.',
+            nodes: {
+                loop_start: {
+                    speaker: 'Narrator',
+                    text: 'You are at the start of a long, featureless hallway. A door is at the far end.',
+                    choices: [{ text: 'Walk down the hallway.', next: 'loop_walk_1' }],
+                },
+                loop_walk_1: {
+                    speaker: 'Narrator',
+                    text: 'You walk... and walk... and find yourself back at the start.',
+                    effects: { flags: { set: 'loop_walked_once' } },
+                    choices: [{ text: 'That\'s... odd. Walk again.', next: 'loop_walk_2' }],
+                },
+                loop_walk_2: {
+                    speaker: 'Narrator',
+                    text: 'Again, you end up where you started. The walls seem closer.',
+                    effects: { flags: { set: 'loop_walked_twice' } },
+                    choices: [{ text: 'Something is wrong. Walk again.', next: 'loop_walk_3' }],
+                },
+                loop_walk_3: {
+                    speaker: 'Narrator',
+                    text: 'The hallway feels claustrophobic now. Something is different.',
+                    choices: [
+                        {
+                            text: 'Walk one more time.',
+                            next: 'loop_break',
+                        },
+                        { text: 'This is madness!', next: 'loop_start' },
+                    ],
+                },
+                loop_break: {
+                    speaker: 'Narrator',
+                    text: 'This time, as you walk, the door at the end gets closer. You\'ve broken the loop.',
+                    choices: [{ text: 'Continue...', next: '' }],
+                },
+            },
+        },
+        CHASE_SEQUENCE: {
+            description: 'A pre-built, high-stakes chase scene using a series of timed choices. Fail a choice, and it leads to a death node.',
+            nodes: {
+                chase_start: {
+                    speaker: 'Narrator',
+                    text: 'A monster roars behind you! You have to run!',
+                    effects: { setCheckpoint: true },
+                    choices: [{ text: 'RUN!', next: 'chase_1' }],
+                },
+                chase_1: {
+                    speaker: 'Narrator',
+                    text: 'You sprint down a corridor. A crate blocks your path!',
+                    timer: 4,
+                    defaultChoiceIndex: 1,
+                    choices: [
+                        { text: 'Slide under the crate. (Requires 20 Stamina)', next: 'chase_2', requires: { stats: { stamina: 20 } }, effects: { stats: { stamina: -10 } } },
+                        { text: 'Try to vault over it.', next: 'chase_fail_death' },
+                    ],
+                },
+                chase_2: {
+                    speaker: 'Narrator',
+                    text: 'You slide under, scraping your back. The hallway splits left and right!',
+                    timer: 3,
+                    defaultChoiceIndex: 1,
+                    choices: [
+                        { text: 'Go left.', next: 'chase_3' },
+                        { text: 'Go right.', next: 'chase_fail_death' },
+                    ],
+                },
+                chase_3: {
+                    speaker: 'Narrator',
+                    text: "You see a door ahead! You're almost there!",
+                    timer: 3,
+                    defaultChoiceIndex: 1,
+                    choices: [
+                        { text: 'Burst through the door.', next: 'chase_success' },
+                        { text: 'You stumble.', next: 'chase_fail_death' },
+                    ],
+                },
+                chase_success: {
+                    speaker: 'Narrator',
+                    text: 'You slam the door behind you, safe for now.',
+                    choices: [{ text: 'Continue...', next: '' }]
+                },
+                chase_fail_death: {
+                    isDeath: true,
+                    text: "You weren't fast enough. The monster catches you.",
+                },
+            },
+        },
         FLAG_CHECK: {
             description: 'A choice that is only enabled if a specific story flag has been set previously.',
             nodes: {
@@ -86,6 +259,43 @@ export const templates = {
                 flag_check_fail: {
                     speaker: 'Guard',
                     text: '"Hey! Get back here!"',
+                    choices: [{ text: 'Continue...', next: '' }]
+                }
+            }
+        },
+        CONDITIONAL_VISIBILITY: {
+            description: 'Choices that appear or disappear based on requirements. Add an "ancient_orb" item in the Story tab for this to work.',
+            nodes: {
+                cond_vis_start: {
+                    speaker: 'Narrator',
+                    text: 'You approach a mysterious pedestal. A faint hum emanates from it.',
+                    choices: [
+                        { text: 'Search for an item.', next: 'cond_vis_get_item' },
+                        {
+                            text: 'Place the Ancient Orb on the pedestal.',
+                            next: 'cond_vis_success',
+                            requires: { inventory: ['ancient_orb'] },
+                            visibilityCondition: 'hide_if_unmet'
+                        }
+                    ]
+                },
+                cond_vis_get_item: {
+                    speaker: 'Narrator',
+                    text: 'You find an Ancient Orb in a dusty corner.',
+                    effects: { inventory: { add: 'ancient_orb' } },
+                    choices: [
+                        {
+                            text: 'Search for an item.',
+                            next: 'cond_vis_get_item',
+                            requires: { inventory: ['ancient_orb'] },
+                            visibilityCondition: 'hide_if_met'
+                        },
+                        { text: 'Return to the pedestal.', next: 'cond_vis_start' }
+                    ]
+                },
+                cond_vis_success: {
+                    speaker: 'Narrator',
+                    text: 'The pedestal glows, revealing a secret passage.',
                     choices: [{ text: 'Continue...', next: '' }]
                 }
             }

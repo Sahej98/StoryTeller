@@ -11,6 +11,8 @@ import {
   RotateCcw,
   Keyboard,
   AlertTriangle,
+  Film,
+  Signal,
 } from 'lucide-react';
 import { KeybindInput } from './KeybindInput.jsx';
 
@@ -169,6 +171,22 @@ export const SettingsModal = ({
               checked={settings.screenShakeEnabled}
               onChange={(e) =>
                 onSettingsChange('screenShakeEnabled', e.target.checked)
+              }
+            />
+            <ToggleSwitch
+              icon={Film}
+              label='Film Grain'
+              checked={settings.filmGrainEnabled}
+              onChange={(e) =>
+                onSettingsChange('filmGrainEnabled', e.target.checked)
+              }
+            />
+            <ToggleSwitch
+              icon={Signal}
+              label='Scan Lines'
+              checked={settings.scanLinesEnabled}
+              onChange={(e) =>
+                onSettingsChange('scanLinesEnabled', e.target.checked)
               }
             />
             <VolumeSlider

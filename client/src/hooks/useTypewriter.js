@@ -2,11 +2,42 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 
 // Helper functions outside component
 const findVoice = (voices, preferences) => {
-  if (!preferences || !preferences.names || !voices) return null;
-  for (const name of preferences.names) {
-    const found = voices.find((v) => v.name.includes(name));
-    if (found) return found;
+  if (!preferences || !voices || voices.length === 0) return null;
+
+  const getNames = (names) => {
+    if (Array.isArray(names)) return names;
+    if (typeof names === 'string') return names.split(',').map(n => n.trim()).filter(Boolean);
+    return [];
+  };
+
+  const nameList = getNames(preferences.names);
+
+  // 1. Try to find by language code first (loose matching, e.g., 'en-US' matches 'en')
+  if (preferences.lang) {
+    const langCode = preferences.lang.split('-')[0];
+    const langVoices = voices.filter((v) => v.lang.startsWith(langCode));
+
+    if (langVoices.length > 0) {
+      // If names are also provided, try to find a matching name within the language-specific voices
+      if (nameList.length > 0) {
+        for (const name of nameList) {
+          const found = langVoices.find((v) => v.name.includes(name));
+          if (found) return found;
+        }
+      }
+      // If no name matches or no names provided, return the first voice for that language
+      return langVoices[0];
+    }
   }
+
+  // 2. Fallback to searching by name across all voices
+  if (nameList.length > 0) {
+    for (const name of nameList) {
+      const found = voices.find((v) => v.name.includes(name));
+      if (found) return found;
+    }
+  }
+
   return null;
 };
 
@@ -84,12 +115,6 @@ export const useTypewriter = ({
 
     setNarratorState('narrating');
 
-    const isSpeechActive =
-      narrationEnabled &&
-      !isMuted &&
-      'speechSynthesis' in window &&
-      voices.length > 0;
-
     const triggerSfxIfNeeded = (text) => {
       if (node.ambientSfx && onAmbientSfx) {
         node.ambientSfx.forEach((trigger, index) => {
@@ -105,33 +130,32 @@ export const useTypewriter = ({
       }
     };
 
+    const voicePrefs = voiceMap[speakerKey] || voiceMap['narrator'];
+    let voice = findVoice(voices, voicePrefs);
+
+    let canSpeak = narrationEnabled && !isMuted && 'speechSynthesis' in window && voices.length > 0 && !!voice;
+
+    // Final check: if a language is required, but the found voice doesn't match, fall back to typewriter.
+    if (canSpeak && voicePrefs?.lang && !voice.lang.startsWith(voicePrefs.lang.split('-')[0])) {
+      canSpeak = false;
+    }
+
     // --- Speech Synthesis Logic ---
-    if (isSpeechActive) {
+    if (canSpeak) {
       const utterance = new SpeechSynthesisUtterance(fullText);
       utteranceRef.current = utterance;
-
-      const voicePrefs = voiceMap[speakerKey] || voiceMap['narrator'];
 
       utterance.pitch = voicePrefs.pitch || 1;
       utterance.rate = voicePrefs.rate || 1;
       utterance.volume = volumes.narration * volumes.master;
-
-      let voice = findVoice(voices, voicePrefs);
-      if (!voice) {
-        voice = voices.find((v) => v.lang.startsWith('en'));
+      utterance.voice = voice;
+      if (voicePrefs.lang) {
+        utterance.lang = voicePrefs.lang;
       }
-      if (voice) utterance.voice = voice;
 
       utterance.onboundary = (event) => {
         if (event.name === 'word') {
-          let endIndex = event.charIndex + event.charLength;
-          while (
-            endIndex < fullText.length &&
-            !/[a-zA-Z0-9\u00C0-\u017F]/.test(fullText[endIndex])
-          ) {
-            endIndex++;
-          }
-          const spokenText = fullText.substring(0, endIndex);
+          const spokenText = fullText.substring(0, event.charIndex + event.charLength);
           setDisplayedText(spokenText);
           triggerSfxIfNeeded(spokenText);
         }
@@ -139,7 +163,6 @@ export const useTypewriter = ({
 
       utterance.onend = () => {
         if (utteranceRef.current === utterance) {
-          // Ensure it's not a stale event
           setDisplayedText(fullText);
           handleFinish();
         }
@@ -149,20 +172,48 @@ export const useTypewriter = ({
       speechSynthesis.speak(utterance);
     } else {
       // --- Typewriter Logic ---
-      let charIndex = 0;
-      const typewriterSpeed = 60 - volumes.textSpeed * 50;
-      typewriterIntervalRef.current = window.setInterval(() => {
-        if (charIndex < fullText.length) {
-          const currentText = fullText.substring(0, charIndex + 1);
-          setDisplayedText(currentText);
-          triggerSfxIfNeeded(currentText);
-          charIndex++;
-        } else {
-          clearInterval(typewriterIntervalRef.current);
-          typewriterIntervalRef.current = null;
-          handleFinish();
-        }
-      }, typewriterSpeed);
+      const lineLanguage = voicePrefs?.lang ? voicePrefs.lang.split('-')[0] : 'en';
+
+      // Fallback for Intl.Segmenter if not supported
+      if (!('Segmenter' in Intl)) {
+        let i = 0;
+        const typewriterSpeed = 60 - volumes.textSpeed * 50;
+        typewriterIntervalRef.current = setInterval(() => {
+          if (i < fullText.length) {
+            setDisplayedText(fullText.substring(0, i + 1));
+            i++;
+          } else {
+            clearInterval(typewriterIntervalRef.current);
+            handleFinish();
+          }
+        }, typewriterSpeed);
+        return;
+      }
+
+      try {
+        const segmenter = new Intl.Segmenter(lineLanguage, { granularity: 'grapheme' });
+        const graphemes = [...segmenter.segment(fullText)].map(s => s.segment);
+        let graphemeIndex = 0;
+        const typewriterSpeed = 60 - volumes.textSpeed * 50;
+
+        typewriterIntervalRef.current = window.setInterval(() => {
+          if (graphemeIndex < graphemes.length) {
+            const currentText = graphemes.slice(0, graphemeIndex + 1).join('');
+            setDisplayedText(currentText);
+            triggerSfxIfNeeded(currentText);
+            graphemeIndex++;
+          } else {
+            clearInterval(typewriterIntervalRef.current);
+            typewriterIntervalRef.current = null;
+            handleFinish();
+          }
+        }, typewriterSpeed);
+      } catch (e) {
+        console.error("Typewriter error (Intl.Segmenter failed):", e);
+        // If Segmenter fails for any reason, fall back to showing full text immediately.
+        setDisplayedText(fullText);
+        handleFinish();
+      }
     }
 
     return () => stopNarration();

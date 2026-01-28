@@ -54,12 +54,28 @@ const CautionScreenSchema = new mongoose.Schema({
     text: { type: String, default: 'This story contains content that may be disturbing to some players. Player discretion is advised.' },
 }, { _id: false });
 
+const VoiceProfileSchema = new mongoose.Schema({
+    names: { type: String, default: '' },
+    pitch: { type: Number, default: 1 },
+    rate: { type: Number, default: 1 },
+    lang: String,
+}, { _id: false });
+
+const CharacterSchema = new mongoose.Schema({
+    name: String,
+    sprite: String,
+    lore: String,
+    voiceKey: String
+}, { _id: false });
+
+
 const StorySchema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
     title: { type: String, required: true },
     description: String,
     thumbnail: String,
     accentColor: String,
+    language: { type: String, default: 'en', enum: ['en'] },
     author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     published: { type: Boolean, default: false },
     cautionScreen: { type: CautionScreenSchema, default: () => ({}) },
@@ -77,7 +93,8 @@ const StorySchema = new mongoose.Schema({
             of: NodeSchema,
         }
     },
-    characters: { type: mongoose.Schema.Types.Mixed, default: {} },
+    voices: { type: Map, of: VoiceProfileSchema, default: {} },
+    characters: { type: Map, of: CharacterSchema, default: {} },
     items: { type: mongoose.Schema.Types.Mixed, default: {} },
 }, { id: false });
 

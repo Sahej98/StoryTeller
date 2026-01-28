@@ -24,6 +24,9 @@ import { UserManagementScreen } from './components/UserManagementScreen.jsx';
 import { AlertModal } from './components/AlertModal.jsx';
 import { LoadingScreen } from './components/LoadingScreen.jsx';
 import { StoryEndScreen } from './components/StoryEndScreen.jsx';
+import { LoreModal } from './components/LoreModal.jsx';
+import { FilmGrainOverlay } from './components/FilmGrainOverlay.jsx';
+import { ScanLinesOverlay } from './components/ScanLinesOverlay.jsx';
 
 const TOKEN_KEY = 'storyteller_token';
 
@@ -35,6 +38,8 @@ const defaultSettings = {
   narrationEnabled: true,
   textSpeed: 0.5,
   screenShakeEnabled: true,
+  filmGrainEnabled: true,
+  scanLinesEnabled: false,
   keybindings: {
     continue: ' ', // Spacebar
     choice1: '1',
@@ -97,6 +102,19 @@ export const App = () => {
   const [alerts, setAlerts] = useState([]);
   const [deathInfo, setDeathInfo] = useState(null);
   const [achievedEnding, setAchievedEnding] = useState(null);
+  const [viewingLore, setViewingLore] = useState(null);
+  const [systemVoices, setSystemVoices] = useState([]);
+
+  useEffect(() => {
+    const loadVoices = () => {
+      setSystemVoices(window.speechSynthesis.getVoices());
+    };
+    // Voices may load asynchronously.
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = loadVoices;
+    }
+    loadVoices(); // For browsers that load them immediately.
+  }, []);
 
   const showAlert = (
     message,
@@ -688,8 +706,17 @@ export const App = () => {
     setEditingStory(null);
   }, []);
 
+  const handleViewLore = (itemKey) => {
+    const itemDef = selectedStory?.items?.[itemKey];
+    if (itemDef?.lore && itemDef.lore.title && itemDef.lore.content) {
+      setViewingLore(itemDef.lore);
+    }
+  };
+
   const storyForTheme = appState === 'editor' ? editingStory : selectedStory;
   const storyAccentColor = storyForTheme?.accentColor || '#FFFFFF';
+
+  const combinedVoiceMap = { ...gameData?.voiceMap, ...selectedStory?.voices };
 
   const renderContent = () => {
     if (appState === 'loading' || !gameData)
@@ -708,6 +735,7 @@ export const App = () => {
           onSave={handleSaveStory}
           gameData={gameData}
           showAlert={showAlert}
+          systemVoices={systemVoices}
         />
       );
     switch (appState) {
@@ -798,7 +826,7 @@ export const App = () => {
             textToDisplay={textToDisplay}
             isPlayerInScene={isPlayerInScene}
             npcToDisplay={npcToDisplay}
-            voiceMap={gameData.voiceMap}
+            voiceMap={combinedVoiceMap}
           />
         );
       case 'toBeContinued':
@@ -853,6 +881,8 @@ export const App = () => {
       <div
         className={`game-viewport ${screenShake ? 'screen-shake' : ''}`}
         style={viewportStyle}>
+        {settings.filmGrainEnabled && <FilmGrainOverlay />}
+        {settings.scanLinesEnabled && <ScanLinesOverlay />}
         <AnimatePresence>
           {jumpscare && (
             <Jumpscare
@@ -926,6 +956,7 @@ export const App = () => {
               onClose={() => setInventoryVisible(false)}
               inventory={inventory}
               itemDefs={selectedStory.items}
+              onViewLore={handleViewLore}
             />
           )}
         </AnimatePresence>
@@ -938,6 +969,14 @@ export const App = () => {
               relationships={relationships}
               itemDefs={selectedStory.items}
               characterDefs={selectedStory.characters}
+            />
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {viewingLore && (
+            <LoreModal
+              lore={viewingLore}
+              onClose={() => setViewingLore(null)}
             />
           )}
         </AnimatePresence>

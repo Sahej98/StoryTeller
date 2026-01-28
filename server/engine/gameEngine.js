@@ -211,10 +211,24 @@ export function getViewModel(story, gameState) {
         return { gameState, view: null };
     }
 
-    const processedChoices = (currentNode.choices || []).map(choice => {
+    const processedChoices = (currentNode.choices || []).reduce((acc, choice) => {
         const { disabled } = checkRequirements(choice.requires, gameState);
-        return { ...choice, isDisabled: disabled };
-    });
+        const met = !disabled;
+
+        if (choice.visibilityCondition === 'hide_if_unmet' && !met) {
+            // This choice should be hidden if requirements are not met, and they are not met. So, we skip it.
+            return acc;
+        }
+
+        if (choice.visibilityCondition === 'hide_if_met' && met) {
+            // This choice should be hidden if requirements are met, and they are met. So, we skip it.
+            return acc;
+        }
+
+        // Otherwise, the choice is visible. We add it to the accumulator and set its disabled state.
+        acc.push({ ...choice, isDisabled: disabled });
+        return acc;
+    }, []);
 
     const hasRevisitText = gameState.visitedNodes.includes(`${chapter}/${key}`) && currentNode.revisitText;
 

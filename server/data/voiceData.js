@@ -8,13 +8,13 @@
 export const voiceMap = {
   // Asylum Characters
   narrator: {
-    names: ['Microsoft David', 'Google US English', 'Daniel'], // Standard, clear male voice
+    names: ['Microsoft David', 'Google US English', 'Daniel', 'Alex', 'Fred', 'Tom'], // Standard, clear male voice
     pitch: 0.8,
     rate: 0.9,
   },
   ghost: {
     // Lily
-    names: ['Microsoft Zira', 'Google UK English Female', 'Samantha', 'Fiona'],
+    names: ['Microsoft Zira', 'Google UK English Female', 'Samantha', 'Fiona', 'Moira'],
     pitch: 1.4,
     rate: 0.8,
   },

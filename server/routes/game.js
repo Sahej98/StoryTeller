@@ -98,7 +98,6 @@ router.post('/action', async (req, res) => {
                     return res.status(400).json({ message: `Choice "${choiceText}" not found for the current node.` });
                 }
 
-                console.log(`[GameAPI] Applying effects for choice: "${choiceText}"`);
                 const { newState: stateAfterChoice, changes: choiceChanges } = applyEffects(currentState, story, serverChoice.effects);
                 mergeChanges(choiceChanges);
 
@@ -117,7 +116,6 @@ router.post('/action', async (req, res) => {
                     return;
                 }
 
-                console.log(`[GameAPI] Applying effects for entering node: "${nextNodeKey}"`);
                 const { newState: stateAfterNode, changes: nodeChanges } = applyEffects(stateAfterChoice, story, nextNode?.effects);
                 mergeChanges(nodeChanges);
 

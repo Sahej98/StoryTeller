@@ -37,8 +37,10 @@ export const GameUI = ({
     choicesFadingOut: false,
   });
   const [dialogueFadingOut, setDialogueFadingOut] = useState(false);
-  const preloadedImages = useRef(new Set());
   const choiceHandlerRef = useRef(null);
+
+  const characterVoiceKey = characters[speakerKey]?.voiceKey;
+  const finalVoiceKey = characterVoiceKey || speakerKey || 'narrator';
 
   const handleContinueClick = () => {
     if (narratorState === 'narrating') {
@@ -73,7 +75,7 @@ export const GameUI = ({
     onFinished: onDialogueEnd,
     onAmbientSfx: onAmbientSfx,
     isReady: uiState.dialogueVisible,
-    speakerKey: speakerKey,
+    speakerKey: finalVoiceKey,
     voiceMap,
   });
 
@@ -142,17 +144,6 @@ export const GameUI = ({
     }, delay);
     return () => clearTimeout(timer);
   }, [currentNode]);
-
-  useEffect(() => {
-    if (currentNode?.choices) {
-      currentNode.choices.forEach((choice) => {
-        if (!choice.next) return;
-        // Preloading logic can be simplified or removed, as backgrounds are part of currentNode
-        // If we want to preload for *next* nodes, this requires more data from server.
-        // For now, we'll keep it simple as the server-driven model reduces look-ahead needs.
-      });
-    }
-  }, [currentNode?.choices]);
 
   return (
     <>

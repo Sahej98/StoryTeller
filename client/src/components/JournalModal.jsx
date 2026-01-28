@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 
 const JournalEntry = ({ entry }) => (
   <li className='journal-entry'>
-    <h3 className='journal-title'>{entry.title}</h3>
-    <p className='journal-content'>{entry.content}</p>
+    <div className='item-content-wrapper'>
+      <h3 className='journal-title'>{entry.title}</h3>
+      <p className='journal-content'>{entry.content}</p>
+    </div>
   </li>
 );
 
@@ -18,16 +20,28 @@ const CharacterEntry = ({ character, relationshipValue }) => {
   };
 
   return (
-    <li className='journal-entry'>
+    <li className='journal-entry' style={{ flexDirection: 'column' }}>
       <div className='journal-character-header'>
-        <h3 className='journal-title'>{character.name}</h3>
+        <h3 className='journal-title' style={{ margin: 0 }}>
+          {character.name}
+        </h3>
         <span
           className='journal-relationship-status'
           data-status={getRelationshipText(relationshipValue).toLowerCase()}>
           {getRelationshipText(relationshipValue)}
         </span>
       </div>
-      {/* We can add character descriptions to common.js later */}
+      {character.lore && (
+        <p
+          className='journal-content'
+          style={{
+            marginTop: '0.5rem',
+            borderTop: '1px solid rgba(255,255,255,0.05)',
+            paddingTop: '0.5rem',
+          }}>
+          {character.lore}
+        </p>
+      )}
     </li>
   );
 };
@@ -80,35 +94,49 @@ export const JournalModal = ({
           </button>
         </div>
 
-        {activeTab === 'lore' &&
-          (loreEntries.length > 0 ? (
-            <ul className='journal-entry-list'>
-              {loreEntries.map((entry, index) => (
+        {activeTab === 'lore' && (
+          <ul className='journal-entry-list'>
+            {loreEntries.length > 0 ? (
+              loreEntries.map((entry, index) => (
                 <JournalEntry key={index} entry={entry} />
-              ))}
-            </ul>
-          ) : (
-            <p style={{ textAlign: 'center', color: '#888' }}>
-              No lore entries yet. Keep exploring.
-            </p>
-          ))}
+              ))
+            ) : (
+              <p
+                style={{
+                  textAlign: 'center',
+                  color: 'var(--secondary-text-color)',
+                  fontStyle: 'italic',
+                  padding: '2rem',
+                }}>
+                No lore entries yet. Keep exploring.
+              </p>
+            )}
+          </ul>
+        )}
 
-        {activeTab === 'characters' &&
-          (characterEntries.length > 0 ? (
-            <ul className='journal-entry-list'>
-              {characterEntries.map((char) => (
+        {activeTab === 'characters' && (
+          <ul className='journal-entry-list'>
+            {characterEntries.length > 0 ? (
+              characterEntries.map((char) => (
                 <CharacterEntry
                   key={char.key}
                   character={char}
                   relationshipValue={relationships?.[char.key] || 0}
                 />
-              ))}
-            </ul>
-          ) : (
-            <p style={{ textAlign: 'center', color: '#888' }}>
-              You haven't met anyone yet.
-            </p>
-          ))}
+              ))
+            ) : (
+              <p
+                style={{
+                  textAlign: 'center',
+                  color: 'var(--secondary-text-color)',
+                  fontStyle: 'italic',
+                  padding: '2rem',
+                }}>
+                You haven't met anyone yet.
+              </p>
+            )}
+          </ul>
+        )}
       </motion.div>
     </motion.div>
   );

@@ -1,14 +1,47 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Package, BookText } from 'lucide-react';
 
-const InventoryItem = ({ def }) => (
-  <li className='inventory-item'>
-    <h3 className='item-name'>{def.name}</h3>
-    <p className='item-desc'>{def.description}</p>
-  </li>
-);
+const InventoryItem = ({ def, itemKey, onViewLore }) => {
+  const hasLore = def.lore && def.lore.title && def.lore.content;
 
-export const InventoryModal = ({ onClose, inventory, itemDefs }) => {
+  return (
+    <li
+      className={`inventory-item ${hasLore ? 'has-lore' : ''}`}
+      onClick={hasLore ? () => onViewLore(itemKey) : undefined}
+      title={hasLore ? 'Click to read lore' : ''}>
+      <div className='item-image-wrapper'>
+        {def.image ? (
+          <img src={def.image} alt={def.name} />
+        ) : (
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#333',
+            }}>
+            <Package size={24} />
+          </div>
+        )}
+      </div>
+      <div className='item-content-wrapper'>
+        <h3 className='item-name'>{def.name}</h3>
+        <p className='item-desc'>{def.description}</p>
+      </div>
+      {hasLore && <BookText className='lore-indicator-icon' size={16} />}
+    </li>
+  );
+};
+
+export const InventoryModal = ({
+  onClose,
+  inventory,
+  itemDefs,
+  onViewLore,
+}) => {
   return (
     <motion.div
       className='modal-overlay'
@@ -28,12 +61,23 @@ export const InventoryModal = ({ onClose, inventory, itemDefs }) => {
           <ul className='inventory-modal-list'>
             {inventory.map((itemKey) =>
               itemDefs[itemKey] ? (
-                <InventoryItem key={itemKey} def={itemDefs[itemKey]} />
+                <InventoryItem
+                  key={itemKey}
+                  itemKey={itemKey}
+                  def={itemDefs[itemKey]}
+                  onViewLore={onViewLore}
+                />
               ) : null,
             )}
           </ul>
         ) : (
-          <p style={{ textAlign: 'center', color: '#888' }}>
+          <p
+            style={{
+              textAlign: 'center',
+              color: 'var(--secondary-text-color)',
+              fontStyle: 'italic',
+              padding: '2rem',
+            }}>
             Your pockets are empty.
           </p>
         )}
