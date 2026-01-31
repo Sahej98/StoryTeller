@@ -7,9 +7,9 @@ import { GlobalStyles } from './components/GlobalStyles.jsx';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <FullScreenGate>
+    <FullscreenGate>
       <GlobalStyles />
       <App />
-    </FullScreenGate>
+    </FullscreenGate>
   </React.StrictMode>,
 );
