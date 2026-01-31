@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import storyRoutes from './routes/stories.js';
 import userRoutes from './routes/users.js';
 import gameRoutes from './routes/game.js';
-import gamedataRoutes from './routes/gameData.js';
+import gamedataRoutes from './routes/gamedata.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -18,7 +18,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // CORS Configuration
-const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+const clientUrl = (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/$/, '');
 app.use(cors({
     origin: clientUrl,
     optionsSuccessStatus: 200
