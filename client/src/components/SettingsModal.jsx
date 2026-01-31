@@ -43,11 +43,23 @@ const VolumeSlider = ({ label, value, onChange, icon }) => {
   );
 };
 
-const ToggleSwitch = ({ label, checked, onChange, icon }) => {
+const ToggleSwitch = ({
+  label,
+  checked,
+  onChange,
+  icon,
+  disabled = false,
+  disabledText = '',
+}) => {
   const Icon = icon;
   return (
-    <div className='settings-row'>
-      <label htmlFor={`toggle-${label}`}>
+    <div className='settings-row' title={disabled ? disabledText : ''}>
+      <label
+        htmlFor={`toggle-${label}`}
+        style={{
+          opacity: disabled ? 0.5 : 1,
+          cursor: disabled ? 'not-allowed' : 'pointer',
+        }}>
         <Icon size={18} />
         {label}
       </label>
@@ -57,8 +69,11 @@ const ToggleSwitch = ({ label, checked, onChange, icon }) => {
           type='checkbox'
           checked={checked}
           onChange={onChange}
+          disabled={disabled}
         />
-        <span className='slider round'></span>
+        <span
+          className='slider round'
+          style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}></span>
       </label>
     </div>
   );
@@ -74,6 +89,7 @@ export const SettingsModal = ({
   onLogout,
   onDeleteAccount,
   context = 'game',
+  narrationAvailable,
 }) => {
   const handleKeybindChange = (action, newKey) => {
     const newKeybindings = { ...settings.keybindings, [action]: newKey };
@@ -158,6 +174,12 @@ export const SettingsModal = ({
               checked={settings.narrationEnabled}
               onChange={(e) =>
                 onSettingsChange('narrationEnabled', e.target.checked)
+              }
+              disabled={!narrationAvailable}
+              disabledText={
+                !narrationAvailable
+                  ? 'Narration is not available on this device/browser.'
+                  : ''
               }
             />
           </div>

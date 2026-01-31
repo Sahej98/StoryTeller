@@ -108,6 +108,7 @@ export const App = () => {
   const [viewingLore, setViewingLore] = useState(null);
   const [systemVoices, setSystemVoices] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [narrationAvailable, setNarrationAvailable] = useState(true);
 
   useEffect(() => {
     // A simple check for mobile devices.
@@ -164,8 +165,26 @@ export const App = () => {
     fetchGameData();
   }, []);
 
-  const handleVoicePackInstalled = useCallback((voices) => {
-    setSystemVoices(voices);
+  const handleVoicePackInstalled = useCallback((voices, success) => {
+    if (success && voices.length > 0) {
+      setSystemVoices(voices);
+      setNarrationAvailable(true);
+    } else {
+      setSystemVoices([]);
+      setNarrationAvailable(false);
+      // Force narration setting to be disabled and inform user.
+      setSettings((s) => ({ ...s, narrationEnabled: false }));
+      setAlerts((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          message:
+            'Your browser or device did not provide any narration voices. The narration feature has been disabled, but the game is still fully playable.',
+          type: 'info',
+          title: 'Narration Unavailable',
+        },
+      ]);
+    }
     setAppState('auth_check');
   }, []);
 
@@ -1018,6 +1037,7 @@ export const App = () => {
                 currentUser && !currentUser.isGuest ? handleDeleteAccount : null
               }
               context={settingsContext}
+              narrationAvailable={narrationAvailable}
             />
           )}
         </AnimatePresence>

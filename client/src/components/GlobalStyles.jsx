@@ -40,6 +40,11 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
 }
 
 /* Keyframes */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -591,6 +596,10 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
 }
 
 /* Base Styles */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
 .game-viewport {
     position: relative;
     width: 100vw;
@@ -3359,6 +3368,21 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     transform: translateX(24px);
 }
 
+.switch input:disabled + .slider {
+    background-color: #2a2a2a !important;
+    cursor: not-allowed;
+    border-color: #444 !important;
+}
+
+.switch input:disabled + .slider:before {
+    background-color: #555 !important;
+}
+
+.settings-row label[style*="not-allowed"] {
+    color: #6a6a6a !important;
+}
+
+
 .keybind-button {
     padding: 0.5rem 1rem;
     border-radius: 4px;
@@ -3754,16 +3778,34 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
 
     /* Game UI */
     .dialogue-wrapper {
-        grid-template-columns: 100px 1fr 100px;
-        gap: 0.5rem;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr auto;
+        grid-template-areas:
+            "player npc"
+            "dialogue dialogue";
+        align-items: end;
         padding: 0 0.5rem 0.5rem;
-    }
-    .story-container {
-        padding: 1rem 1.5rem;
+        height: auto;
+        gap: 0;
     }
     .character-sprite {
-        max-height: 60vh;
+        max-height: 45vh;
     }
+    .character-sprite.player {
+        grid-area: player;
+        justify-self: start;
+    }
+    .character-sprite.npc {
+        grid-area: npc;
+        justify-self: end;
+    }
+    .story-container {
+        grid-area: dialogue;
+        width: 100%;
+        padding: 1.5rem;
+        background: linear-gradient(to top, rgba(10, 10, 10, 0.98) 50%, rgba(10, 10, 10, 0.9) 80%, transparent 100%);
+    }
+
     .control-bar {
         top: 1rem;
         left: 1rem;
@@ -3798,6 +3840,10 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     .stat-change-container {
         top: 90px;
         left: 1rem;
+    }
+    .notification-container {
+        bottom: auto;
+        top: 20%;
     }
 
     /* Story/Chapter Select */
