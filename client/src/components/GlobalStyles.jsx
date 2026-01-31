@@ -1089,6 +1089,7 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     .auth-form-panel {
         border-left: none;
         box-shadow: none;
+        padding: 2rem;
     }
 }
 
@@ -3459,7 +3460,7 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
 
 /* Menu Context (Book) Theme */
 .settings-modal-panel.context-menu {
-    background: #1a1612);
+    background: #1a1612 url('https://www.transparenttextures.com/patterns/old-wall.png');
     color: #e0d1b9;
     border: 4px solid #4a3a2a;
     box-shadow: 0 10px 50px #000, 0 0 0 8px rgba(0, 0, 0, 0.3);
@@ -3655,5 +3656,252 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     background-color: rgba(255, 171, 64, 0.2);
     color: #ffcc80;
 }
+
+/* =================================== */
+/* ========== RESPONSIVE STYLES ========== */
+/* =================================== */
+
+@media (max-width: 992px) {
+    .editor-layout {
+        flex-direction: column;
+    }
+    .editor-sidebar {
+        width: 100%;
+        height: 250px;
+        border-right: none;
+        border-bottom: 2px solid #4a3a2a;
+        box-shadow: inset 0 -10px 15px rgba(0,0,0,0.3);
+    }
+    .editor-main {
+        padding: 1.5rem;
+    }
+    #template-modal .settings-modal-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    /* General Typography */
+    .story-text {
+        font-size: 1rem;
+        line-height: 1.6;
+        min-height: 80px;
+    }
+    .choice-button {
+        padding: 1rem 1.2rem;
+        font-size: 1rem;
+    }
+    .selection-screen-title {
+        font-size: clamp(1.8rem, 7vw, 2.2rem);
+    }
+
+    /* Game UI */
+    .dialogue-wrapper {
+        grid-template-columns: 100px 1fr 100px;
+        gap: 0.5rem;
+        padding: 0 0.5rem 0.5rem;
+    }
+    .story-container {
+        padding: 1rem 1.5rem;
+    }
+    .character-sprite {
+        max-height: 60vh;
+    }
+    .control-bar {
+        top: 1rem;
+        left: 1rem;
+        right: 1rem;
+    }
+    .control-bar-section:last-child {
+        gap: 0.5rem;
+    }
+    .game-action-button {
+        width: 40px;
+        height: 40px;
+    }
+    .game-action-button svg {
+        width: 20px;
+        height: 20px;
+    }
+    .stat-circle-display {
+        width: 44px;
+        height: 44px;
+    }
+    .stat-circle-svg {
+        top: -18px;
+        left: -18px;
+    }
+    .stat-circle-icon {
+        width: 18px;
+        height: 18px;
+    }
+    .stat-circle-value {
+        font-size: 0.75rem;
+    }
+    .stat-change-container {
+        top: 90px;
+        left: 1rem;
+    }
+
+    /* Story/Chapter Select */
+    .story-select-main-themed {
+        padding-bottom: 2vh;
+    }
+    .story-carousel-container {
+        width: 300px;
+        height: 200px;
+    }
+    .chapter-card {
+        border-width: 1px;
+    }
+    .story-select-nav {
+        padding: 0.5rem;
+    }
+    .story-select-nav svg {
+        width: 36px;
+        height: 36px;
+    }
+    .story-select-nav.left { left: 1vw; }
+    .story-select-nav.right { right: 1vw; }
+    .story-details-panel h2 {
+        font-size: 1.8rem;
+    }
+    .story-details-panel p {
+        font-size: 0.9rem;
+        min-height: 40px;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Modals */
+    .modal-panel {
+        padding: 1.5rem;
+        width: 95%;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+    }
+    .inventory-modal-list, .journal-entry-list {
+        max-height: 70vh;
+    }
+    .settings-modal-panel {
+        width: 95vw;
+        height: 90vh;
+    }
+    .settings-modal-header {
+        padding: 1rem 1.5rem;
+    }
+    .settings-modal-header h2 {
+        font-size: 1.5rem;
+    }
+    .settings-modal-content {
+        padding: 1rem 1.5rem;
+    }
+    .settings-modal-content.grid-layout {
+        grid-template-columns: 1fr;
+    }
+    .settings-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+    }
+    .slider-container {
+        width: 100%;
+    }
+    .keybind-row {
+        flex-direction: row;
+        align-items: center;
+    }
+    .alert-modal-document {
+        width: 90%;
+    }
+    .alert-document-body {
+        padding: 1rem;
+    }
+    .alert-document-header, .alert-document-footer {
+        padding: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    /* Story Editor */
+    .field-row {
+        grid-template-columns: 1fr;
+    }
+    .editor-header {
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding: 1rem;
+    }
+    .editor-title-input {
+        width: 100%;
+        font-size: 1.2rem;
+    }
+
+    /* Story End */
+    .story-end-book {
+        grid-template-columns: 1fr;
+        width: 90vw;
+        height: 80vh;
+    }
+    .story-end-page {
+        padding: 2rem;
+    }
+    .left-page {
+        border-right: none;
+        border-bottom: 2px solid #4a3a2a;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Further refinement for small phones */
+    .control-bar {
+        top: 0.5rem;
+        left: 0.5rem;
+        right: 0.5rem;
+    }
+    .hud-stats-container {
+      gap: 0.5rem;
+    }
+    .stat-circle-display {
+      width: 40px;
+      height: 40px;
+    }
+    .stat-circle-svg {
+      top: -20px;
+      left: -20px;
+    }
+    .game-action-button {
+      width: 36px;
+      height: 36px;
+    }
+    .game-action-button svg {
+      width: 18px;
+      height: 18px;
+    }
+    .story-container {
+      padding: 1rem;
+    }
+    .speaker-name {
+        font-size: 1.1rem;
+    }
+    .story-text {
+        font-size: 0.9rem;
+    }
+    .choice-button {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+    }
+    .start-screen-secondary-actions {
+      flex-direction: column;
+    }
+    .story-select-nav {
+      display: none; /* Swipe might be better on mobile, but for now, hide to declutter */
+    }
+    .story-carousel-container {
+      width: 80vw;
+      height: calc(80vw / 1.5);
+    }
+}
+
     `}</style>
 );
