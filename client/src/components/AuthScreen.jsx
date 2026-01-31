@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 const OtpModal = ({ email, onVerified, onClose, showAlert }) => {
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +24,7 @@ const OtpModal = ({ email, onVerified, onClose, showAlert }) => {
     setIsLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/users/verify', {
+      const res = await fetch(`${API_URL}/api/users/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
@@ -89,7 +91,7 @@ const ForgotPasswordModal = ({ onClose, showAlert }) => {
     setIsLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/users/forgot-password', {
+      const res = await fetch(`${API_URL}/api/users/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -109,7 +111,7 @@ const ForgotPasswordModal = ({ onClose, showAlert }) => {
     setIsLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/users/reset-password', {
+      const res = await fetch(`${API_URL}/api/users/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp, newPassword: password }),
@@ -239,7 +241,7 @@ export const AuthScreen = ({ onAuthSuccess, showAlert }) => {
         return;
       }
       try {
-        const response = await fetch('/api/users/login', {
+        const response = await fetch(`${API_URL}/api/users/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password }),
@@ -263,7 +265,7 @@ export const AuthScreen = ({ onAuthSuccess, showAlert }) => {
         return;
       }
       try {
-        const response = await fetch('/api/users/register', {
+        const response = await fetch(`${API_URL}/api/users/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password, email, fullName }),

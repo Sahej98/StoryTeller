@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 
 const TOKEN_KEY = 'storyteller_token';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const EditUserModal = ({ user, onClose, onSave, showAlert }) => {
   const [formData, setFormData] = useState({
@@ -81,7 +82,7 @@ const EditUserModal = ({ user, onClose, onSave, showAlert }) => {
               />
             </div>
           </div>
-          <div className='modal-actions' style={{ marginTop: '2rem', display: 'flex', gap: '20px'}}>
+          <div className='modal-actions' style={{ marginTop: '2rem' }}>
             <button
               type='button'
               className='themed-button secondary'
@@ -113,7 +114,7 @@ export const UserManagementScreen = ({ onBack, showAlert, currentUser }) => {
     setError('');
     try {
       const token = localStorage.getItem(TOKEN_KEY);
-      const response = await fetch('/api/users', {
+      const response = await fetch(`${API_URL}/api/users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error('Failed to fetch users');
@@ -138,7 +139,7 @@ export const UserManagementScreen = ({ onBack, showAlert, currentUser }) => {
 
     try {
       const token = localStorage.getItem(TOKEN_KEY);
-      const response = await fetch(`/api/users/${userId}`, {
+      const response = await fetch(`${API_URL}/api/users/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -166,7 +167,7 @@ export const UserManagementScreen = ({ onBack, showAlert, currentUser }) => {
       async () => {
         try {
           const token = localStorage.getItem(TOKEN_KEY);
-          const response = await fetch(`/api/users/${userId}`, {
+          const response = await fetch(`${API_URL}/api/users/${userId}`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` },
           });

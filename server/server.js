@@ -17,22 +17,19 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+// CORS Configuration
+const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+app.use(cors({
+    origin: clientUrl,
+    optionsSuccessStatus: 200
+}));
+
 app.use(express.json({ limit: '50mb' }));
 
 app.use('/api/stories', storyRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/game', gameRoutes);
 app.use('/api/gamedata', gamedataRoutes);
-
-// Serve frontend in production
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '..', 'dist')));
-
-    app.get('*', (req, res) => {
-        res.sendFile(path.resolve(__dirname, '..', 'dist', 'index.html'));
-    });
-}
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/storyteller';
 

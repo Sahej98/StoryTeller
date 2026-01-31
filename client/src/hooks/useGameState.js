@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 
 const TOKEN_KEY = 'storyteller_token';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const callGameAPI = async (action, payload) => {
   const token = localStorage.getItem(TOKEN_KEY);
@@ -8,7 +9,7 @@ const callGameAPI = async (action, payload) => {
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-  const response = await fetch('/api/game/action', {
+  const response = await fetch(`${API_URL}/api/game/action`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ action, payload }),
@@ -104,7 +105,7 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
       if (!token) return;
 
       try {
-        const response = await fetch(`/api/users/save/${storyId}`, {
+        const response = await fetch(`${API_URL}/api/users/save/${storyId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -130,7 +131,7 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
     setLastChanges(null);
 
     try {
-      const res = await fetch(`/api/users/load/${storyId}`, {
+      const res = await fetch(`${API_URL}/api/users/load/${storyId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

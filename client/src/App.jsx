@@ -29,6 +29,7 @@ import { FilmGrainOverlay } from './components/FilmGrainOverlay.jsx';
 import { ScanLinesOverlay } from './components/ScanLinesOverlay.jsx';
 
 const TOKEN_KEY = 'storyteller_token';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const defaultSettings = {
   master: 1,
@@ -149,7 +150,7 @@ export const App = () => {
   useEffect(() => {
     const fetchGameData = async () => {
       try {
-        const response = await fetch('/api/gamedata');
+        const response = await fetch(`${API_URL}/api/gamedata`);
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         setGameData(data);
@@ -231,7 +232,7 @@ export const App = () => {
     const verifyToken = async () => {
       if (authToken) {
         try {
-          const res = await fetch('/api/users/me', {
+          const res = await fetch(`${API_URL}/api/users/me`, {
             headers: { Authorization: `Bearer ${authToken}` },
           });
           if (res.ok) {
@@ -261,7 +262,7 @@ export const App = () => {
         if (authToken) {
           headers['Authorization'] = `Bearer ${authToken}`;
         }
-        const response = await fetch('/api/stories', { headers });
+        const response = await fetch(`${API_URL}/api/stories`, { headers });
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         setAllStories(data);
@@ -282,7 +283,9 @@ export const App = () => {
       if (selectedStory && selectedStory.id === selectedStoryId) return;
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/stories/${selectedStoryId}`);
+        const response = await fetch(
+          `${API_URL}/api/stories/${selectedStoryId}`,
+        );
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         setSelectedStory(data);
@@ -301,7 +304,7 @@ export const App = () => {
 
     if (currentUser && !currentUser.isGuest && authToken) {
       try {
-        await fetch('/api/users/settings', {
+        await fetch(`${API_URL}/api/users/settings`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -609,7 +612,7 @@ export const App = () => {
       'Confirm Account Deletion',
       async () => {
         try {
-          const response = await fetch('/api/users/me', {
+          const response = await fetch(`${API_URL}/api/users/me`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${authToken}` },
           });
@@ -640,7 +643,7 @@ export const App = () => {
   const handleDeleteStory = async (storyId) => {
     if (!authToken) return;
     try {
-      const response = await fetch(`/api/stories/${storyId}`, {
+      const response = await fetch(`${API_URL}/api/stories/${storyId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${authToken}` },
       });
@@ -661,8 +664,8 @@ export const App = () => {
     const isNewStory = !storyData._id;
     const method = isNewStory ? 'POST' : 'PUT';
     const endpoint = isNewStory
-      ? '/api/stories'
-      : `/api/stories/${storyData.id}`;
+      ? `${API_URL}/api/stories`
+      : `${API_URL}/api/stories/${storyData.id}`;
 
     try {
       const response = await fetch(endpoint, {
