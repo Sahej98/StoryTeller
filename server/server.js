@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import storyRoutes from './routes/stories.js';
 import userRoutes from './routes/users.js';
 import gameRoutes from './routes/game.js';
-import gamedataRoutes from './routes/gamedata.js';
+import gamedataRoutes from './routes/gameData.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
