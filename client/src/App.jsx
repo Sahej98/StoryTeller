@@ -31,6 +31,7 @@ import { VoicePackGate } from './components/VoicePackGate.jsx';
 import { ArrowLeft } from 'lucide-react';
 
 const TOKEN_KEY = 'storyteller_token';
+const SETTINGS_KEY = 'storyteller_settings';
 const API_URL = import.meta.env.VITE_API_URL || '';
 
 const defaultSettings = {
@@ -91,7 +92,17 @@ export const App = () => {
   const [allStories, setAllStories] = useState([]);
   const [selectedStory, setSelectedStory] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [settings, setSettings] = useState(defaultSettings);
+  const [settings, setSettings] = useState(() => {
+    try {
+      const localSettings = localStorage.getItem(SETTINGS_KEY);
+      return localSettings
+        ? { ...defaultSettings, ...JSON.parse(localSettings) }
+        : defaultSettings;
+    } catch (error) {
+      console.error('Failed to load settings from localStorage:', error);
+      return defaultSettings;
+    }
+  });
   const [editingStory, setEditingStory] = useState(null);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [isBindingKey, setIsBindingKey] = useState(false);
@@ -109,6 +120,7 @@ export const App = () => {
   const [systemVoices, setSystemVoices] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const [narrationAvailable, setNarrationAvailable] = useState(true);
+  const [loadingText, setLoadingText] = useState('Loading...');
 
   useEffect(() => {
     // A simple check for mobile devices.
@@ -164,6 +176,14 @@ export const App = () => {
     };
     fetchGameData();
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    } catch (error) {
+      console.error('Failed to save settings to localStorage:', error);
+    }
+  }, [settings]);
 
   const handleVoicePackInstalled = useCallback((voices, success) => {
     if (success && voices.length > 0) {
@@ -566,6 +586,71 @@ export const App = () => {
     }
   };
 
+  const proceedToGame = useCallback(() => {
+    if (selectedChapter) {
+      setLoadingText('Starting chapter...');
+      startGameAt(selectedChapter);
+      setAppState('playing');
+    }
+  }, [selectedChapter, startGameAt]);
+
+  useEffect(() => {
+    if (appState !== 'preloading' || !selectedChapter || !selectedStory) return;
+
+    const preloadChapterAssets = async () => {
+      const chapterData = selectedStory.storyData[selectedChapter];
+      const characters = selectedStory.characters;
+
+      const urls = new Set();
+      if (chapterData && characters) {
+        for (const nodeKey in chapterData) {
+          const node = chapterData[nodeKey];
+          if (node.background) urls.add(node.background);
+          if (node.jumpscare) {
+            if (node.jumpscare.type === 'image' && node.jumpscare.image)
+              urls.add(node.jumpscare.image);
+            if (
+              node.jumpscare.type === 'sprite' &&
+              node.jumpscare.character &&
+              characters[node.jumpscare.character]?.sprite
+            )
+              urls.add(characters[node.jumpscare.character].sprite);
+          }
+          if (node.speaker && characters[node.speaker]?.sprite)
+            urls.add(characters[node.speaker].sprite);
+          if (node.npc) {
+            const npcs = Array.isArray(node.npc) ? node.npc : [node.npc];
+            npcs.forEach((npcKey) => {
+              if (characters[npcKey]?.sprite)
+                urls.add(characters[npcKey].sprite);
+            });
+          }
+        }
+      }
+      if (characters?.player?.sprite) urls.add(characters.player.sprite);
+      if (selectedStory.thumbnail) urls.add(selectedStory.thumbnail);
+
+      const promises = [...urls].filter(Boolean).map((url) => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.src = url;
+          img.onload = resolve;
+          img.onerror = resolve; // Resolve on error too, so one broken image doesn't block the game
+        });
+      });
+
+      await Promise.all(promises);
+
+      if (selectedStory.cautionScreen?.enabled) {
+        setAppState('caution');
+      } else {
+        proceedToGame();
+      }
+    };
+
+    preloadChapterAssets();
+  }, [appState, selectedChapter, selectedStory, proceedToGame]);
+
   const handleContinueAfterDeath = (nodeKey) => {
     setAppState('playing');
     startGameAt(gameContext.gameState.currentPosition.chapter, nodeKey);
@@ -573,18 +658,14 @@ export const App = () => {
 
   const handleChapterSelect = (chapterKey) => {
     setSelectedChapter(chapterKey);
-    if (selectedStory.cautionScreen?.enabled) {
-      setAppState('caution');
-    } else {
-      handleCautionProceed();
-    }
+    setLoadingText('Loading chapter...');
+    setAppState('preloading');
   };
+
   const handleCautionProceed = () => {
-    if (selectedChapter) {
-      startGameAt(selectedChapter);
-      setAppState('playing');
-    }
+    proceedToGame();
   };
+
   const handleQuickSave = () => {
     if (currentUser?.isGuest) {
       showAlert(
@@ -617,7 +698,6 @@ export const App = () => {
   const handleAuthSuccess = ({ user, token }) => {
     if (user.isGuest) {
       setCurrentUser(user);
-      setSettings(defaultSettings);
       setAppState('startScreen');
     } else {
       localStorage.setItem(TOKEN_KEY, token);
@@ -758,6 +838,8 @@ export const App = () => {
   const renderContent = () => {
     if (appState === 'loading' || !gameData)
       return <LoadingScreen text='Initializing...' />;
+
+    if (appState === 'preloading') return <LoadingScreen text={loadingText} />;
 
     if (appState === 'voicepack_prompt')
       return <VoicePackGate onInstalled={handleVoicePackInstalled} />;
