@@ -27,6 +27,8 @@ import { StoryEndScreen } from './components/StoryEndScreen.jsx';
 import { LoreModal } from './components/LoreModal.jsx';
 import { FilmGrainOverlay } from './components/FilmGrainOverlay.jsx';
 import { ScanLinesOverlay } from './components/ScanLinesOverlay.jsx';
+import { VoicePackGate } from './components/VoicePackGate.jsx';
+import { ArrowLeft } from 'lucide-react';
 
 const TOKEN_KEY = 'storyteller_token';
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -78,7 +80,7 @@ export const App = () => {
   const [authToken, setAuthToken] = useState(() =>
     localStorage.getItem(TOKEN_KEY),
   );
-  const [appState, setAppState] = useState('loading'); // loading, auth, startScreen...
+  const [appState, setAppState] = useState('loading'); // loading, voicepack_prompt, auth_check, auth, startScreen...
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [inventoryVisible, setInventoryVisible] = useState(false);
   const [journalVisible, setJournalVisible] = useState(false);
@@ -105,16 +107,15 @@ export const App = () => {
   const [achievedEnding, setAchievedEnding] = useState(null);
   const [viewingLore, setViewingLore] = useState(null);
   const [systemVoices, setSystemVoices] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const loadVoices = () => {
-      setSystemVoices(window.speechSynthesis.getVoices());
-    };
-    // Voices may load asynchronously.
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-      speechSynthesis.onvoiceschanged = loadVoices;
-    }
-    loadVoices(); // For browsers that load them immediately.
+    // A simple check for mobile devices.
+    const mobileCheck =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      );
+    setIsMobile(mobileCheck);
   }, []);
 
   const showAlert = (
@@ -156,9 +157,16 @@ export const App = () => {
         setGameData(data);
       } catch (error) {
         console.error('Failed to fetch game data:', error);
+      } finally {
+        setAppState('voicepack_prompt');
       }
     };
     fetchGameData();
+  }, []);
+
+  const handleVoicePackInstalled = useCallback((voices) => {
+    setSystemVoices(voices);
+    setAppState('auth_check');
   }, []);
 
   useEffect(() => {
@@ -251,8 +259,10 @@ export const App = () => {
         setAppState('auth');
       }
     };
-    verifyToken();
-  }, [authToken]);
+    if (appState === 'auth_check') {
+      verifyToken();
+    }
+  }, [appState, authToken]);
 
   useEffect(() => {
     const fetchStories = async () => {
@@ -716,6 +726,11 @@ export const App = () => {
     }
   };
 
+  const onEditorClick = () => {
+    setEditingStory(null);
+    setAppState('editor');
+  };
+
   const storyForTheme = appState === 'editor' ? editingStory : selectedStory;
   const storyAccentColor = storyForTheme?.accentColor || '#FFFFFF';
 
@@ -724,13 +739,66 @@ export const App = () => {
   const renderContent = () => {
     if (appState === 'loading' || !gameData)
       return <LoadingScreen text='Initializing...' />;
-    if (isLoading && !['auth', 'startScreen', 'loading'].includes(appState))
+
+    if (appState === 'voicepack_prompt')
+      return <VoicePackGate onInstalled={handleVoicePackInstalled} />;
+
+    if (
+      isLoading &&
+      ![
+        'auth',
+        'startScreen',
+        'loading',
+        'voicepack_prompt',
+        'auth_check',
+      ].includes(appState)
+    )
       return <LoadingScreen />;
-    if (appState === 'auth')
+
+    if (appState === 'auth' || appState === 'auth_check')
       return (
         <AuthScreen onAuthSuccess={handleAuthSuccess} showAlert={showAlert} />
       );
-    if (appState === 'editor')
+
+    if (appState === 'editor') {
+      if (isMobile) {
+        return (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              textAlign: 'center',
+              padding: '2rem',
+              boxSizing: 'border-box',
+            }}>
+            <h2
+              className='selection-screen-title'
+              style={{ marginBottom: '1rem' }}>
+              Editor Unavailable on Mobile
+            </h2>
+            <p
+              style={{
+                color: 'var(--secondary-text-color)',
+                fontFamily: 'var(--body-font)',
+                maxWidth: '400px',
+                margin: '0 0 2rem 0',
+                lineHeight: '1.6',
+              }}>
+              The Story Editor has complex features that require a larger
+              screen. Please switch to a desktop device to create and edit
+              stories.
+            </p>
+            <button
+              className='themed-button secondary'
+              onClick={handleEditorBack}>
+              <ArrowLeft size={16} /> Back to Menu
+            </button>
+          </div>
+        );
+      }
       return (
         <StoryEditor
           storyToEdit={editingStory}
@@ -741,6 +809,7 @@ export const App = () => {
           systemVoices={systemVoices}
         />
       );
+    }
     switch (appState) {
       case 'startScreen':
         return (
@@ -749,13 +818,11 @@ export const App = () => {
             onLoad={handleContinue}
             hasSaveData={!!currentUser?.lastSave}
             onSettingsClick={() => setSettingsVisible(true)}
-            onEditorClick={() => {
-              setEditingStory(null);
-              setAppState('editor');
-            }}
+            onEditorClick={onEditorClick}
             onUserManagementClick={() => setAppState('userManagement')}
             onLogout={handleLogout}
             isAdmin={currentUser?.role === 'admin'}
+            isMobile={isMobile}
           />
         );
       case 'userManagement':
@@ -777,6 +844,7 @@ export const App = () => {
             onEdit={handleEditStory}
             onDelete={handleDeleteStory}
             showAlert={showAlert}
+            isMobile={isMobile}
           />
         );
       case 'chapterSelect':

@@ -16,6 +16,7 @@ export const StartScreen = ({
   onLogout,
   isAdmin,
   onUserManagementClick,
+  isMobile,
 }) => (
   <div className='start-screen-container'>
     <div className='start-screen-branding'>
@@ -44,7 +45,13 @@ export const StartScreen = ({
           <>
             <button
               className='start-menu-button'
-              onClick={() => onEditorClick()}>
+              onClick={onEditorClick}
+              disabled={isMobile}
+              title={
+                isMobile
+                  ? 'Story Editor is not available on mobile devices.'
+                  : 'Create or edit a story'
+              }>
               <Edit3 size={18} /> Create Story
             </button>
             <button

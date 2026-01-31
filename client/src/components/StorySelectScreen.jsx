@@ -10,6 +10,7 @@ export const StorySelectScreen = ({
   onEdit,
   onDelete,
   showAlert,
+  isMobile,
 }) => {
   const storyList = stories || [];
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -177,7 +178,13 @@ export const StorySelectScreen = ({
               <div className='story-card-admin-actions-themed'>
                 <button
                   className='themed-button secondary'
-                  onClick={(e) => onEdit(selectedStory)}>
+                  onClick={(e) => onEdit(selectedStory)}
+                  disabled={isMobile}
+                  title={
+                    isMobile
+                      ? 'Story Editor is not available on mobile devices.'
+                      : 'Edit Story'
+                  }>
                   <Edit3 size={16} />
                 </button>
                 <button

@@ -234,7 +234,7 @@ export const UserManagementScreen = ({ onBack, showAlert, currentUser }) => {
                         <tr
                           key={user._id}
                           className={user.disabled ? 'disabled' : ''}>
-                          <td>
+                          <td data-label='Username'>
                             @{user.username}{' '}
                             {isCurrentUser && (
                               <span
@@ -247,9 +247,9 @@ export const UserManagementScreen = ({ onBack, showAlert, currentUser }) => {
                               </span>
                             )}
                           </td>
-                          <td>{user.fullName}</td>
-                          <td>{user.email}</td>
-                          <td>
+                          <td data-label='Full Name'>{user.fullName}</td>
+                          <td data-label='Email'>{user.email}</td>
+                          <td data-label='Role'>
                             <select
                               value={user.role}
                               onChange={(e) =>
@@ -262,7 +262,7 @@ export const UserManagementScreen = ({ onBack, showAlert, currentUser }) => {
                               <option value='admin'>Admin</option>
                             </select>
                           </td>
-                          <td>
+                          <td data-label='Status'>
                             <div className='status-badges'>
                               <span
                                 className={`user-file-status ${user.disabled ? 'disabled' : 'active'}`}>
@@ -274,8 +274,8 @@ export const UserManagementScreen = ({ onBack, showAlert, currentUser }) => {
                               </span>
                             </div>
                           </td>
-                          <td>{joinDate}</td>
-                          <td className='actions-cell'>
+                          <td data-label='Joined'>{joinDate}</td>
+                          <td data-label='Actions' className='actions-cell'>
                             <button
                               className={`themed-button small ${user.disabled ? 'secondary' : 'warning'}`}
                               onClick={() =>

@@ -3678,6 +3678,48 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     #template-modal .settings-modal-content {
         grid-template-columns: 1fr;
     }
+    /* User Management Table */
+    .management-table {
+        border: none;
+        box-shadow: none;
+    }
+    .management-table thead {
+        display: none;
+    }
+    .management-table tr {
+        display: block;
+        margin-bottom: 1.5rem;
+        border: 2px solid #4a3a2a;
+        border-radius: 8px;
+        padding: 1rem;
+        background: rgba(0,0,0,0.1);
+    }
+    .management-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid #4a3a2a;
+    }
+    .management-table td:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .management-table td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        text-transform: uppercase;
+        font-family: var(--title-font);
+        color: #d4c0a1;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        text-align: left;
+        padding-right: 1rem;
+    }
+    .management-table .actions-cell {
+        justify-content: flex-end; /* Align buttons to the right */
+    }
 }
 
 @media (max-width: 768px) {
@@ -3693,6 +3735,21 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     }
     .selection-screen-title {
         font-size: clamp(1.8rem, 7vw, 2.2rem);
+    }
+    /* Start Screen */
+    .start-screen-main-logo {
+        max-width: 140px;
+    }
+    .start-screen-logo-title {
+        font-size: clamp(2.5rem, 8vw, 2.8rem);
+    }
+    .start-menu-button {
+        padding: 0.9rem;
+        font-size: 1rem;
+    }
+    .start-menu-button.secondary {
+        padding: 0.7rem;
+        font-size: 0.8rem;
     }
 
     /* Game UI */
@@ -3853,6 +3910,18 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
 }
 
 @media (max-width: 576px) {
+    /* Start Screen */
+    .start-screen-main-logo {
+        max-width: 120px;
+    }
+    .start-screen-logo-title {
+        font-size: 2.2rem;
+    }
+    .start-menu-button {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+    }
+
     /* Further refinement for small phones */
     .control-bar {
         top: 0.5rem;
