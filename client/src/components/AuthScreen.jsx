@@ -244,7 +244,7 @@ export const AuthScreen = ({ onAuthSuccess, showAlert }) => {
         const response = await fetch(`${API_URL}/api/users/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password }),
+          body: JSON.stringify({ username: username.trim(), password }),
         });
         const data = await response.json();
         if (response.ok) {
@@ -268,7 +268,12 @@ export const AuthScreen = ({ onAuthSuccess, showAlert }) => {
         const response = await fetch(`${API_URL}/api/users/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password, email, fullName }),
+          body: JSON.stringify({
+            username: username.trim(),
+            password,
+            email: email.trim(),
+            fullName,
+          }),
         });
         const data = await response.json();
         if (response.ok) {
@@ -346,7 +351,7 @@ export const AuthScreen = ({ onAuthSuccess, showAlert }) => {
                 <User size={18} color='#9e8a71' />
                 <input
                   type='text'
-                  placeholder='Username'
+                  placeholder={isLogin ? 'Username or Email' : 'Username'}
                   value={username}
                   autoComplete='username'
                   onChange={(e) => setUsername(e.target.value)}

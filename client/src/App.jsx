@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  useMemo,
+} from 'react';
 import { useGameState } from './hooks/useGameState.js';
 import { useSoundManager } from './hooks/useSoundManager.js';
 import { AnimatePresence } from 'framer-motion';
@@ -847,7 +853,12 @@ export const App = () => {
   const storyForTheme = appState === 'editor' ? editingStory : selectedStory;
   const storyAccentColor = storyForTheme?.accentColor || '#FFFFFF';
 
-  const combinedVoiceMap = { ...gameData?.voiceMap, ...selectedStory?.voices };
+  // Memoize combinedVoiceMap to ensure referential stability.
+  // This prevents useTypewriter hook (in GameUI) from resetting narration
+  // every time the app re-renders (e.g. on inventory open/stat change).
+  const combinedVoiceMap = useMemo(() => {
+    return { ...gameData?.voiceMap, ...selectedStory?.voices };
+  }, [gameData, selectedStory]);
 
   const renderContent = () => {
     if (appState === 'loading' || !gameData)

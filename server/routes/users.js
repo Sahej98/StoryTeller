@@ -128,7 +128,14 @@ router.post('/login', async (req, res) => {
     if (!username || !password) return res.status(400).json({ message: 'Please enter all fields' });
 
     try {
-        const user = await User.findOne({ username });
+        // Allow login with either username or email
+        const user = await User.findOne({
+            $or: [
+                { username: username },
+                { email: username }
+            ]
+        });
+
         if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
         if (!user.isVerified) return res.status(401).json({ message: 'Please verify your email address before logging in.' });

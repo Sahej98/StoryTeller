@@ -609,7 +609,7 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     width: 100vw;
     height: 100vh;
     display: grid;
-    grid-template-columns: 1.2fr 1fr;
+    grid-template-columns: 1fr 1fr;
     background: #0a0a0a;
     animation: fadeIn 1.5s ease-out;
     position: relative;
@@ -651,7 +651,7 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 4rem;
+    padding: 0 8rem;
     background: #1a1612 url('https://www.transparenttextures.com/patterns/old-wall.png');
     border-left: 4px solid #4a3a2a;
     box-shadow: inset 10px 0 20px rgba(0, 0, 0, 0.5);
@@ -3115,7 +3115,7 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
 
 /* Menu Context (Book) Theme */
 .settings-modal-panel.context-menu {
-    background: #1a1612 url('https://www.transparenttextures.com/patterns/old-wall.png');
+    background: #1a1612;
     color: #e0d1b9;
     border: 4px solid #4a3a2a;
     box-shadow: 0 10px 50px #000, 0 0 0 8px rgba(0, 0, 0, 0.3);
