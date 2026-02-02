@@ -155,7 +155,13 @@ export const useTypewriter = ({
 
       utterance.onboundary = (event) => {
         if (event.name === 'word') {
-          const spokenText = fullText.substring(0, event.charIndex + event.charLength);
+          // Look ahead for punctuation so it appears with the word
+          let endIndex = event.charIndex + event.charLength;
+          while (endIndex < fullText.length && /[.,!?;:"')\]}]/.test(fullText[endIndex])) {
+            endIndex++;
+          }
+
+          const spokenText = fullText.substring(0, endIndex);
           setDisplayedText(spokenText);
           triggerSfxIfNeeded(spokenText);
         }

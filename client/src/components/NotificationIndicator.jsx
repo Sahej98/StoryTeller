@@ -1,20 +1,35 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { PlusCircle, MinusCircle, BookOpen, Heart } from 'lucide-react';
+import { Plus, Minus, BookOpen, Heart } from 'lucide-react';
 
 const icons = {
-  item_add: <PlusCircle size={18} />,
-  item_remove: <MinusCircle size={18} />,
-  journal_update: <BookOpen size={18} />,
-  relationship: <Heart size={18} />,
+  item_add: <Plus size={16} />,
+  item_remove: <Minus size={16} />,
+  journal_update: <BookOpen size={16} />,
+  relationship: <Heart size={16} />,
 };
 
-const colors = {
-  item_add: '#81c784', // green
-  item_remove: '#e57373', // red
-  journal_update: '#64b5f6', // blue
-  relationship_increase: '#81c784',
-  relationship_decrease: '#e57373',
+const typeClasses = {
+  item_add: 'notif-item-add',
+  item_remove: 'notif-item-remove',
+  journal_update: 'notif-journal',
+  relationship_increase: 'notif-rel-up',
+  relationship_decrease: 'notif-rel-down',
+};
+
+const notificationVariants = {
+  initial: { opacity: 0, y: 30, scale: 0.9 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: 'spring', stiffness: 300, damping: 25 },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.9,
+    transition: { duration: 0.3 },
+  },
 };
 
 export const NotificationIndicator = ({
@@ -27,28 +42,27 @@ export const NotificationIndicator = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       onComplete(id);
-    }, 1000); // Duration
+    }, 3500);
     return () => clearTimeout(timer);
   }, [id, onComplete]);
 
-  let color = '#fff';
+  let finalType = type;
   if (type === 'relationship') {
-    color =
-      change > 0 ? colors.relationship_increase : colors.relationship_decrease;
-  } else {
-    color = colors[type];
+    finalType = change > 0 ? 'relationship_increase' : 'relationship_decrease';
   }
+
+  const className = typeClasses[finalType] || 'notif-default';
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 50, scale: 0.5 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
-      className='notification-indicator'
-      style={{ color: color }}>
-      {icons[type]}
-      <span>{text}</span>
+      variants={notificationVariants}
+      initial='initial'
+      animate='animate'
+      exit='exit'
+      className={`notification-indicator-sleek ${className}`}>
+      <div className='notif-icon-box'>{icons[type]}</div>
+      <span className='notif-text'>{text}</span>
     </motion.div>
   );
 };

@@ -159,41 +159,42 @@ export const GameUI = ({
           !uiState.dialogueVisible || dialogueFadingOut ? 'hidden' : ''
         }`}
         aria-hidden={!uiState.dialogueVisible || dialogueFadingOut}>
-        {isPlayerInScene ? (
-          <CharacterSprite
-            sprite={characters?.player?.sprite}
-            name='Player'
-            className='player'
-            isActive={speakerKey === 'player'}
-          />
-        ) : (
-          <div style={{ gridColumn: 1 }}></div>
-        )}
-
-        <DialogueBox
-          speakerName={speakerName}
-          displayedText={displayedText}
-          narratorState={narratorState}
-          textEffects={currentNode?.textEffects}
-        />
-
-        <div
-          style={{
-            gridColumn: 3,
-            display: 'flex',
-            justifyContent: 'flex-start',
-          }}>
-          {(npcToDisplay || []).map((npcKey) =>
-            characters[npcKey] ? (
+        {/* Layer 1: Sprites - Positioned absolutely so they don't affect flow */}
+        <div className='sprites-layer'>
+          <div className='sprite-container player-side'>
+            {isPlayerInScene && (
               <CharacterSprite
-                key={npcKey}
-                sprite={characters[npcKey].sprite}
-                name={characters[npcKey].name}
-                className='npc'
-                isActive={speakerKey === npcKey}
+                sprite={characters?.player?.sprite}
+                name='Player'
+                className='player'
+                isActive={speakerKey === 'player'}
               />
-            ) : null,
-          )}
+            )}
+          </div>
+
+          <div className='sprite-container npc-side'>
+            {(npcToDisplay || []).map((npcKey) =>
+              characters[npcKey] ? (
+                <CharacterSprite
+                  key={npcKey}
+                  sprite={characters[npcKey].sprite}
+                  name={characters[npcKey].name}
+                  className='npc'
+                  isActive={speakerKey === npcKey}
+                />
+              ) : null,
+            )}
+          </div>
+        </div>
+
+        {/* Layer 2: Dialogue UI - Centered */}
+        <div className='ui-layer'>
+          <DialogueBox
+            speakerName={speakerName}
+            displayedText={displayedText}
+            narratorState={narratorState}
+            textEffects={currentNode?.textEffects}
+          />
         </div>
       </div>
 

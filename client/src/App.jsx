@@ -27,7 +27,6 @@ import { StoryEndScreen } from './components/StoryEndScreen.jsx';
 import { LoreModal } from './components/LoreModal.jsx';
 import { FilmGrainOverlay } from './components/FilmGrainOverlay.jsx';
 import { ScanLinesOverlay } from './components/ScanLinesOverlay.jsx';
-import { VoicePackGate } from './components/VoicePackGate.jsx';
 import { ArrowLeft } from 'lucide-react';
 
 const TOKEN_KEY = 'storyteller_token';
@@ -81,7 +80,7 @@ export const App = () => {
   const [authToken, setAuthToken] = useState(() =>
     localStorage.getItem(TOKEN_KEY),
   );
-  const [appState, setAppState] = useState('loading'); // loading, voicepack_prompt, auth_check, auth, startScreen...
+  const [appState, setAppState] = useState('loading'); // loading, auth_check, auth, startScreen...
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [inventoryVisible, setInventoryVisible] = useState(false);
   const [journalVisible, setJournalVisible] = useState(false);
@@ -122,6 +121,23 @@ export const App = () => {
   const [narrationAvailable, setNarrationAvailable] = useState(true);
   const [loadingText, setLoadingText] = useState('Loading...');
 
+  const showAlert = useCallback(
+    (
+      message,
+      type = 'error',
+      title = 'Alert',
+      onConfirm = null,
+      actions = null,
+      prompt = null,
+    ) => {
+      setAlerts((prev) => [
+        ...prev,
+        { id: Date.now(), message, type, title, onConfirm, actions, prompt },
+      ]);
+    },
+    [],
+  );
+
   useEffect(() => {
     // A simple check for mobile devices.
     const mobileCheck =
@@ -129,21 +145,36 @@ export const App = () => {
         navigator.userAgent,
       );
     setIsMobile(mobileCheck);
-  }, []);
 
-  const showAlert = (
-    message,
-    type = 'error',
-    title = 'Alert',
-    onConfirm = null,
-    actions = null,
-    prompt = null,
-  ) => {
-    setAlerts((prev) => [
-      ...prev,
-      { id: Date.now(), message, type, title, onConfirm, actions, prompt },
-    ]);
-  };
+    if (mobileCheck) {
+      // Disable narration for mobile
+      setNarrationAvailable(false);
+      setSettings((s) => ({ ...s, narrationEnabled: false }));
+
+      const hasShownWarning = localStorage.getItem('narration_warning_shown');
+      if (!hasShownWarning) {
+        showAlert(
+          'Narration features are not supported on mobile devices.',
+          'info',
+          'Audio Notice',
+        );
+        localStorage.setItem('narration_warning_shown', 'true');
+      }
+    } else {
+      // Attempt to load voices for desktop
+      const loadVoices = () => {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          setSystemVoices(voices);
+          setNarrationAvailable(true);
+        }
+      };
+      loadVoices();
+      if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+      }
+    }
+  }, [showAlert]);
 
   useEffect(() => {
     const handleFirstInteraction = () => {
@@ -171,7 +202,7 @@ export const App = () => {
       } catch (error) {
         console.error('Failed to fetch game data:', error);
       } finally {
-        setAppState('voicepack_prompt');
+        setAppState('auth_check');
       }
     };
     fetchGameData();
@@ -184,29 +215,6 @@ export const App = () => {
       console.error('Failed to save settings to localStorage:', error);
     }
   }, [settings]);
-
-  const handleVoicePackInstalled = useCallback((voices, success) => {
-    if (success && voices.length > 0) {
-      setSystemVoices(voices);
-      setNarrationAvailable(true);
-    } else {
-      setSystemVoices([]);
-      setNarrationAvailable(false);
-      // Force narration setting to be disabled and inform user.
-      setSettings((s) => ({ ...s, narrationEnabled: false }));
-      setAlerts((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          message:
-            'Your browser or device did not provide any narration voices. The narration feature has been disabled, but the game is still fully playable.',
-          type: 'info',
-          title: 'Narration Unavailable',
-        },
-      ]);
-    }
-    setAppState('auth_check');
-  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -702,6 +710,12 @@ export const App = () => {
     } else {
       localStorage.setItem(TOKEN_KEY, token);
       setAuthToken(token);
+      // Immediately set user state and transition to start screen
+      setCurrentUser({ ...user, isGuest: false });
+      if (user.settings) {
+        setSettings({ ...defaultSettings, ...user.settings });
+      }
+      setAppState('startScreen');
     }
   };
 
@@ -841,18 +855,11 @@ export const App = () => {
 
     if (appState === 'preloading') return <LoadingScreen text={loadingText} />;
 
-    if (appState === 'voicepack_prompt')
-      return <VoicePackGate onInstalled={handleVoicePackInstalled} />;
+    // voicepack_prompt removed, flow continues directly to auth_check in fetchGameData
 
     if (
       isLoading &&
-      ![
-        'auth',
-        'startScreen',
-        'loading',
-        'voicepack_prompt',
-        'auth_check',
-      ].includes(appState)
+      !['auth', 'startScreen', 'loading', 'auth_check'].includes(appState)
     )
       return <LoadingScreen />;
 

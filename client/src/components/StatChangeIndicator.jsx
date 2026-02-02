@@ -1,24 +1,24 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { ArrowUp, ArrowDown } from 'lucide-react';
 
 const formatStatName = (stat) => {
   return stat.charAt(0).toUpperCase() + stat.slice(1);
 };
 
 const indicatorVariants = {
-  initial: { opacity: 0, y: 10, scale: 0.7 },
+  initial: { opacity: 0, x: -50, filter: 'blur(10px)' },
   animate: {
     opacity: 1,
-    y: -25,
-    scale: 1,
-    transition: { type: 'spring', stiffness: 400, damping: 20 },
+    x: 0,
+    filter: 'blur(0px)',
+    transition: { type: 'spring', stiffness: 300, damping: 25 },
   },
   exit: {
     opacity: 0,
-    y: -50,
-    scale: 0.8,
-    transition: { duration: 0.4, ease: 'easeOut' },
+    x: 20,
+    filter: 'blur(10px)',
+    transition: { duration: 0.5, ease: 'easeInOut' },
   },
 };
 
@@ -26,16 +26,13 @@ export const StatChangeIndicator = ({ id, stat, change, onComplete }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onComplete(id);
-    }, 1500); // Display duration before starting exit animation
+    }, 3000);
     return () => clearTimeout(timer);
   }, [id, onComplete]);
 
   const isIncrease = change > 0;
-  const text = `${isIncrease ? '+' : ''}${change} ${formatStatName(stat)}`;
-  const className = `stat-change-indicator ${
-    isIncrease ? 'increase' : 'decrease'
-  }`;
-  const Icon = isIncrease ? ArrowUpCircle : ArrowDownCircle;
+  const colorClass = isIncrease ? 'stat-increase' : 'stat-decrease';
+  const Icon = isIncrease ? ArrowUp : ArrowDown;
 
   return (
     <motion.div
@@ -44,9 +41,17 @@ export const StatChangeIndicator = ({ id, stat, change, onComplete }) => {
       initial='initial'
       animate='animate'
       exit='exit'
-      className={className}>
-      <Icon size={18} />
-      <span>{text}</span>
+      className={`stat-change-indicator-sleek ${colorClass}`}>
+      <div className='icon-wrapper'>
+        <Icon size={16} strokeWidth={3} />
+      </div>
+      <div className='text-content'>
+        <span className='stat-name'>{formatStatName(stat)}</span>
+        <span className='stat-value'>
+          {isIncrease ? '+' : ''}
+          {change}
+        </span>
+      </div>
     </motion.div>
   );
 };

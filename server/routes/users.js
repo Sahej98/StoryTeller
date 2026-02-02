@@ -105,7 +105,15 @@ router.post('/verify', async (req, res) => {
         const payload = { user: { id: user.id, role: user.role } };
         const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
 
-        const userPayload = { username: user.username, fullName: user.fullName, email: user.email, role: user.role, settings: user.settings };
+        const userPayload = {
+            id: user._id,
+            username: user.username,
+            fullName: user.fullName,
+            email: user.email,
+            role: user.role,
+            settings: user.settings,
+            lastSave: user.lastSave
+        };
         res.json({ token, user: userPayload });
 
     } catch (err) {
@@ -132,7 +140,15 @@ router.post('/login', async (req, res) => {
         const payload = { user: { id: user.id, role: user.role } };
         const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
 
-        const userPayload = { username: user.username, fullName: user.fullName, email: user.email, role: user.role, settings: user.settings };
+        const userPayload = {
+            id: user._id,
+            username: user.username,
+            fullName: user.fullName,
+            email: user.email,
+            role: user.role,
+            settings: user.settings,
+            lastSave: user.lastSave
+        };
         res.json({ token, user: userPayload });
 
     } catch (err) {
