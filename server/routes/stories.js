@@ -1,5 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import { Story } from '../models/story.js';
 import { User } from '../models/user.js';
 
@@ -20,7 +21,7 @@ const auth = (req, res, next) => {
 };
 
 const adminAuth = (req, res, next) => {
-    if (req.user.role !== 'admin') {
+    if (!req.user || req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Admin access required' });
     }
     next();
@@ -41,7 +42,7 @@ const optionalAuth = (req, res, next) => {
 // GET all stories (metadata only)
 router.get('/', optionalAuth, async (req, res) => {
     try {
-        const fields = 'id title description thumbnail theme author published worldTitle';
+        const fields = 'id _id title description thumbnail theme author published worldTitle';
         
         let stories;
         if (req.user && req.user.role === 'admin') {
@@ -61,8 +62,17 @@ router.get('/', optionalAuth, async (req, res) => {
 // GET a single story by ID (full data)
 router.get('/:id', async (req, res) => {
     try {
-        const story = await Story.findOne({ id: req.params.id }).lean();
+        const { id } = req.params;
+        let query = { id: id };
+        
+        // Robust check: try custom id first, then _id if it's a valid ObjectId
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            query = { $or: [{ id: id }, { _id: id }] };
+        }
+
+        const story = await Story.findOne(query).lean();
         if (!story) {
+            console.error(`[Stories API] Story not found with identifier: ${id}`);
             return res.status(404).json({ message: 'Story not found' });
         }
         res.json(story);
@@ -103,7 +113,13 @@ router.post('/', auth, adminAuth, async (req, res) => {
 // PUT /api/stories/:id (Admin only)
 router.put('/:id', auth, adminAuth, async (req, res) => {
     try {
-        const story = await Story.findOne({ id: req.params.id });
+        const { id } = req.params;
+        let query = { id: id };
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            query = { $or: [{ id: id }, { _id: id }] };
+        }
+
+        const story = await Story.findOne(query);
         if (!story) return res.status(404).json({ message: 'Story not found' });
 
         // Admins can edit any story. Non-admins are blocked by adminAuth middleware.
@@ -138,11 +154,17 @@ router.put('/:id', auth, adminAuth, async (req, res) => {
 // DELETE /api/stories/:id (Admin only)
 router.delete('/:id', auth, adminAuth, async (req, res) => {
     try {
-        const story = await Story.findOne({ id: req.params.id });
+        const { id } = req.params;
+        let query = { id: id };
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            query = { $or: [{ id: id }, { _id: id }] };
+        }
+
+        const story = await Story.findOne(query);
         if (!story) return res.status(404).json({ message: 'Story not found' });
 
         // Admins can delete any story.
-        await Story.deleteOne({ id: req.params.id });
+        await story.deleteOne();
         res.json({ message: 'Story deleted successfully' });
     } catch (err) {
         res.status(500).json({ message: err.message });
