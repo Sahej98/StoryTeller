@@ -63,21 +63,24 @@ router.get('/', optionalAuth, async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        let query = { id: id };
         
-        // Robust check: try custom id first, then _id if it's a valid ObjectId
-        if (mongoose.Types.ObjectId.isValid(id)) {
-            query = { $or: [{ id: id }, { _id: id }] };
-        }
+        // Attempt to find by either custom string 'id' or MongoDB '_id'
+        const isObjectId = mongoose.Types.ObjectId.isValid(id);
+        const query = isObjectId 
+            ? { $or: [{ id: id }, { _id: id }] }
+            : { id: id };
+
+        console.log(`[Stories API] Fetching story with identifier: ${id} (IsObjectId: ${isObjectId})`);
 
         const story = await Story.findOne(query).lean();
         if (!story) {
-            console.error(`[Stories API] Story not found with identifier: ${id}`);
+            console.warn(`[Stories API] Story NOT FOUND for: ${id}`);
             return res.status(404).json({ message: 'Story not found' });
         }
+        
         res.json(story);
     } catch (err) {
-        console.error('Error fetching story by ID:', err);
+        console.error('[Stories API] Error fetching story:', err);
         res.status(500).json({ message: err.message });
     }
 });
@@ -104,8 +107,10 @@ router.post('/', auth, adminAuth, async (req, res) => {
             author: req.user.id,
         });
         const savedStory = await newStory.save();
+        console.log(`[Stories API] Created new story: ${savedStory.title} (ID: ${savedStory.id}, _ID: ${savedStory._id})`);
         res.status(201).json(savedStory);
     } catch (err) {
+        console.error('[Stories API] Error creating story:', err);
         res.status(400).json({ message: err.message });
     }
 });
@@ -114,15 +119,14 @@ router.post('/', auth, adminAuth, async (req, res) => {
 router.put('/:id', auth, adminAuth, async (req, res) => {
     try {
         const { id } = req.params;
-        let query = { id: id };
-        if (mongoose.Types.ObjectId.isValid(id)) {
-            query = { $or: [{ id: id }, { _id: id }] };
-        }
+        const isObjectId = mongoose.Types.ObjectId.isValid(id);
+        const query = isObjectId 
+            ? { $or: [{ id: id }, { _id: id }] }
+            : { id: id };
 
         const story = await Story.findOne(query);
         if (!story) return res.status(404).json({ message: 'Story not found' });
 
-        // Admins can edit any story. Non-admins are blocked by adminAuth middleware.
         const { _id, author, ...updateData } = req.body;
 
         const convertToMap = (obj) => obj ? new Map(Object.entries(obj)) : new Map();
@@ -145,8 +149,10 @@ router.put('/:id', auth, adminAuth, async (req, res) => {
         story.markModified('items');
 
         const updatedStory = await story.save();
+        console.log(`[Stories API] Updated story: ${updatedStory.title} (ID: ${updatedStory.id})`);
         res.json(updatedStory);
     } catch (err) {
+        console.error('[Stories API] Error updating story:', err);
         res.status(400).json({ message: err.message });
     }
 });
@@ -155,18 +161,19 @@ router.put('/:id', auth, adminAuth, async (req, res) => {
 router.delete('/:id', auth, adminAuth, async (req, res) => {
     try {
         const { id } = req.params;
-        let query = { id: id };
-        if (mongoose.Types.ObjectId.isValid(id)) {
-            query = { $or: [{ id: id }, { _id: id }] };
-        }
+        const isObjectId = mongoose.Types.ObjectId.isValid(id);
+        const query = isObjectId 
+            ? { $or: [{ id: id }, { _id: id }] }
+            : { id: id };
 
         const story = await Story.findOne(query);
         if (!story) return res.status(404).json({ message: 'Story not found' });
 
-        // Admins can delete any story.
         await story.deleteOne();
+        console.log(`[Stories API] Deleted story: ${id}`);
         res.json({ message: 'Story deleted successfully' });
     } catch (err) {
+        console.error('[Stories API] Error deleting story:', err);
         res.status(500).json({ message: err.message });
     }
 });
