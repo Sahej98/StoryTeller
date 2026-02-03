@@ -65,13 +65,18 @@ router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         
-        // Attempt to find by either custom string 'id' or MongoDB '_id'
-        const isObjectId = mongoose.Types.ObjectId.isValid(id);
-        const query = isObjectId 
-            ? { $or: [{ id: id }, { _id: id }] }
-            : { id: id };
+        console.log(`[Stories API] GET /:id called with: ${id}`);
 
-        console.log(`[Stories API] Fetching story. Input: "${id}", IsObjectId: ${isObjectId}, Query: ${JSON.stringify(query)}`);
+        let query = {};
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            // If it looks like a Mongo ID, check both _id and the custom 'id' field
+            query = { $or: [{ _id: id }, { id: id }] };
+        } else {
+            // If it's not a valid Mongo ID, it MUST be a custom 'id'
+            query = { id: id };
+        }
+
+        console.log(`[Stories API] Executing query:`, JSON.stringify(query));
 
         const story = await Story.findOne(query).lean();
         
@@ -80,6 +85,7 @@ router.get('/:id', async (req, res) => {
             return res.status(404).json({ message: 'Story not found' });
         }
         
+        console.log(`[Stories API] Story found: ${story.title} (_id: ${story._id})`);
         res.json(story);
     } catch (err) {
         console.error('[Stories API] Error fetching story:', err);
@@ -123,10 +129,14 @@ router.post('/', auth, adminAuth, async (req, res) => {
 router.put('/:id', auth, adminAuth, async (req, res) => {
     try {
         const { id } = req.params;
-        const isObjectId = mongoose.Types.ObjectId.isValid(id);
-        const query = isObjectId 
-            ? { $or: [{ id: id }, { _id: id }] }
-            : { id: id };
+        
+        // Similar robust lookup for PUT
+        let query = {};
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            query = { $or: [{ _id: id }, { id: id }] };
+        } else {
+            query = { id: id };
+        }
 
         const story = await Story.findOne(query);
         if (!story) {
@@ -170,10 +180,13 @@ router.put('/:id', auth, adminAuth, async (req, res) => {
 router.delete('/:id', auth, adminAuth, async (req, res) => {
     try {
         const { id } = req.params;
-        const isObjectId = mongoose.Types.ObjectId.isValid(id);
-        const query = isObjectId 
-            ? { $or: [{ id: id }, { _id: id }] }
-            : { id: id };
+        
+        let query = {};
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            query = { $or: [{ _id: id }, { id: id }] };
+        } else {
+            query = { id: id };
+        }
 
         const story = await Story.findOne(query);
         if (!story) return res.status(404).json({ message: 'Story not found' });
