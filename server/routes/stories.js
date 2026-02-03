@@ -42,15 +42,16 @@ const optionalAuth = (req, res, next) => {
 // GET all stories (metadata only)
 router.get('/', optionalAuth, async (req, res) => {
     try {
+        // Explicitly select id and _id to ensure client has both
         const fields = 'id _id title description thumbnail theme author published worldTitle';
         
         let stories;
         if (req.user && req.user.role === 'admin') {
-            // Admins see everything
-            stories = await Story.find({}, fields);
+            // Admins see everything. Use lean() for performance and plain objects.
+            stories = await Story.find({}, fields).lean();
         } else {
             // Regular users/guests only see published stories
-            stories = await Story.find({ published: true }, fields);
+            stories = await Story.find({ published: true }, fields).lean();
         }
 
         res.json(stories);
@@ -70,11 +71,12 @@ router.get('/:id', async (req, res) => {
             ? { $or: [{ id: id }, { _id: id }] }
             : { id: id };
 
-        console.log(`[Stories API] Fetching story with identifier: ${id} (IsObjectId: ${isObjectId})`);
+        console.log(`[Stories API] Fetching story. Input: "${id}", IsObjectId: ${isObjectId}, Query: ${JSON.stringify(query)}`);
 
         const story = await Story.findOne(query).lean();
+        
         if (!story) {
-            console.warn(`[Stories API] Story NOT FOUND for: ${id}`);
+            console.warn(`[Stories API] Story NOT FOUND for identifier: ${id}`);
             return res.status(404).json({ message: 'Story not found' });
         }
         
@@ -108,7 +110,9 @@ router.post('/', auth, adminAuth, async (req, res) => {
         });
         const savedStory = await newStory.save();
         console.log(`[Stories API] Created new story: ${savedStory.title} (ID: ${savedStory.id}, _ID: ${savedStory._id})`);
-        res.status(201).json(savedStory);
+        
+        // Return toObject() to ensure virtuals/transformations are applied if any, but mostly to get a clean object
+        res.status(201).json(savedStory.toObject());
     } catch (err) {
         console.error('[Stories API] Error creating story:', err);
         res.status(400).json({ message: err.message });
@@ -125,8 +129,12 @@ router.put('/:id', auth, adminAuth, async (req, res) => {
             : { id: id };
 
         const story = await Story.findOne(query);
-        if (!story) return res.status(404).json({ message: 'Story not found' });
+        if (!story) {
+            console.warn(`[Stories API] Update failed - Story NOT FOUND: ${id}`);
+            return res.status(404).json({ message: 'Story not found' });
+        }
 
+        // Admins can edit any story.
         const { _id, author, ...updateData } = req.body;
 
         const convertToMap = (obj) => obj ? new Map(Object.entries(obj)) : new Map();
@@ -150,7 +158,8 @@ router.put('/:id', auth, adminAuth, async (req, res) => {
 
         const updatedStory = await story.save();
         console.log(`[Stories API] Updated story: ${updatedStory.title} (ID: ${updatedStory.id})`);
-        res.json(updatedStory);
+        
+        res.json(updatedStory.toObject());
     } catch (err) {
         console.error('[Stories API] Error updating story:', err);
         res.status(400).json({ message: err.message });
