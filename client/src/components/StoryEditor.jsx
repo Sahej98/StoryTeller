@@ -26,6 +26,8 @@ import {
 import { TemplateModal } from './TemplateModal.jsx';
 import { templates } from '../data/editorTemplates.js';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 const NEW_STORY_TEMPLATE = {
   id: `custom_${Date.now()}`,
   title: 'My First Story',
@@ -284,14 +286,20 @@ export const StoryEditor = ({
             // URI encode component is used to ensure special characters in custom IDs don't break the URL path.
             const identifier = storyToEdit._id || storyToEdit.id;
             
-            console.log(`[StoryEditor] Fetching full data for story. Identifier: ${identifier}`);
+            const url = `${API_URL}/api/stories/${encodeURIComponent(identifier)}`;
+            console.log(`[StoryEditor] Fetching full data for story. URL: ${url}`);
             
             if (!identifier) {
                 console.error("Story object missing identifier:", storyToEdit);
                 throw new Error("No valid story identifier found (missing _id and id).");
             }
 
-            const response = await fetch(`/api/stories/${encodeURIComponent(identifier)}`);
+            const response = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!response.ok) {
               const errText = await response.text();
               throw new Error(`Failed to fetch full story data (Status: ${response.status}). Server says: ${errText}`);
