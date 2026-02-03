@@ -278,8 +278,8 @@ export const StoryEditor = ({
       if (storyToEdit) {
         if (!storyToEdit.storyData) {
           try {
-            // Use custom id first, fallback to _id
-            const identifier = storyToEdit.id || storyToEdit._id;
+            // Prefer _id (internal primary key) over custom id string for reliable fetching
+            const identifier = storyToEdit._id || storyToEdit.id;
             if (!identifier) throw new Error("No valid story identifier found.");
 
             const response = await fetch(`/api/stories/${identifier}`);
