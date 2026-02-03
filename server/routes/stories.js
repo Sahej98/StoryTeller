@@ -42,22 +42,17 @@ const optionalAuth = (req, res, next) => {
 router.get('/', optionalAuth, async (req, res) => {
     try {
         const fields = 'id title description thumbnail theme author published worldTitle';
-        const publicStoriesQuery = Story.find({ published: true }, fields);
-
-        const queries = [publicStoriesQuery];
-
+        
+        let stories;
         if (req.user && req.user.role === 'admin') {
-            const userStoriesQuery = Story.find({ author: req.user.id }, fields);
-            queries.push(userStoriesQuery);
+            // Admins see everything
+            stories = await Story.find({}, fields);
+        } else {
+            // Regular users/guests only see published stories
+            stories = await Story.find({ published: true }, fields);
         }
 
-        const results = await Promise.all(queries);
-        const allStories = results.flat();
-
-        // Deduplicate stories
-        const uniqueStories = Array.from(new Map(allStories.map(story => [story.id, story])).values());
-
-        res.json(uniqueStories);
+        res.json(stories);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -66,10 +61,6 @@ router.get('/', optionalAuth, async (req, res) => {
 // GET a single story by ID (full data)
 router.get('/:id', async (req, res) => {
     try {
-        // Use .lean() to get a plain JavaScript object instead of a Mongoose document.
-        // This is more performant for read-only operations and ensures all nested
-        // Maps are converted to plain objects, fixing the issue where chapters
-        // were not appearing on the client.
         const story = await Story.findOne({ id: req.params.id }).lean();
         if (!story) {
             return res.status(404).json({ message: 'Story not found' });
@@ -115,10 +106,7 @@ router.put('/:id', auth, adminAuth, async (req, res) => {
         const story = await Story.findOne({ id: req.params.id });
         if (!story) return res.status(404).json({ message: 'Story not found' });
 
-        if (story.author && story.author.toString() !== req.user.id) {
-            return res.status(403).json({ message: 'Not authorized to edit this story' });
-        }
-
+        // Admins can edit any story. Non-admins are blocked by adminAuth middleware.
         const { _id, author, ...updateData } = req.body;
 
         const convertToMap = (obj) => obj ? new Map(Object.entries(obj)) : new Map();
@@ -153,16 +141,12 @@ router.delete('/:id', auth, adminAuth, async (req, res) => {
         const story = await Story.findOne({ id: req.params.id });
         if (!story) return res.status(404).json({ message: 'Story not found' });
 
-        if (story.author && story.author.toString() !== req.user.id) {
-            return res.status(403).json({ message: 'Not authorized to delete this story' });
-        }
-
+        // Admins can delete any story.
         await Story.deleteOne({ id: req.params.id });
         res.json({ message: 'Story deleted successfully' });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
-
 
 export default router;
