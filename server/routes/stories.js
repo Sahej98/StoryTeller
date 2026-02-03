@@ -64,16 +64,17 @@ router.get('/', optionalAuth, async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        const cleanId = id.trim();
         
-        console.log(`[Stories API] GET /:id called with: ${id}`);
+        console.log(`[Stories API] GET /:id called with: ${cleanId}`);
 
         let query = {};
-        if (mongoose.Types.ObjectId.isValid(id)) {
-            // If it looks like a Mongo ID, check both _id and the custom 'id' field
-            query = { $or: [{ _id: id }, { id: id }] };
+        if (mongoose.Types.ObjectId.isValid(cleanId)) {
+            // Explicitly cast to ObjectId for the _id field to ensure matching works
+            query = { $or: [{ _id: new mongoose.Types.ObjectId(cleanId) }, { id: cleanId }] };
         } else {
             // If it's not a valid Mongo ID, it MUST be a custom 'id'
-            query = { id: id };
+            query = { id: cleanId };
         }
 
         console.log(`[Stories API] Executing query:`, JSON.stringify(query));
@@ -81,7 +82,7 @@ router.get('/:id', async (req, res) => {
         const story = await Story.findOne(query).lean();
         
         if (!story) {
-            console.warn(`[Stories API] Story NOT FOUND for identifier: ${id}`);
+            console.warn(`[Stories API] Story NOT FOUND for identifier: ${cleanId}`);
             return res.status(404).json({ message: 'Story not found' });
         }
         
@@ -129,18 +130,18 @@ router.post('/', auth, adminAuth, async (req, res) => {
 router.put('/:id', auth, adminAuth, async (req, res) => {
     try {
         const { id } = req.params;
+        const cleanId = id.trim();
         
-        // Similar robust lookup for PUT
         let query = {};
-        if (mongoose.Types.ObjectId.isValid(id)) {
-            query = { $or: [{ _id: id }, { id: id }] };
+        if (mongoose.Types.ObjectId.isValid(cleanId)) {
+            query = { $or: [{ _id: new mongoose.Types.ObjectId(cleanId) }, { id: cleanId }] };
         } else {
-            query = { id: id };
+            query = { id: cleanId };
         }
 
         const story = await Story.findOne(query);
         if (!story) {
-            console.warn(`[Stories API] Update failed - Story NOT FOUND: ${id}`);
+            console.warn(`[Stories API] Update failed - Story NOT FOUND: ${cleanId}`);
             return res.status(404).json({ message: 'Story not found' });
         }
 
@@ -180,19 +181,20 @@ router.put('/:id', auth, adminAuth, async (req, res) => {
 router.delete('/:id', auth, adminAuth, async (req, res) => {
     try {
         const { id } = req.params;
+        const cleanId = id.trim();
         
         let query = {};
-        if (mongoose.Types.ObjectId.isValid(id)) {
-            query = { $or: [{ _id: id }, { id: id }] };
+        if (mongoose.Types.ObjectId.isValid(cleanId)) {
+            query = { $or: [{ _id: new mongoose.Types.ObjectId(cleanId) }, { id: cleanId }] };
         } else {
-            query = { id: id };
+            query = { id: cleanId };
         }
 
         const story = await Story.findOne(query);
         if (!story) return res.status(404).json({ message: 'Story not found' });
 
         await story.deleteOne();
-        console.log(`[Stories API] Deleted story: ${id}`);
+        console.log(`[Stories API] Deleted story: ${cleanId}`);
         res.json({ message: 'Story deleted successfully' });
     } catch (err) {
         console.error('[Stories API] Error deleting story:', err);
