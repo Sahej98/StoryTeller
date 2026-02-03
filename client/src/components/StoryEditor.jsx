@@ -282,16 +282,17 @@ export const StoryEditor = ({
         // The list view often only contains metadata (id, title, thumbnail, etc.)
         if (!storyToEdit.storyData) {
           try {
-            // Prioritize the stable MongoDB _id, fallback to custom string id.
-            // URI encode component is used to ensure special characters in custom IDs don't break the URL path.
-            const identifier = storyToEdit._id || storyToEdit.id;
+            // Prioritize the stable string 'id' over the MongoDB '_id'.
+            // '_id' can change if the server re-seeds data, causing stale references in the client.
+            // 'id' is designed to be persistent and unique (e.g. 'the_asylum').
+            const identifier = storyToEdit.id || storyToEdit._id;
             
             const url = `${API_URL}/api/stories/${encodeURIComponent(identifier)}`;
             console.log(`[StoryEditor] Fetching full data for story. URL: ${url}`);
             
             if (!identifier) {
                 console.error("Story object missing identifier:", storyToEdit);
-                throw new Error("No valid story identifier found (missing _id and id).");
+                throw new Error("No valid story identifier found (missing id and _id).");
             }
 
             const response = await fetch(url, {
