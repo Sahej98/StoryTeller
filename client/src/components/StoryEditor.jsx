@@ -276,26 +276,39 @@ export const StoryEditor = ({
       setIsLoading(true);
       let storyDataToSet;
       if (storyToEdit) {
+        // If storyToEdit exists but lacks full data (storyData), we need to fetch it.
+        // The list view often only contains metadata (id, title, thumbnail, etc.)
         if (!storyToEdit.storyData) {
           try {
-            // Prefer _id (internal primary key) over custom id string for reliable fetching
+            // Prioritize the stable MongoDB _id, fallback to custom string id.
+            // URI encode component is used to ensure special characters in custom IDs don't break the URL path.
             const identifier = storyToEdit._id || storyToEdit.id;
-            if (!identifier) throw new Error("No valid story identifier found.");
+            
+            console.log(`[StoryEditor] Fetching full data for story. Identifier: ${identifier}`);
+            
+            if (!identifier) {
+                console.error("Story object missing identifier:", storyToEdit);
+                throw new Error("No valid story identifier found (missing _id and id).");
+            }
 
-            const response = await fetch(`/api/stories/${identifier}`);
-            if (!response.ok)
-              throw new Error(`Failed to fetch full story data (Status: ${response.status})`);
+            const response = await fetch(`/api/stories/${encodeURIComponent(identifier)}`);
+            if (!response.ok) {
+              const errText = await response.text();
+              throw new Error(`Failed to fetch full story data (Status: ${response.status}). Server says: ${errText}`);
+            }
             storyDataToSet = await response.json();
           } catch (error) {
-            console.error(error);
+            console.error("[StoryEditor] Initialization Error:", error);
             showAlert(`Error loading story for editing: ${error.message}`, 'error', 'Loading Error');
             onBack();
             return;
           }
         } else {
+          // If storyData is already present (e.g. state preserved or passed fully), use it.
           storyDataToSet = JSON.parse(JSON.stringify(storyToEdit));
         }
       } else {
+        // Creating a new story from scratch
         storyDataToSet = { ...NEW_STORY_TEMPLATE, id: `custom_${Date.now()}` };
       }
 
@@ -319,7 +332,7 @@ export const StoryEditor = ({
     };
 
     initializeStory();
-  }, [storyToEdit, onBack]);
+  }, [storyToEdit, onBack, showAlert]);
 
   const updateStory = (updater) => {
     setStory((prev) => {
