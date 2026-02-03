@@ -763,8 +763,9 @@ export const App = () => {
     const isNewStory = !storyData._id;
     const method = isNewStory ? 'POST' : 'PUT';
     
-    // Fix: Prefer _id if available to prevent 404s when updating existing stories
-    const identifier = storyData._id || storyData.id;
+    // Fix: Prefer id over _id because id is stable across seed resets.
+    // If we use _id, and the server was re-seeded, the _id on the client is stale and causes 404.
+    const identifier = storyData.id || storyData._id;
     
     const endpoint = isNewStory
       ? `${API_URL}/api/stories`
