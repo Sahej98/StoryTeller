@@ -51,9 +51,9 @@ export const StorySelectScreen = ({
   }
 
   const selectedStory = storyList[selectedIndex];
-
-  // All admins can manage all stories.
-  const canManage = isAdmin;
+  const isAuthor =
+    isAdmin &&
+    (!selectedStory.author || selectedStory.author === currentUser.id);
 
   const changeStory = (dir) => {
     setDirection(dir);

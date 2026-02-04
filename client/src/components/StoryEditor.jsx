@@ -22,8 +22,6 @@ import {
   Skull,
   Languages,
   Volume2,
-  PanelLeft,
-  PanelRight,
 } from 'lucide-react';
 import { TemplateModal } from './TemplateModal.jsx';
 import { templates } from '../data/editorTemplates.js';
@@ -271,9 +269,6 @@ const TEXT_EFFECT_OPTIONS = [
   'glitch',
   'ghostly',
   'gold',
-  'blur',
-  'wavy',
-  'typewriter',
 ];
 const JUMPSCARE_TYPES = ['image', 'sprite', 'text', 'glitch'];
 
@@ -359,40 +354,14 @@ export const StoryEditor = ({
         // The list view often only contains metadata (id, title, thumbnail, etc.)
         if (!storyToEdit.storyData) {
           try {
-            // Prioritize the stable string 'id' over the MongoDB '_id'.
-            // '_id' can change if the server re-seeds data, causing stale references in the client.
-            // 'id' is designed to be persistent and unique (e.g. 'the_asylum').
-            const identifier = storyToEdit.id || storyToEdit._id;
-
-            const url = `${API_URL}/api/stories/${encodeURIComponent(identifier)}`;
-            console.log(
-              `[StoryEditor] Fetching full data for story. URL: ${url}`,
-            );
-
-            if (!identifier) {
-              console.error('Story object missing identifier:', storyToEdit);
-              throw new Error(
-                'No valid story identifier found (missing id and _id).',
-              );
-            }
-
-            const response = await fetch(url, {
-              headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-              },
-            });
-            if (!response.ok) {
-              const errText = await response.text();
-              throw new Error(
-                `Failed to fetch full story data (Status: ${response.status}). Server says: ${errText}`,
-              );
-            }
+            const response = await fetch(`/api/stories/${storyToEdit.id}`);
+            if (!response.ok)
+              throw new Error('Failed to fetch full story data');
             storyDataToSet = await response.json();
           } catch (error) {
-            console.error('[StoryEditor] Initialization Error:', error);
+            console.error(error);
             showAlert(
-              `Error loading story for editing: ${error.message}`,
+              'Error loading story for editing.',
               'error',
               'Loading Error',
             );
@@ -959,18 +928,11 @@ export const StoryEditor = ({
   return (
     <div className='editor-container'>
       <header className='editor-header'>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-            flex: 1,
-          }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <button
             onClick={handleAttemptBack}
-            className='themed-button secondary mobile-icon-only'
-            aria-label='Back'>
-            <ArrowLeft size={18} /> <span>Back</span>
+            className='themed-button secondary'>
+            <ArrowLeft size={18} /> Back
           </button>
           <input
             className='editor-title-input'
@@ -984,24 +946,9 @@ export const StoryEditor = ({
             }
           />
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button
-            className='themed-button secondary mobile-only'
-            onClick={handleMobileViewSwitch}
-            title='Toggle View'>
-            {mobileView === 'sidebar' ? (
-              <PanelRight size={18} />
-            ) : (
-              <PanelLeft size={18} />
-            )}
-          </button>
-          <button
-            onClick={handleSaveAndExit}
-            className='themed-button primary mobile-icon-only'
-            aria-label='Save'>
-            <Save size={18} /> <span>Save</span>
-          </button>
-        </div>
+        <button onClick={handleSaveAndExit} className='themed-button primary'>
+          <Save size={18} /> Save & Exit
+        </button>
       </header>
 
       <main className={`editor-layout mobile-view-${mobileView}`}>
@@ -1068,7 +1015,6 @@ export const StoryEditor = ({
                       onClick={() => {
                         setActiveNodeKey(key);
                         setActiveView('nodes');
-                        if (window.innerWidth < 992) setMobileView('editor');
                       }}>
                       <span>{key}</span>
                       <div className='list-item-actions'>

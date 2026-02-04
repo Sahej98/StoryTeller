@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useCallback,
-  useEffect,
-  useRef,
-  useMemo,
-} from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useGameState } from './hooks/useGameState.js';
 import { useSoundManager } from './hooks/useSoundManager.js';
 import { AnimatePresence } from 'framer-motion';
@@ -100,11 +94,9 @@ export const App = () => {
   const [settings, setSettings] = useState(() => {
     try {
       const localSettings = localStorage.getItem(SETTINGS_KEY);
-      return localSettings
-        ? { ...defaultSettings, ...JSON.parse(localSettings) }
-        : defaultSettings;
+      return localSettings ? { ...defaultSettings, ...JSON.parse(localSettings) } : defaultSettings;
     } catch (error) {
-      console.error('Failed to load settings from localStorage:', error);
+      console.error("Failed to load settings from localStorage:", error);
       return defaultSettings;
     }
   });
@@ -127,58 +119,48 @@ export const App = () => {
   const [narrationAvailable, setNarrationAvailable] = useState(true);
   const [loadingText, setLoadingText] = useState('Loading...');
 
-  const showAlert = useCallback(
-    (
-      message,
-      type = 'error',
-      title = 'Alert',
-      onConfirm = null,
-      actions = null,
-      prompt = null,
-    ) => {
-      setAlerts((prev) => [
-        ...prev,
-        { id: Date.now(), message, type, title, onConfirm, actions, prompt },
-      ]);
-    },
-    [],
-  );
+  const showAlert = useCallback((
+    message,
+    type = 'error',
+    title = 'Alert',
+    onConfirm = null,
+    actions = null,
+    prompt = null,
+  ) => {
+    setAlerts((prev) => [
+      ...prev,
+      { id: Date.now(), message, type, title, onConfirm, actions, prompt },
+    ]);
+  }, []);
 
   useEffect(() => {
     // A simple check for mobile devices.
-    const mobileCheck =
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent,
-      );
+    const mobileCheck = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     setIsMobile(mobileCheck);
 
     if (mobileCheck) {
-      // Disable narration for mobile
-      setNarrationAvailable(false);
-      setSettings((s) => ({ ...s, narrationEnabled: false }));
-
-      const hasShownWarning = localStorage.getItem('narration_warning_shown');
-      if (!hasShownWarning) {
-        showAlert(
-          'Narration features are not supported on mobile devices.',
-          'info',
-          'Audio Notice',
-        );
-        localStorage.setItem('narration_warning_shown', 'true');
-      }
-    } else {
-      // Attempt to load voices for desktop
-      const loadVoices = () => {
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length > 0) {
-          setSystemVoices(voices);
-          setNarrationAvailable(true);
+        // Disable narration for mobile
+        setNarrationAvailable(false);
+        setSettings(s => ({...s, narrationEnabled: false}));
+        
+        const hasShownWarning = localStorage.getItem('narration_warning_shown');
+        if (!hasShownWarning) {
+            showAlert("Narration features are not supported on mobile devices.", "info", "Audio Notice");
+            localStorage.setItem('narration_warning_shown', 'true');
         }
-      };
-      loadVoices();
-      if (window.speechSynthesis.onvoiceschanged !== undefined) {
-        window.speechSynthesis.onvoiceschanged = loadVoices;
-      }
+    } else {
+        // Attempt to load voices for desktop
+        const loadVoices = () => {
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length > 0) {
+                setSystemVoices(voices);
+                setNarrationAvailable(true);
+            }
+        };
+        loadVoices();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
     }
   }, [showAlert]);
 
@@ -197,7 +179,7 @@ export const App = () => {
       window.removeEventListener('keydown', handleFirstInteraction);
     };
   }, []);
-
+  
   useEffect(() => {
     const fetchGameData = async () => {
       try {
@@ -213,12 +195,12 @@ export const App = () => {
     };
     fetchGameData();
   }, []);
-
+  
   useEffect(() => {
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     } catch (error) {
-      console.error('Failed to save settings to localStorage:', error);
+      console.error("Failed to save settings to localStorage:", error);
     }
   }, [settings]);
 
@@ -313,7 +295,7 @@ export const App = () => {
       }
     };
     if (appState === 'auth_check') {
-      verifyToken();
+        verifyToken();
     }
   }, [appState, authToken]);
 
@@ -346,9 +328,7 @@ export const App = () => {
       if (selectedStory && selectedStory.id === selectedStoryId) return;
       try {
         setIsLoading(true);
-        const response = await fetch(
-          `${API_URL}/api/stories/${selectedStoryId}`,
-        );
+        const response = await fetch(`${API_URL}/api/stories/${selectedStoryId}`);
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         setSelectedStory(data);
@@ -602,9 +582,9 @@ export const App = () => {
 
   const proceedToGame = useCallback(() => {
     if (selectedChapter) {
-      setLoadingText('Starting chapter...');
-      startGameAt(selectedChapter);
-      setAppState('playing');
+        setLoadingText('Starting chapter...');
+        startGameAt(selectedChapter);
+        setAppState('playing');
     }
   }, [selectedChapter, startGameAt]);
 
@@ -612,54 +592,44 @@ export const App = () => {
     if (appState !== 'preloading' || !selectedChapter || !selectedStory) return;
 
     const preloadChapterAssets = async () => {
-      const chapterData = selectedStory.storyData[selectedChapter];
-      const characters = selectedStory.characters;
-
-      const urls = new Set();
-      if (chapterData && characters) {
-        for (const nodeKey in chapterData) {
-          const node = chapterData[nodeKey];
-          if (node.background) urls.add(node.background);
-          if (node.jumpscare) {
-            if (node.jumpscare.type === 'image' && node.jumpscare.image)
-              urls.add(node.jumpscare.image);
-            if (
-              node.jumpscare.type === 'sprite' &&
-              node.jumpscare.character &&
-              characters[node.jumpscare.character]?.sprite
-            )
-              urls.add(characters[node.jumpscare.character].sprite);
-          }
-          if (node.speaker && characters[node.speaker]?.sprite)
-            urls.add(characters[node.speaker].sprite);
-          if (node.npc) {
-            const npcs = Array.isArray(node.npc) ? node.npc : [node.npc];
-            npcs.forEach((npcKey) => {
-              if (characters[npcKey]?.sprite)
-                urls.add(characters[npcKey].sprite);
-            });
-          }
+        const chapterData = selectedStory.storyData[selectedChapter];
+        const characters = selectedStory.characters;
+        
+        const urls = new Set();
+        if (chapterData && characters) {
+            for (const nodeKey in chapterData) {
+                const node = chapterData[nodeKey];
+                if (node.background) urls.add(node.background);
+                if (node.jumpscare) {
+                    if (node.jumpscare.type === 'image' && node.jumpscare.image) urls.add(node.jumpscare.image);
+                    if (node.jumpscare.type === 'sprite' && node.jumpscare.character && characters[node.jumpscare.character]?.sprite) urls.add(characters[node.jumpscare.character].sprite);
+                }
+                if (node.speaker && characters[node.speaker]?.sprite) urls.add(characters[node.speaker].sprite);
+                if (node.npc) {
+                    const npcs = Array.isArray(node.npc) ? node.npc : [node.npc];
+                    npcs.forEach(npcKey => { if (characters[npcKey]?.sprite) urls.add(characters[npcKey].sprite); });
+                }
+            }
         }
-      }
-      if (characters?.player?.sprite) urls.add(characters.player.sprite);
-      if (selectedStory.thumbnail) urls.add(selectedStory.thumbnail);
+        if (characters?.player?.sprite) urls.add(characters.player.sprite);
+        if (selectedStory.thumbnail) urls.add(selectedStory.thumbnail);
 
-      const promises = [...urls].filter(Boolean).map((url) => {
-        return new Promise((resolve) => {
-          const img = new Image();
-          img.src = url;
-          img.onload = resolve;
-          img.onerror = resolve; // Resolve on error too, so one broken image doesn't block the game
+        const promises = [...urls].filter(Boolean).map(url => {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.src = url;
+                img.onload = resolve;
+                img.onerror = resolve; // Resolve on error too, so one broken image doesn't block the game
+            });
         });
-      });
+        
+        await Promise.all(promises);
 
-      await Promise.all(promises);
-
-      if (selectedStory.cautionScreen?.enabled) {
-        setAppState('caution');
-      } else {
-        proceedToGame();
-      }
+        if (selectedStory.cautionScreen?.enabled) {
+            setAppState('caution');
+        } else {
+            proceedToGame();
+        }
     };
 
     preloadChapterAssets();
@@ -669,7 +639,7 @@ export const App = () => {
     setAppState('playing');
     startGameAt(gameContext.gameState.currentPosition.chapter, nodeKey);
   };
-
+  
   const handleChapterSelect = (chapterKey) => {
     setSelectedChapter(chapterKey);
     setLoadingText('Loading chapter...');
@@ -792,11 +762,6 @@ export const App = () => {
     if (!authToken) return;
     const isNewStory = !storyData._id;
     const method = isNewStory ? 'POST' : 'PUT';
-
-    // Fix: Prefer id over _id because id is stable across seed resets.
-    // If we use _id, and the server was re-seeded, the _id on the client is stale and causes 404.
-    const identifier = storyData.id || storyData._id;
-
     const endpoint = isNewStory
       ? `${API_URL}/api/stories`
       : `${API_URL}/api/stories/${identifier}`;
@@ -846,7 +811,7 @@ export const App = () => {
   const handleViewLore = (itemKey) => {
     const itemDef = selectedStory?.items?.[itemKey];
     if (itemDef?.lore && itemDef.lore.title && itemDef.lore.content) {
-      setViewingLore(itemDef.lore);
+        setViewingLore(itemDef.lore);
     }
   };
 
@@ -857,7 +822,7 @@ export const App = () => {
 
   const storyForTheme = appState === 'editor' ? editingStory : selectedStory;
   const storyAccentColor = storyForTheme?.accentColor || '#FFFFFF';
-
+  
   // Memoize combinedVoiceMap to ensure referential stability.
   // This prevents useTypewriter hook (in GameUI) from resetting narration
   // every time the app re-renders (e.g. on inventory open/stat change).
@@ -865,26 +830,63 @@ export const App = () => {
     return { ...gameData?.voiceMap, ...selectedStory?.voices };
   }, [gameData, selectedStory]);
 
+
   const renderContent = () => {
     if (appState === 'loading' || !gameData)
       return <LoadingScreen text='Initializing...' />;
 
-    if (appState === 'preloading') return <LoadingScreen text={loadingText} />;
-
+    if (appState === 'preloading')
+      return <LoadingScreen text={loadingText} />;
+      
     // voicepack_prompt removed, flow continues directly to auth_check in fetchGameData
 
-    if (
-      isLoading &&
-      !['auth', 'startScreen', 'loading', 'auth_check'].includes(appState)
-    )
+    if (isLoading && !['auth', 'startScreen', 'loading', 'auth_check'].includes(appState))
       return <LoadingScreen />;
-
+      
     if (appState === 'auth' || appState === 'auth_check')
       return (
         <AuthScreen onAuthSuccess={handleAuthSuccess} showAlert={showAlert} />
       );
 
     if (appState === 'editor') {
+      if (isMobile) {
+        return (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              textAlign: 'center',
+              padding: '2rem',
+              boxSizing: 'border-box',
+            }}>
+            <h2
+              className='selection-screen-title'
+              style={{ marginBottom: '1rem' }}>
+              Editor Unavailable on Mobile
+            </h2>
+            <p
+              style={{
+                color: 'var(--secondary-text-color)',
+                fontFamily: 'var(--body-font)',
+                maxWidth: '400px',
+                margin: '0 0 2rem 0',
+                lineHeight: '1.6',
+              }}>
+              The Story Editor has complex features that require a larger
+              screen. Please switch to a desktop device to create and edit
+              stories.
+            </p>
+            <button
+              className='themed-button secondary'
+              onClick={handleEditorBack}>
+              <ArrowLeft size={16} /> Back to Menu
+            </button>
+          </div>
+        );
+      }
       return (
         <StoryEditor
           storyToEdit={editingStory}
@@ -988,7 +990,9 @@ export const App = () => {
         );
       case 'toBeContinued':
         return (
-          <ToBeContinuedScreen onMainMenu={() => setAppState('storySelect')} />
+          <ToBeContinuedScreen
+            onMainMenu={() => setAppState('storySelect')}
+          />
         );
       case 'deathScreen':
         return (
@@ -1019,16 +1023,7 @@ export const App = () => {
     '--accent-color-rgb': hexToRgb(storyAccentColor).join(', '),
   };
 
-  const settingsContext = [
-    'playing',
-    'toBeContinued',
-    'deathScreen',
-    'storyEnd',
-    'caution',
-    'chapterSelect',
-  ].includes(appState)
-    ? 'game'
-    : 'menu';
+  const settingsContext = ['playing', 'toBeContinued', 'deathScreen', 'storyEnd', 'caution', 'chapterSelect'].includes(appState) ? 'game' : 'menu';
 
   return (
     <>
@@ -1131,12 +1126,9 @@ export const App = () => {
           )}
         </AnimatePresence>
         <AnimatePresence>
-          {viewingLore && (
-            <LoreModal
-              lore={viewingLore}
-              onClose={() => setViewingLore(null)}
-            />
-          )}
+            {viewingLore && (
+                <LoreModal lore={viewingLore} onClose={() => setViewingLore(null)} />
+            )}
         </AnimatePresence>
       </div>
     </>
