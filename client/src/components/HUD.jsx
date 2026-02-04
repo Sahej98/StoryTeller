@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Home,
   Backpack,
@@ -9,8 +9,11 @@ import {
   BrainCircuit,
   Zap,
   Scale,
+  Menu,
+  X,
 } from 'lucide-react';
 import { StatCircle } from './StatCircle.jsx';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export const HUD = ({
   theme,
@@ -23,9 +26,11 @@ export const HUD = ({
   onHomeClick,
   updatedStats = [],
 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
     <div className={`control-bar theme-${theme}`}>
-      <div className='control-bar-section'>
+      <div className='control-bar-section stats-section'>
         {playerStats && (
           <div className='hud-stats-container'>
             <StatCircle
@@ -60,38 +65,71 @@ export const HUD = ({
           </div>
         )}
       </div>
-      <div className='control-bar-section'>
+      <div className='control-bar-section actions-section'>
         <button
-          className='game-action-button'
-          onClick={onHomeClick}
-          aria-label='Save and Return to Chapters'>
-          <Home />
+          className={`game-action-button toggle-button ${isExpanded ? 'active' : ''}`}
+          onClick={() => setIsExpanded(!isExpanded)}
+          aria-label='Toggle Menu'>
+          {isExpanded ? <X size={24} /> : <Menu size={24} />}
         </button>
-        <button
-          className='game-action-button'
-          onClick={onInventoryClick}
-          aria-label={`Open Inventory, ${inventoryCount} items`}>
-          <Backpack />
-          {inventoryCount > 0 && <span>{inventoryCount}</span>}
-        </button>
-        <button
-          className='game-action-button'
-          onClick={onJournalClick}
-          aria-label='Open Journal'>
-          <BookOpen />
-        </button>
-        <button
-          className='game-action-button'
-          onClick={onSaveClick}
-          aria-label='Save Game'>
-          <Save />
-        </button>
-        <button
-          className='game-action-button'
-          onClick={onSettingsClick}
-          aria-label='Open Settings'>
-          <Settings />
-        </button>
+
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              className='expanded-actions'
+              initial={{ opacity: 0, y: -20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.9 }}
+              transition={{ duration: 0.2 }}>
+              <button
+                className='game-action-button'
+                onClick={() => {
+                  onHomeClick();
+                  setIsExpanded(false);
+                }}
+                aria-label='Save and Return to Chapters'>
+                <Home />
+              </button>
+              <button
+                className='game-action-button'
+                onClick={() => {
+                  onInventoryClick();
+                  setIsExpanded(false);
+                }}
+                aria-label={`Open Inventory, ${inventoryCount} items`}>
+                <Backpack />
+                {inventoryCount > 0 && <span>{inventoryCount}</span>}
+              </button>
+              <button
+                className='game-action-button'
+                onClick={() => {
+                  onJournalClick();
+                  setIsExpanded(false);
+                }}
+                aria-label='Open Journal'>
+                <BookOpen />
+              </button>
+              <button
+                className='game-action-button'
+                onClick={() => {
+                  onSaveClick();
+                  setIsExpanded(false);
+                }}
+                aria-label='Save Game'>
+                <Save />
+              </button>
+              <button
+                className='game-action-button'
+                onClick={() => {
+                  onSettingsClick();
+                  setIsExpanded(false);
+                }}
+                aria-label='Open Settings'>
+                <Settings />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

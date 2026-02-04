@@ -202,8 +202,11 @@ export const UserManagementScreen = ({ onBack, showAlert, currentUser }) => {
             style={{ margin: 0, fontSize: '1.5rem' }}>
             User Management
           </h1>
-          <button className='themed-button secondary' onClick={onBack}>
-            <ChevronLeft size={16} /> Back to Menu
+          <button
+            className='themed-button secondary mobile-icon-only'
+            onClick={onBack}
+            aria-label='Back to Menu'>
+            <ChevronLeft size={16} /> <span>Back to Menu</span>
           </button>
         </header>
         <main className='editor-layout'>

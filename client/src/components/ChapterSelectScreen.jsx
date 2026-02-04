@@ -23,8 +23,11 @@ export const ChapterSelectScreen = ({
     return (
       <div className='story-select-container-themed'>
         <header className='story-select-header'>
-          <button className='themed-button secondary' onClick={onBack}>
-            <ChevronLeft size={16} /> Back to Library
+          <button
+            className='themed-button secondary mobile-icon-only'
+            onClick={onBack}
+            aria-label='Back to Library'>
+            <ChevronLeft size={16} /> <span>Back to Library</span>
           </button>
         </header>
         <div
@@ -84,8 +87,11 @@ export const ChapterSelectScreen = ({
       <div className='story-select-vignette'></div>
 
       <header className='story-select-header'>
-        <button className='themed-button secondary' onClick={onBack}>
-          <ChevronLeft size={16} /> Back to Library
+        <button
+          className='themed-button secondary mobile-icon-only'
+          onClick={onBack}
+          aria-label='Back to Library'>
+          <ChevronLeft size={16} /> <span>Back to Library</span>
         </button>
       </header>
 

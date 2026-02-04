@@ -792,9 +792,14 @@ export const App = () => {
     if (!authToken) return;
     const isNewStory = !storyData._id;
     const method = isNewStory ? 'POST' : 'PUT';
+
+    // Fix: Prefer id over _id because id is stable across seed resets.
+    // If we use _id, and the server was re-seeded, the _id on the client is stale and causes 404.
+    const identifier = storyData.id || storyData._id;
+
     const endpoint = isNewStory
       ? `${API_URL}/api/stories`
-      : `${API_URL}/api/stories/${storyData.id}`;
+      : `${API_URL}/api/stories/${identifier}`;
 
     try {
       const response = await fetch(endpoint, {
@@ -880,44 +885,6 @@ export const App = () => {
       );
 
     if (appState === 'editor') {
-      if (isMobile) {
-        return (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%',
-              textAlign: 'center',
-              padding: '2rem',
-              boxSizing: 'border-box',
-            }}>
-            <h2
-              className='selection-screen-title'
-              style={{ marginBottom: '1rem' }}>
-              Editor Unavailable on Mobile
-            </h2>
-            <p
-              style={{
-                color: 'var(--secondary-text-color)',
-                fontFamily: 'var(--body-font)',
-                maxWidth: '400px',
-                margin: '0 0 2rem 0',
-                lineHeight: '1.6',
-              }}>
-              The Story Editor has complex features that require a larger
-              screen. Please switch to a desktop device to create and edit
-              stories.
-            </p>
-            <button
-              className='themed-button secondary'
-              onClick={handleEditorBack}>
-              <ArrowLeft size={16} /> Back to Menu
-            </button>
-          </div>
-        );
-      }
       return (
         <StoryEditor
           storyToEdit={editingStory}

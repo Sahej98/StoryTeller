@@ -46,12 +46,7 @@ export const StartScreen = ({
             <button
               className='start-menu-button'
               onClick={onEditorClick}
-              disabled={isMobile}
-              title={
-                isMobile
-                  ? 'Story Editor is not available on mobile devices.'
-                  : 'Create or edit a story'
-              }>
+              title='Create or edit a story'>
               <Edit3 size={18} /> Create Story
             </button>
             <button

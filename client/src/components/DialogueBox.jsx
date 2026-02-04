@@ -6,7 +6,7 @@ const renderTextWithEffects = (text, effects = []) => {
 
   // Create a regex that will split the string by all the words we want to style
   const effectWords = effects.map((e) =>
-    e.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    e.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
   );
   const regex = new RegExp(`(${effectWords.join('|')})`, 'g');
 
@@ -42,7 +42,7 @@ export const DialogueBox = ({
     </p>
     {narratorState === 'finished' && (
       <div className='continue-indicator' aria-hidden='true'>
-        <ChevronDown />
+        <ChevronDown color='white' />
       </div>
     )}
   </div>

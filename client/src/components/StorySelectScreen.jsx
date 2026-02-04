@@ -22,8 +22,11 @@ export const StorySelectScreen = ({
       <div className='story-select-container-themed'>
         <div className='story-select-vignette'></div>
         <header className='story-select-header'>
-          <button className='themed-button secondary' onClick={onBack}>
-            <ChevronLeft size={20} /> Back
+          <button
+            className='themed-button secondary mobile-icon-only'
+            onClick={onBack}
+            aria-label='Back'>
+            <ChevronLeft size={20} /> <span>Back</span>
           </button>
         </header>
         <div
@@ -48,9 +51,9 @@ export const StorySelectScreen = ({
   }
 
   const selectedStory = storyList[selectedIndex];
-  const isAuthor =
-    isAdmin &&
-    (!selectedStory.author || selectedStory.author === currentUser.id);
+
+  // All admins can manage all stories.
+  const canManage = isAdmin;
 
   const changeStory = (dir) => {
     setDirection(dir);
@@ -106,8 +109,11 @@ export const StorySelectScreen = ({
       <div className='story-select-vignette'></div>
 
       <header className='story-select-header'>
-        <button className='themed-button secondary' onClick={onBack}>
-          <ChevronLeft size={16} /> Back to Menu
+        <button
+          className='themed-button secondary mobile-icon-only'
+          onClick={onBack}
+          aria-label='Back to Menu'>
+          <ChevronLeft size={16} /> <span>Back to Menu</span>
         </button>
       </header>
 
@@ -174,17 +180,12 @@ export const StorySelectScreen = ({
               onClick={() => onSelect(selectedStory.id)}>
               Begin Story
             </button>
-            {isAuthor && (
+            {canManage && (
               <div className='story-card-admin-actions-themed'>
                 <button
                   className='themed-button secondary'
                   onClick={(e) => onEdit(selectedStory)}
-                  disabled={isMobile}
-                  title={
-                    isMobile
-                      ? 'Story Editor is not available on mobile devices.'
-                      : 'Edit Story'
-                  }>
+                  title='Edit Story'>
                   <Edit3 size={16} />
                 </button>
                 <button

@@ -21,7 +21,6 @@ export const GameUI = ({
   onHomeClick,
   lastAction,
   updatedStats,
-  // New props from server view model
   currentNode,
   processedChoices,
   speakerKey,
@@ -132,12 +131,11 @@ export const GameUI = ({
     });
     setDialogueFadingOut(false);
 
-    // Check if current node exists to prevent errors on chapter end
     if (!currentNode) return;
 
     const isInitialScene =
       currentNode?.choices?.length > 0 &&
-      currentNode.choices[0].next === 'start_b'; // Heuristic for first node
+      currentNode.choices[0].next === 'start_b';
     const delay = isInitialScene ? 1500 : 500;
     const timer = setTimeout(() => {
       setUiState((prev) => ({ ...prev, dialogueVisible: true }));
@@ -159,9 +157,8 @@ export const GameUI = ({
           !uiState.dialogueVisible || dialogueFadingOut ? 'hidden' : ''
         }`}
         aria-hidden={!uiState.dialogueVisible || dialogueFadingOut}>
-        {/* Layer 1: Sprites - Positioned absolutely so they don't affect flow */}
-        <div className='sprites-layer'>
-          <div className='sprite-container player-side'>
+        <div className='scene-layout'>
+          <div className='scene-column left'>
             {isPlayerInScene && (
               <CharacterSprite
                 sprite={characters?.player?.sprite}
@@ -172,7 +169,19 @@ export const GameUI = ({
             )}
           </div>
 
-          <div className='sprite-container npc-side'>
+          <div className='scene-column center'>
+            {/* Mobile-only sprite container is handled via CSS rearranging these columns */}
+            <div className='story-box-container'>
+              <DialogueBox
+                speakerName={speakerName}
+                displayedText={displayedText}
+                narratorState={narratorState}
+                textEffects={currentNode?.textEffects}
+              />
+            </div>
+          </div>
+
+          <div className='scene-column right'>
             {(npcToDisplay || []).map((npcKey) =>
               characters[npcKey] ? (
                 <CharacterSprite
@@ -185,16 +194,6 @@ export const GameUI = ({
               ) : null,
             )}
           </div>
-        </div>
-
-        {/* Layer 2: Dialogue UI - Centered */}
-        <div className='ui-layer'>
-          <DialogueBox
-            speakerName={speakerName}
-            displayedText={displayedText}
-            narratorState={narratorState}
-            textEffects={currentNode?.textEffects}
-          />
         </div>
       </div>
 
