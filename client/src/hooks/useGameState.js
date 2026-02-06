@@ -28,14 +28,13 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
         try {
           setStoryData(JSON.parse(cached));
           setIsLoadingStory(false);
-          // Background update check could go here
-          return;
+          // Background update check can happen here if needed
         } catch (e) {
           console.warn("Corrupt story cache", e);
         }
       }
 
-      // Fetch from Server if not cached
+      // Always fetch latest to ensure updates, unless offline
       try {
         const res = await fetch(`${API_URL}/api/stories/${storyId}`);
         if (!res.ok) throw new Error("Failed to fetch story");
@@ -50,7 +49,7 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
 
         setStoryData(data);
       } catch (e) {
-        console.error("Story load error:", e);
+        console.error("Story load error (using cache if avail):", e);
       } finally {
         setIsLoadingStory(false);
       }
@@ -73,7 +72,8 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
     const nextNodeKey = (typeof choice.next === 'object' && choice.next !== null) ? choice.next.key : choice.next;
 
     // Handle End of Chapter/Story
-    if (nextNodeKey === null) {
+    // FIX: Check for both null and empty string to trigger To Be Continued
+    if (nextNodeKey === null || nextNodeKey === '') {
       onChapterEnd();
       return; // Transition handled by UI
     }
@@ -136,7 +136,11 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
   // 3. Save/Load Helpers
   const savePersistent = (sId, state) => {
     // Saves to local storage. This is the "Safety Save" at start of chapter.
-    localStorage.setItem(`${LOCAL_SAVE_KEY}_${sId}`, JSON.stringify(state));
+    try {
+      localStorage.setItem(`${LOCAL_SAVE_KEY}_${sId}`, JSON.stringify(state));
+    } catch (e) {
+      console.error("Save to local storage failed", e);
+    }
 
     // Also sync to cloud if logged in
     if (currentUser && !currentUser.isGuest) {
@@ -158,15 +162,7 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
   const startGameAt = useCallback((chapterKey, nodeKey = 'start') => {
     if (!storyData) return;
 
-    // Reset ephemeral state for a fresh run or chapter replay
-    // If replaying a chapter, we ideally want the state *as it was* at start of chapter.
-    // Since we only save *at* start of chapter, loading the save does exactly this.
-    // But for "New Game", we create fresh.
-
-    // Check if we have a save file for this story to inherit stats if just starting a later chapter via menu?
-    // Simplified: "Start Game" creates a fresh state. 
-    // "Continue" loads the save.
-
+    // Fresh start for a chapter
     const initialRelationships = {};
     if (storyData.characters) {
       Object.keys(storyData.characters).forEach(k => initialRelationships[k] = 0);
@@ -189,7 +185,7 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
     setGameContext(context);
     setLastChanges(null);
 
-    // Initial Save
+    // Initial Save for this run
     savePersistent(storyId, initialState);
 
   }, [storyId, storyData]);
@@ -216,20 +212,7 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
     }
 
     if (savedState) {
-      // FORCE RESTART CHAPTER LOGIC
-      // Even if the save has a specific node key, we reset it to 'start' of that chapter
-      // This ensures users can't save-scum mid-chapter.
-      // Unless it's the very first node, we ensure the key is 'start' or the entry point.
-      // Assuming 'start' is always the entry point for a chapter.
-
-      // If the saved position is NOT 'start', it means they saved mid-chapter (old version) 
-      // OR we want to force them back.
-      // The prompt says "restart the chapter if not completed".
-
-      // Ideally, the save only HAPPENS at chapter start, so savedState is ALREADY at start.
-      // But for robustness:
-      // savedState.currentPosition.key = 'start'; 
-
+      // Logic: If loading, we assume the saved state IS the chapter start because we don't save mid-chapter.
       const context = getViewModel(storyData, savedState);
       setGameContext(context);
       setLastChanges(null);
@@ -239,28 +222,18 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
   }, [storyId, storyData, currentUser]);
 
   const saveGame = useCallback(async (isSilent = false) => {
-    // Manual Save is now DISABLED for mid-chapter as per requirements ("cant save... at a particular point")
-    // We can interpret "Save Game" button as "Save & Quit" which resets you to chapter start?
-    // Or simply disable the button.
-    // Based on prompt "cant save the chapter at a particular point", 
-    // I will make the manual save function do nothing or just save the CURRENT CHAPTER START.
-
-    if (!gameContext?.gameState) return;
-
+    // Manual Save is disabled for mid-chapter state to enforce "Restart Chapter" difficulty
     if (!isSilent) {
-      alert("Saving is disabled during chapters. Progress is saved automatically at the start of each chapter.");
+      alert("Progress is only saved at the start of each chapter. Complete the chapter to secure your progress.");
     }
-
-    // We do NOT update the save file with current mid-chapter node.
-  }, [gameContext]);
+  }, []);
 
   const loadCheckpoint = useCallback(() => {
     if (!gameContext?.gameState) return;
-    // This is the "Try Again" on death. It loads the in-memory checkpoint (start of dangerous section)
-    // This does NOT load from persistent storage.
+    // This loads the in-memory checkpoint (e.g., right before a boss fight or death node)
     const checkpointState = {
       ...gameContext.gameState,
-      currentPosition: gameContext.gameState.checkpoint || gameContext.gameState.currentPosition, // Fallback
+      currentPosition: gameContext.gameState.checkpoint || gameContext.gameState.currentPosition,
       playerStats: { ...gameContext.gameState.playerStats, health: 100, stamina: 100 } // Mercy heal
     };
     const context = getViewModel(storyData, checkpointState);

@@ -127,6 +127,9 @@ export const App = () => {
   const [narrationAvailable, setNarrationAvailable] = useState(true);
   const [loadingText, setLoadingText] = useState('Loading...');
 
+  // Track the last processed jumpscare node to prevent re-triggering on setting changes
+  const lastJumpscareNodeRef = useRef(null);
+
   const showAlert = useCallback(
     (
       message,
@@ -213,14 +216,6 @@ export const App = () => {
     };
     fetchGameData();
   }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-    } catch (error) {
-      console.error('Failed to save settings to localStorage:', error);
-    }
-  }, [settings]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -361,23 +356,39 @@ export const App = () => {
     fetchStoryData();
   }, [selectedStoryId, selectedStory]);
 
-  const handleSettingsChange = async (key, value) => {
-    const newSettings = { ...settings, [key]: value };
-    setSettings(newSettings);
+  const handleSettingsChange = (key, value) => {
+    setSettings((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const saveAllSettings = async () => {
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    } catch (error) {
+      console.error('Failed to save settings to localStorage:', error);
+    }
 
     if (currentUser && !currentUser.isGuest && authToken) {
       try {
-        await fetch(`${API_URL}/api/users/settings`, {
+        const response = await fetch(`${API_URL}/api/users/settings`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authToken}`,
           },
-          body: JSON.stringify({ [key]: value }),
+          body: JSON.stringify(settings), // send whole object
         });
+        if (!response.ok) throw new Error('Server responded with an error.');
+        showAlert('Settings saved to your account!', 'success', 'Saved');
       } catch (error) {
-        console.error('Failed to save settings:', error);
+        console.error('Failed to save settings to server:', error);
+        showAlert(
+          'Failed to save settings to your account.',
+          'error',
+          'Save Failed',
+        );
       }
+    } else {
+      showAlert('Settings saved to this device!', 'success', 'Saved');
     }
   };
 
@@ -444,6 +455,8 @@ export const App = () => {
     if (appState !== 'playing' || !currentNode) {
       setActiveBackground(null);
       setScreenShake(false);
+      // Reset jumpscare ref if we leave playing state
+      lastJumpscareNodeRef.current = null;
       return;
     }
 
@@ -451,12 +464,38 @@ export const App = () => {
       setActiveBackground(currentNode.background);
     }
 
-    if (currentNode.jumpscare && gameData?.SFX) {
-      setJumpscare(currentNode.jumpscare);
-      if (gameData.SFX[currentNode.jumpscare.sfx]) {
-        const audio = new Audio(gameData.SFX[currentNode.jumpscare.sfx]);
-        audio.volume = settings.sfx * settings.master;
-        audio.play().catch(() => {});
+    if (currentNode.jumpscare) {
+      // Create a unique ID for this node to prevent re-triggering on setting changes
+      const nodeId = `${gameState?.currentPosition?.chapter}_${gameState?.currentPosition?.key}`;
+
+      if (lastJumpscareNodeRef.current !== nodeId) {
+        lastJumpscareNodeRef.current = nodeId;
+        setJumpscare(currentNode.jumpscare);
+
+        // Handle audio logic with fallback for direct paths vs keys
+        if (gameData?.SFX) {
+          const sfxSource = currentNode.jumpscare.sfx;
+          let sfxUrl = null;
+
+          if (gameData.SFX[sfxSource]) {
+            // It's a key like 'jumpscare'
+            sfxUrl = gameData.SFX[sfxSource];
+          } else if (
+            typeof sfxSource === 'string' &&
+            (sfxSource.startsWith('/') || sfxSource.startsWith('http'))
+          ) {
+            // It's a direct path like '/audio/sfx/jumpscare.mp3'
+            sfxUrl = sfxSource;
+          }
+
+          if (sfxUrl) {
+            const audio = new Audio(sfxUrl);
+            audio.volume = settings.sfx * settings.master;
+            audio
+              .play()
+              .catch((e) => console.warn('Jumpscare audio play failed', e));
+          }
+        }
       }
     }
 
@@ -464,7 +503,11 @@ export const App = () => {
       setScreenShake(true);
       setTimeout(() => setScreenShake(false), 400);
     }
-  }, [appState, currentNode, settings, playAmbientSfx, gameData]);
+  }, [appState, currentNode, settings, playAmbientSfx, gameData, gameState]);
+
+  const handleJumpscareComplete = useCallback(() => {
+    setJumpscare(null);
+  }, []);
 
   useEffect(() => {
     if (!lastChanges || !selectedStory) return;
@@ -574,7 +617,7 @@ export const App = () => {
   };
   const handleChoice = async (choice) => {
     stopAllSfx();
-    if (choice.next === null) {
+    if (choice.next === null || choice.next === '') {
       setAppState('toBeContinued');
       return;
     }
@@ -859,8 +902,6 @@ export const App = () => {
   const storyAccentColor = storyForTheme?.accentColor || '#FFFFFF';
 
   // Memoize combinedVoiceMap to ensure referential stability.
-  // This prevents useTypewriter hook (in GameUI) from resetting narration
-  // every time the app re-renders (e.g. on inventory open/stat change).
   const combinedVoiceMap = useMemo(() => {
     return { ...gameData?.voiceMap, ...selectedStory?.voices };
   }, [gameData, selectedStory]);
@@ -870,8 +911,6 @@ export const App = () => {
       return <LoadingScreen text='Initializing...' />;
 
     if (appState === 'preloading') return <LoadingScreen text={loadingText} />;
-
-    // voicepack_prompt removed, flow continues directly to auth_check in fetchGameData
 
     if (
       isLoading &&
@@ -1045,7 +1084,7 @@ export const App = () => {
             <Jumpscare
               config={jumpscare}
               characters={selectedStory?.characters || {}}
-              onComplete={() => setJumpscare(null)}
+              onComplete={handleJumpscareComplete}
             />
           )}
         </AnimatePresence>
@@ -1076,6 +1115,7 @@ export const App = () => {
                 }
               />
             ))}
+            \n{' '}
           </AnimatePresence>
         </div>
         {showAutosave && <AutosaveIndicator />}
@@ -1085,6 +1125,7 @@ export const App = () => {
               onClose={() => setSettingsVisible(false)}
               settings={settings}
               onSettingsChange={handleSettingsChange}
+              onSaveSettings={saveAllSettings}
               onBindingChange={setIsBindingKey}
               onSave={appState === 'playing' ? handleQuickSave : null}
               onRestart={
@@ -1103,6 +1144,7 @@ export const App = () => {
               onDeleteAccount={
                 currentUser && !currentUser.isGuest ? handleDeleteAccount : null
               }
+              showAlert={showAlert}
               context={settingsContext}
               narrationAvailable={narrationAvailable}
             />

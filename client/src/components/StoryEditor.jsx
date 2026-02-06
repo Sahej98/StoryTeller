@@ -17,13 +17,12 @@ import {
   BookCopy,
   Library,
   FileText,
-  AlertTriangle,
   Clock,
   Skull,
-  Languages,
   Volume2,
   PanelLeft,
   PanelRight,
+  Globe,
 } from 'lucide-react';
 import { TemplateModal } from './TemplateModal.jsx';
 import { templates } from '../data/editorTemplates.js';
@@ -274,6 +273,15 @@ const TEXT_EFFECT_OPTIONS = [
   'blur',
   'wavy',
   'typewriter',
+  'magic',
+  'digital',
+  'ice',
+  'blood',
+  'neon',
+  'pixel',
+  'corrupted',
+  'divine',
+  'void',
 ];
 const JUMPSCARE_TYPES = ['image', 'sprite', 'text', 'glitch'];
 
@@ -447,6 +455,10 @@ export const StoryEditor = ({
       setIsDirty(false);
       onBack();
     }
+  };
+
+  const handleTogglePublish = () => {
+    updateStory((prev) => ({ ...prev, published: !prev.published }));
   };
 
   const handleAttemptBack = () => {
@@ -994,6 +1006,13 @@ export const StoryEditor = ({
             ) : (
               <PanelLeft size={18} />
             )}
+          </button>
+          <button
+            onClick={handleTogglePublish}
+            className={`themed-button ${story.published ? 'warning' : 'secondary'} mobile-icon-only`}
+            title={story.published ? 'Unpublish Story' : 'Publish Story'}>
+            <Globe size={18} />{' '}
+            <span>{story.published ? 'Published' : 'Draft'}</span>
           </button>
           <button
             onClick={handleSaveAndExit}

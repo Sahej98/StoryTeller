@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-
 export const GlobalStyles = () => (
   <style>{`
     :root {
@@ -102,6 +100,54 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     0% { color: #ffd700; text-shadow: 0 0 2px #fff; }
     50% { color: #fff; text-shadow: 0 0 15px #ffd700; }
     100% { color: #ffd700; text-shadow: 0 0 2px #fff; }
+}
+
+@keyframes magic-glow {
+    0%, 100% { text-shadow: 0 0 5px #be2ed6, 0 0 10px #be2ed6; color: #d689e3; }
+    50% { text-shadow: 0 0 15px #e3a1f0, 0 0 25px #be2ed6; color: #e3a1f0; }
+}
+
+@keyframes digital-flicker {
+    0%, 100% { opacity: 1; text-shadow: 0 0 2px #39ff14, 1px 1px 2px #39ff14; }
+    50% { opacity: 0.9; text-shadow: 0 0 2px #39ff14, -1px -1px 2px #39ff14; }
+}
+
+@keyframes ice-shimmer {
+    0%, 100% { text-shadow: 0 0 3px #a1c4fd, 0 0 6px #a1c4fd; color: #c2e9fb; transform: skewX(0deg); }
+    50% { text-shadow: 0 0 8px #fff, 0 0 12px #a1c4fd; color: #fff; transform: skewX(2deg); }
+}
+
+@keyframes blood-drip {
+    0%, 100% { text-shadow: 0 0 4px #7f0000; transform: translateY(0); }
+    50% { text-shadow: 0 0 8px #ff0000, 0 2px 2px #3d0000; transform: translateY(1px); }
+}
+
+@keyframes neon-flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #ff00de, 0 0 35px #ff00de, 0 0 40px #ff00de;
+    }
+    20%, 24%, 55% {
+        text-shadow: none;
+    }
+}
+
+@keyframes corrupted-text {
+    0% { transform: skew(0deg); filter: blur(0px); color: #fff; }
+    20% { transform: skew(-20deg); filter: blur(1px); color: #f00; }
+    40% { transform: skew(10deg); filter: blur(0px); color: #fff; }
+    60% { transform: skew(-5deg); filter: blur(2px); color: #000; text-shadow: 2px 2px #f00; }
+    80% { transform: skew(5deg); filter: blur(0px); color: #fff; }
+    100% { transform: skew(0deg); filter: blur(0px); color: #fff; }
+}
+
+@keyframes divine-glow {
+    0%, 100% { text-shadow: 0 0 10px #fff, 0 0 20px #ffd700, 0 0 30px #ffd700; color: #fff; }
+    50% { text-shadow: 0 0 20px #fff, 0 0 30px #ffd700, 0 0 40px #ffd700; color: #ffeb3b; }
+}
+
+@keyframes void-pulse {
+    0%, 100% { color: #333; text-shadow: 0 0 5px #000; transform: scale(1); }
+    50% { color: #000; text-shadow: 0 0 15px #000; transform: scale(0.95); }
 }
 
 @keyframes screenShake {
@@ -353,7 +399,7 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 999;
+    z-index: 3000; /* Increased Z-Index to ensure it's on top */
     animation: fadeIn 0.05s;
     overflow: hidden;
 }
@@ -1172,6 +1218,15 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
 .text-effect-blur { color: transparent !important; text-shadow: 0 0 5px rgba(255,255,255,0.8); }
 .text-effect-wavy { display: inline-block; animation: wave 1s ease-in-out infinite; }
 .text-effect-typewriter { font-family: 'Courier New', monospace; font-weight: bold; letter-spacing: 2px; }
+.text-effect-magic { display: inline-block; animation: magic-glow 2.5s ease-in-out infinite; font-weight: bold; }
+.text-effect-digital { font-family: 'Courier New', monospace; color: #39ff14 !important; animation: digital-flicker 0.2s steps(2, start) infinite; font-weight: bold; }
+.text-effect-ice { display: inline-block; animation: ice-shimmer 3s ease-in-out infinite, shake-subtle 1.5s linear infinite; font-weight: bold; }
+.text-effect-blood { color: #8b0000 !important; font-weight: bold; animation: blood-drip 2s ease-in-out infinite; display: inline-block; }
+.text-effect-neon { animation: neon-flicker 1.5s infinite alternate; color: #fff; font-family: 'Courier New', monospace; text-transform: uppercase; }
+.text-effect-pixel { font-family: 'Courier New', monospace; letter-spacing: 2px; text-transform: uppercase; }
+.text-effect-corrupted { display: inline-block; animation: corrupted-text 0.5s infinite; font-weight: bold; }
+.text-effect-divine { display: inline-block; animation: divine-glow 3s infinite ease-in-out; font-weight: bold; }
+.text-effect-void { display: inline-block; animation: void-pulse 4s infinite ease-in-out; font-weight: bold; }
 
 .cursor {
     display: inline-block;
@@ -1351,7 +1406,7 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
 
 .hud-stats-container {
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem;
     align-items: flex-start;
 }
 
@@ -3155,7 +3210,7 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
 
 /* Menu Context (Book) Theme */
 .settings-modal-panel.context-menu {
-    background: #1a1612;
+    background: #1a1612 url('https://www.transparenttextures.com/patterns/old-wall.png');
     color: #e0d1b9;
     border: 4px solid #4a3a2a;
     box-shadow: 0 10px 50px #000, 0 0 0 8px rgba(0, 0, 0, 0.3);
@@ -3554,17 +3609,18 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
         gap: 0.5rem;
     }
     .game-action-button {
-        width: 42px;
-        height: 42px;
+        width: 40px;
+        height: 40px;
     }
     .game-action-button svg {
         width: 20px;
         height: 20px;
     }
     .hud-stats-container {
-      flex-direction: column; 
+      flex-direction: row; 
       flex-wrap: wrap;
-      margin-top: 5px;
+      gap: 0.5rem;
+      margin-top: 0;
     }
     .stat-circle-display {
       width: 40px;
@@ -3585,7 +3641,7 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     
     /* Story/Chapter Select */
     .story-select-main-themed {
-        padding-bottom: 10vh;
+        padding-bottom: 2vh;
     }
     .story-carousel-container {
         width: 300px;
@@ -3638,7 +3694,7 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     /* Modals */
     .modal-panel {
         padding: 1.2rem;
-        width: 80vw !important;
+        width: 90vw !important;
         max-width: 400px;
         max-height: 90vh;
         margin: auto;
@@ -3650,8 +3706,8 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
         max-height: 50vh;
     }
     .settings-modal-panel {
-        width: 80vw !important;
-        height: 80vh !important;
+        width: 90vw !important;
+        height: 85vh !important;
         border-radius: 8px;
         margin: auto;
     }
@@ -3729,6 +3785,14 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     }
     
     /* Further refinement for small phones */
+    .control-bar {
+        top: 0.5rem;
+        left: 0.5rem;
+        right: 0.5rem;
+    }
+    .hud-stats-container {
+      gap: 0.5rem;
+    }
     .stat-circle-display {
       width: 36px;
       height: 36px;
@@ -3736,6 +3800,10 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     .stat-circle-svg {
       top: -22px;
       left: -22px;
+    }
+    .game-action-button {
+      width: 36px;
+      height: 36px;
     }
     .game-action-button svg {
       width: 18px;

@@ -69,6 +69,16 @@ export const StartScreen = ({
             <LogOut size={18} /> Logout
           </button>
         </div>
+        <div
+          style={{
+            marginTop: '2rem',
+            textAlign: 'center',
+            opacity: 0.3,
+            fontSize: '0.7rem',
+            color: '#a38c6d',
+          }}>
+          v1.1 - The Asylum Update
+        </div>
       </div>
     </div>
   </div>

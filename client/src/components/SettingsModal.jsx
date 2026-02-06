@@ -13,6 +13,8 @@ import {
   AlertTriangle,
   Film,
   Signal,
+  Trash2,
+  Database,
 } from 'lucide-react';
 import { KeybindInput } from './KeybindInput.jsx';
 
@@ -83,17 +85,53 @@ export const SettingsModal = ({
   onClose,
   settings,
   onSettingsChange,
+  onSaveSettings,
   onBindingChange,
   onSave,
   onRestart,
   onLogout,
   onDeleteAccount,
+  showAlert,
   context = 'game',
   narrationAvailable,
 }) => {
   const handleKeybindChange = (action, newKey) => {
     const newKeybindings = { ...settings.keybindings, [action]: newKey };
     onSettingsChange('keybindings', newKeybindings);
+  };
+
+  const handleClearCache = () => {
+    showAlert(
+      'This will remove all downloaded story content and guest progress from your browser. Your account, settings, and cloud saves will not be affected. Are you sure you want to continue?',
+      'error',
+      'Confirm Cache Deletion',
+      () => {
+        let clearedCount = 0;
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (
+            key &&
+            (key.startsWith('storyteller_data_cache_') ||
+              key.startsWith('storyteller_save_'))
+          ) {
+            keysToRemove.push(key);
+          }
+        }
+
+        keysToRemove.forEach((key) => {
+          localStorage.removeItem(key);
+          clearedCount++;
+        });
+
+        showAlert(
+          `Successfully cleared ${clearedCount} cached items. The page will now reload.`,
+          'success',
+          'Cache Cleared',
+          () => window.location.reload(),
+        );
+      },
+    );
   };
 
   const keybindLabels = {
@@ -234,6 +272,30 @@ export const SettingsModal = ({
               />
             ))}
           </div>
+
+          <div className='settings-section full-width'>
+            <h3>
+              <Database size={16} /> Data Management
+            </h3>
+            <div className='settings-row'>
+              <label>Clear Cached Story Data</label>
+              <button
+                className='themed-button danger'
+                onClick={handleClearCache}>
+                <Trash2 size={16} /> Clear Cache
+              </button>
+            </div>
+            <p
+              style={{
+                fontSize: '0.8rem',
+                color: 'var(--secondary-text-color)',
+                marginTop: '-0.5rem',
+              }}>
+              This removes downloaded story content and guest progress from your
+              browser. Your account and settings are not affected.
+            </p>
+          </div>
+
           {onDeleteAccount && (
             <div className='settings-section full-width'>
               <h3>
@@ -260,19 +322,31 @@ export const SettingsModal = ({
           )}
         </div>
         <div className='settings-modal-actions'>
+          <button
+            className='themed-button primary mobile-icon-only'
+            onClick={onSaveSettings}>
+            <Save size={16} /> <span>Save Settings</span>
+          </button>
+          <div style={{ flex: 1 }}></div> {/* Spacer */}
           {onSave && (
-            <button className='themed-button secondary' onClick={onSave}>
-              <Save size={16} /> Save Game
+            <button
+              className='themed-button secondary mobile-icon-only'
+              onClick={onSave}>
+              <Save size={16} /> <span>Save Game</span>
             </button>
           )}
           {onRestart && (
-            <button className='themed-button secondary' onClick={onRestart}>
-              <RotateCcw size={16} /> Restart Story
+            <button
+              className='themed-button secondary mobile-icon-only'
+              onClick={onRestart}>
+              <RotateCcw size={16} /> <span>Restart Story</span>
             </button>
           )}
           {onLogout && (
-            <button className='themed-button danger' onClick={onLogout}>
-              <LogOut size={16} /> Logout
+            <button
+              className='themed-button danger mobile-icon-only'
+              onClick={onLogout}>
+              <LogOut size={16} /> <span>Logout</span>
             </button>
           )}
         </div>

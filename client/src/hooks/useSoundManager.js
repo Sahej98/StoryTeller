@@ -77,7 +77,6 @@ export const useSoundManager = ({
       'startScreen',
       'storySelect',
       'chapterSelect',
-      'editor',
     ];
     const isMenuState = menuStates.includes(gameState);
     const isPlayingState = gameState === 'playing';
@@ -169,7 +168,7 @@ export const useSoundManager = ({
           bgmAudioRef.current.volume = targetBgmVolume;
         }
       } else {
-        // Other states (loading, death screen, etc.)
+        // Other states (loading, death screen, editor etc.)
         if (bgmAudioRef.current && !bgmAudioRef.current.paused) {
           fade(bgmAudioRef, 0, FADE_DURATION / 2, () => {
             bgmAudioRef.current.pause();
