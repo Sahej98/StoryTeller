@@ -1406,7 +1406,7 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
 
 .hud-stats-container {
     display: flex;
-    gap: 0.75rem;
+    gap: 1rem;
     align-items: flex-start;
 }
 
@@ -3210,7 +3210,7 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
 
 /* Menu Context (Book) Theme */
 .settings-modal-panel.context-menu {
-    background: #1a1612 url('https://www.transparenttextures.com/patterns/old-wall.png');
+    background: #1a1612;
     color: #e0d1b9;
     border: 4px solid #4a3a2a;
     box-shadow: 0 10px 50px #000, 0 0 0 8px rgba(0, 0, 0, 0.3);
@@ -3609,18 +3609,17 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
         gap: 0.5rem;
     }
     .game-action-button {
-        width: 40px;
-        height: 40px;
+        width: 42px;
+        height: 42px;
     }
     .game-action-button svg {
         width: 20px;
         height: 20px;
     }
     .hud-stats-container {
-      flex-direction: row; 
+      flex-direction: column; 
       flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-top: 0;
+      margin-top: 5px;
     }
     .stat-circle-display {
       width: 40px;
@@ -3641,7 +3640,7 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     
     /* Story/Chapter Select */
     .story-select-main-themed {
-        padding-bottom: 2vh;
+        padding-bottom: 10vh;
     }
     .story-carousel-container {
         width: 300px;
@@ -3785,14 +3784,6 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     }
     
     /* Further refinement for small phones */
-    .control-bar {
-        top: 0.5rem;
-        left: 0.5rem;
-        right: 0.5rem;
-    }
-    .hud-stats-container {
-      gap: 0.5rem;
-    }
     .stat-circle-display {
       width: 36px;
       height: 36px;
@@ -3800,14 +3791,6 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     .stat-circle-svg {
       top: -22px;
       left: -22px;
-    }
-    .game-action-button {
-      width: 36px;
-      height: 36px;
-    }
-    .game-action-button svg {
-      width: 18px;
-      height: 18px;
     }
     .story-container {
       padding: 1rem;
