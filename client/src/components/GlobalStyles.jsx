@@ -3814,5 +3814,60 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     }
 }
 
+.list-item {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid #4a3a2a;
+    color: #a38c6d;
+    padding: 0.7rem 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+    font-family: var(--title-font);
+    letter-spacing: 0.5px;
+    gap: 0.5rem;
+}
+
+.list-item.dragging {
+    opacity: 0.5;
+    border-color: #ffab40;
+    background: rgba(255, 171, 64, 0.1);
+}
+
+.list-item-content {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.drag-handle {
+    color: #5a4a3a;
+    cursor: grab;
+    flex-shrink: 0;
+    transition: color 0.2s;
+}
+
+.drag-handle:hover {
+    color: #d4c0a1;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.list-item span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+    min-width: 0;
+}
+
     `}</style>
 );

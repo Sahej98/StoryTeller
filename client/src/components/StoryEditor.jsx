@@ -23,11 +23,14 @@ import {
   PanelLeft,
   PanelRight,
   Globe,
+  GripVertical,
 } from 'lucide-react';
 import { TemplateModal } from './TemplateModal.jsx';
 import { templates } from '../data/editorTemplates.js';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
+
+/* ... existing constants (NEW_STORY_TEMPLATE, JsonEditor, TEXT_EFFECT_OPTIONS, JUMPSCARE_TYPES) ... */
 
 const NEW_STORY_TEMPLATE = {
   id: `custom_${Date.now()}`,
@@ -306,6 +309,9 @@ export const StoryEditor = ({
   const originalStory = useRef(null);
   const [mobileView, setMobileView] = useState('sidebar'); // 'sidebar' | 'editor'
 
+  // Drag and Drop state
+  const [draggedNode, setDraggedNode] = useState(null);
+
   const categorizedVoices = useMemo(() => {
     if (!systemVoices || systemVoices.length === 0) {
       return { female: [], male: [], other: [] };
@@ -448,6 +454,50 @@ export const StoryEditor = ({
     });
   };
 
+  /* --- Drag and Drop Logic --- */
+  const handleNodeDragStart = (e, key) => {
+    setDraggedNode(key);
+    e.dataTransfer.effectAllowed = 'move';
+    // Optional: Set transparent drag image or similar
+  };
+
+  const handleNodeDragOver = (e) => {
+    e.preventDefault(); // Necessary to allow dropping
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleNodeDrop = (e, targetKey) => {
+    e.preventDefault();
+    if (!draggedNode || draggedNode === targetKey) return;
+
+    // Get current keys in their current order
+    const currentNodes = story.storyData[activeChapterKey];
+    const keys = Object.keys(currentNodes);
+    const fromIndex = keys.indexOf(draggedNode);
+    const toIndex = keys.indexOf(targetKey);
+
+    if (fromIndex < 0 || toIndex < 0) return;
+
+    // Reorder keys
+    const newKeys = [...keys];
+    newKeys.splice(fromIndex, 1);
+    newKeys.splice(toIndex, 0, draggedNode);
+
+    // Reconstruct the object to enforce the new key order
+    // Note: In modern JS engines, object keys (string) are iterated in insertion order.
+    const newChapterData = {};
+    newKeys.forEach((key) => {
+      newChapterData[key] = currentNodes[key];
+    });
+
+    updateStory((prev) => {
+      const next = JSON.parse(JSON.stringify(prev));
+      next.storyData[activeChapterKey] = newChapterData;
+      return next;
+    });
+    setDraggedNode(null);
+  };
+
   const handleSaveAndExit = async () => {
     const success = await onSave(story);
     if (success) {
@@ -469,8 +519,7 @@ export const StoryEditor = ({
         "A Scribe's Dilemma",
         null,
         [
-          { text: 'Cancel', action: () => {}, class: 'secondary' },
-          { text: 'Exit Without Saving', action: onBack, class: 'danger' },
+          { text: 'Just Exit', action: onBack, class: 'danger' },
           { text: 'Save & Exit', action: handleSaveAndExit, class: 'primary' },
         ],
       );
@@ -1078,18 +1127,26 @@ export const StoryEditor = ({
                 </div>
               </h4>
               <div className='node-list' style={{ flex: 1, overflowY: 'auto' }}>
-                {Object.keys(story.storyData[activeChapterKey] || {})
-                  .sort()
-                  .map((key) => (
+                {Object.keys(story.storyData[activeChapterKey] || {}).map(
+                  (key) => (
                     <div
                       key={key}
-                      className={`list-item ${activeNodeKey === key ? 'active' : ''}`}
+                      className={`list-item ${activeNodeKey === key ? 'active' : ''} ${draggedNode === key ? 'dragging' : ''}`}
                       onClick={() => {
                         setActiveNodeKey(key);
                         setActiveView('nodes');
                         if (window.innerWidth < 992) setMobileView('editor');
-                      }}>
-                      <span>{key}</span>
+                      }}
+                      draggable
+                      onDragStart={(e) => handleNodeDragStart(e, key)}
+                      onDragOver={handleNodeDragOver}
+                      onDrop={(e) => handleNodeDrop(e, key)}>
+                      <div className='list-item-content'>
+                        <div className='drag-handle' title='Drag to reorder'>
+                          <GripVertical size={14} />
+                        </div>
+                        <span>{key}</span>
+                      </div>
                       <div className='list-item-actions'>
                         <button
                           onClick={(e) => {
@@ -1108,13 +1165,15 @@ export const StoryEditor = ({
                         </button>
                       </div>
                     </div>
-                  ))}
+                  ),
+                )}
               </div>
             </div>
           </div>
         </aside>
         <section className='editor-main'>
           <div className='editor-canvas'>
+            {/* ... rest of the editor content ... */}
             <div className='tab-group'>
               {[
                 { id: 'story', label: 'Story', icon: Library },
