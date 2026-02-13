@@ -1071,14 +1071,113 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
 }
 
 .themed-button.small {
-    padding: 0.5rem 1rem;
     font-size: 0.8rem;
-    gap: 0.4rem;
 }
 
 .themed-button:active, .start-menu-button:active, .auth-submit:active, .auth-guest:active, .fullscreen-gate-button:active, .choice-button:active, .restart-button:active {
     transform: scale(0.98);
     transition: transform 0.1s ease;
+}
+
+/* Asset Manager Styles & Generic Inputs */
+.asset-row { display: flex; gap: 1rem; align-items: flex-end; background: rgba(0, 0, 0, 0.3); padding: 1rem; border: 1px solid #4a3a2a; border-radius: 6px; margin-bottom: 0.5rem; }
+.asset-key-group { flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 0.3rem; }
+.asset-value-group { flex: 2; min-width: 200px; display: flex; flex-direction: column; gap: 0.3rem; }
+.asset-input-wrapper { display: flex; gap: 0.5rem; width: 100%; }
+.asset-input-wrapper input { flex: 1; min-width: 0; }
+.asset-actions { display: flex; gap: 0.5rem; padding-bottom: 2px; }
+.voice-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; width: 100%; }
+
+/* Unified Input Styles */
+.styled-input, 
+.field-group input:not([type="range"]), 
+.field-group textarea, 
+.field-group select,
+.asset-row input:not([type="range"]),
+.choice-builder input:not([type="range"]) {
+    background: #110e0c;
+    border: 1px solid #4a3a2a;
+    color: #e0d1b9;
+    padding: 0.8rem;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.styled-input:focus, 
+.field-group input:not([type="range"]):focus, 
+.field-group textarea:focus, 
+.field-group select:focus,
+.asset-row input:not([type="range"]):focus,
+.choice-builder input:not([type="range"]):focus {
+    border-color: #ffab40;
+    background: #16120e;
+    box-shadow: 0 0 10px rgba(255, 171, 64, 0.2);
+}
+
+input[type="range"] {
+    accent-color: var(--accent-color);
+    cursor: pointer;
+    width: 100%;
+    max-width: 100%;
+    margin: 8px 0;
+    display: block;
+    box-sizing: border-box;
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 0; /* Ensures flex/grid items don't overflow */
+}
+
+.field-group textarea { min-height: 80px; resize: vertical; }
+.field-group textarea[placeholder*="JSON"] { font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; background-color: #0c0a08; border-color: #3a2a1a; color: #f2c97d; line-height: 1.5; white-space: pre; tab-size: 2; }
+
+/* Search Bar */
+.search-input-group {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #4a3a2a;
+    border-radius: 4px;
+    padding: 0 1rem;
+    transition: all 0.3s;
+    margin-bottom: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.search-input-group:focus-within {
+    border-color: #ffab40;
+    box-shadow: 0 0 10px rgba(255, 171, 64, 0.2);
+}
+
+.search-input-group input {
+    background: transparent;
+    border: none;
+    color: #e0d1b9;
+    padding: 0.8rem 0 0.8rem 0.8rem;
+    width: 100%;
+    outline: none;
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+    .asset-row { flex-direction: column; align-items: stretch; gap: 1rem; }
+    .asset-key-group, .asset-value-group { width: 100%; }
+    .asset-actions { flex-direction: row; justify-content: flex-end; padding-bottom: 0; margin-top: 0.5rem; }
+    .asset-input-wrapper { flex-direction: column; }
+    .asset-input-wrapper input { width: 100%; }
+    .asset-input-wrapper .asset-uploader { width: 100%; }
+    .asset-input-wrapper .asset-uploader label { width: 100%; justify-content: center; box-sizing: border-box; }
+    .voice-grid { grid-template-columns: 1fr; }
 }
 
 /* In-Game UI - Updated Layout for Sprites & Centered Dialogue */
@@ -2677,6 +2776,35 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     font-family: var(--title-font);
     letter-spacing: 0.5px;
     gap: 0.5rem;
+}
+
+.list-item.dragging {
+    opacity: 0.5;
+    border-color: #ffab40;
+    background: rgba(255, 171, 64, 0.1);
+}
+
+.list-item-content {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.drag-handle {
+    color: #5a4a3a;
+    cursor: grab;
+    flex-shrink: 0;
+    transition: color 0.2s;
+}
+
+.drag-handle:hover {
+    color: #d4c0a1;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
 }
 
 .list-item span {

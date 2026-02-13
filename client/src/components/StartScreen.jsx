@@ -5,6 +5,7 @@ import {
   Settings,
   FolderOpen,
   Users,
+  Database,
 } from 'lucide-react';
 
 export const StartScreen = ({
@@ -16,6 +17,7 @@ export const StartScreen = ({
   onLogout,
   isAdmin,
   onUserManagementClick,
+  onGlobalAssetsClick,
   isMobile,
 }) => (
   <div className='start-screen-container'>
@@ -49,11 +51,18 @@ export const StartScreen = ({
               title='Create or edit a story'>
               <Edit3 size={18} /> Create Story
             </button>
-            <button
-              className='start-menu-button'
-              onClick={onUserManagementClick}>
-              <Users size={18} /> User Management
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                className='start-menu-button secondary'
+                onClick={onUserManagementClick}>
+                <Users size={18} /> Users
+              </button>
+              <button
+                className='start-menu-button secondary'
+                onClick={onGlobalAssetsClick}>
+                <Database size={18} /> Assets
+              </button>
+            </div>
           </>
         )}
 
@@ -77,7 +86,7 @@ export const StartScreen = ({
             fontSize: '0.7rem',
             color: '#a38c6d',
           }}>
-          v1.1 - The Asylum Update
+          v1.2 - The Asset Update
         </div>
       </div>
     </div>

@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { useGameState } from './hooks/useGameState.js';
 import { useSoundManager } from './hooks/useSoundManager.js';
+import { useSmartPreload } from './hooks/useSmartPreload.js';
 import { AnimatePresence } from 'framer-motion';
 
 import { Vignette } from './components/Vignette.jsx';
@@ -27,6 +28,7 @@ import { Jumpscare } from './components/Jumpscare.jsx';
 import { StatChangeIndicator } from './components/StatChangeIndicator.jsx';
 import { NotificationIndicator } from './components/NotificationIndicator.jsx';
 import { UserManagementScreen } from './components/UserManagementScreen.jsx';
+import { GlobalSettingsScreen } from './components/GlobalSettingsScreen.jsx'; // Import new component
 import { AlertModal } from './components/AlertModal.jsx';
 import { LoadingScreen } from './components/LoadingScreen.jsx';
 import { StoryEndScreen } from './components/StoryEndScreen.jsx';
@@ -127,7 +129,6 @@ export const App = () => {
   const [narrationAvailable, setNarrationAvailable] = useState(true);
   const [loadingText, setLoadingText] = useState('Loading...');
 
-  // Track the last processed jumpscare node to prevent re-triggering on setting changes
   const lastJumpscareNodeRef = useRef(null);
 
   const showAlert = useCallback(
@@ -148,7 +149,6 @@ export const App = () => {
   );
 
   useEffect(() => {
-    // A simple check for mobile devices.
     const mobileCheck =
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
         navigator.userAgent,
@@ -156,7 +156,6 @@ export const App = () => {
     setIsMobile(mobileCheck);
 
     if (mobileCheck) {
-      // Disable narration for mobile
       setNarrationAvailable(false);
       setSettings((s) => ({ ...s, narrationEnabled: false }));
 
@@ -170,7 +169,6 @@ export const App = () => {
         localStorage.setItem('narration_warning_shown', 'true');
       }
     } else {
-      // Attempt to load voices for desktop
       const loadVoices = () => {
         const voices = window.speechSynthesis.getVoices();
         if (voices.length > 0) {
@@ -234,7 +232,6 @@ export const App = () => {
       );
 
       if (action) {
-        // Prevent default browser actions for keys like Space or F5
         if (
           action === 'continue' ||
           action === 'saveGame' ||
@@ -250,7 +247,6 @@ export const App = () => {
           if (settingsVisible) {
             setSettingsVisible(false);
           } else {
-            // Open settings, close others
             setSettingsVisible(true);
             setInventoryVisible(false);
             setJournalVisible(false);
@@ -258,7 +254,7 @@ export const App = () => {
           return;
         }
 
-        if (settingsVisible) return; // Don't process game actions if settings are open
+        if (settingsVisible) return;
 
         if (action === 'openInventory' && appState === 'playing') {
           setInventoryVisible((v) => !v);
@@ -267,7 +263,6 @@ export const App = () => {
         } else if (action === 'saveGame' && appState === 'playing') {
           handleQuickSave();
         } else if (!isModalOpen) {
-          // Pass game-specific actions down only if no modals are open
           setLastAction({ action, time: Date.now() });
         }
       }
@@ -375,7 +370,7 @@ export const App = () => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authToken}`,
           },
-          body: JSON.stringify(settings), // send whole object
+          body: JSON.stringify(settings),
         });
         if (!response.ok) throw new Error('Server responded with an error.');
         showAlert('Settings saved to your account!', 'success', 'Saved');
@@ -428,6 +423,12 @@ export const App = () => {
     relationships = {},
   } = gameState || {};
 
+  useSmartPreload(
+    currentNode,
+    selectedStory?.storyData,
+    selectedStory?.characters,
+  );
+
   useEffect(() => {
     if (appState === 'playing' && gameState?.visitedNodes && saveGame) {
       if (gameState.visitedNodes.length > 0) {
@@ -455,7 +456,6 @@ export const App = () => {
     if (appState !== 'playing' || !currentNode) {
       setActiveBackground(null);
       setScreenShake(false);
-      // Reset jumpscare ref if we leave playing state
       lastJumpscareNodeRef.current = null;
       return;
     }
@@ -465,26 +465,22 @@ export const App = () => {
     }
 
     if (currentNode.jumpscare) {
-      // Create a unique ID for this node to prevent re-triggering on setting changes
       const nodeId = `${gameState?.currentPosition?.chapter}_${gameState?.currentPosition?.key}`;
 
       if (lastJumpscareNodeRef.current !== nodeId) {
         lastJumpscareNodeRef.current = nodeId;
         setJumpscare(currentNode.jumpscare);
 
-        // Handle audio logic with fallback for direct paths vs keys
         if (gameData?.SFX) {
           const sfxSource = currentNode.jumpscare.sfx;
           let sfxUrl = null;
 
           if (gameData.SFX[sfxSource]) {
-            // It's a key like 'jumpscare'
             sfxUrl = gameData.SFX[sfxSource];
           } else if (
             typeof sfxSource === 'string' &&
             (sfxSource.startsWith('/') || sfxSource.startsWith('http'))
           ) {
-            // It's a direct path like '/audio/sfx/jumpscare.mp3'
             sfxUrl = sfxSource;
           }
 
@@ -512,7 +508,6 @@ export const App = () => {
   useEffect(() => {
     if (!lastChanges || !selectedStory) return;
 
-    // Handle Stat Changes
     if (lastChanges.stats && lastChanges.stats.length > 0) {
       const newStatChanges = lastChanges.stats.map((change) => ({
         ...change,
@@ -525,7 +520,6 @@ export const App = () => {
       setTimeout(() => setUpdatedStats([]), 700);
     }
 
-    // Handle Notifications
     const newNotifications = [];
     if (lastChanges.inventory) {
       lastChanges.inventory.add.forEach((item) => {
@@ -625,12 +619,11 @@ export const App = () => {
       if (choice.ending) {
         setAchievedEnding(choice.ending);
       } else {
-        // A default ending if none is specified
         setAchievedEnding({
           key: 'default_ending',
           title: 'The Story Concludes',
           description: 'Your journey has come to an end.',
-          thumbnail: selectedStory.thumbnail, // fallback to story thumbnail
+          thumbnail: selectedStory.thumbnail,
         });
       }
       setAppState('storyEnd');
@@ -654,58 +647,16 @@ export const App = () => {
   useEffect(() => {
     if (appState !== 'preloading' || !selectedChapter || !selectedStory) return;
 
-    const preloadChapterAssets = async () => {
-      const chapterData = selectedStory.storyData[selectedChapter];
-      const characters = selectedStory.characters;
+    const startNodeKey = 'start';
+    const chapterData = selectedStory.storyData[selectedChapter];
 
-      const urls = new Set();
-      if (chapterData && characters) {
-        for (const nodeKey in chapterData) {
-          const node = chapterData[nodeKey];
-          if (node.background) urls.add(node.background);
-          if (node.jumpscare) {
-            if (node.jumpscare.type === 'image' && node.jumpscare.image)
-              urls.add(node.jumpscare.image);
-            if (
-              node.jumpscare.type === 'sprite' &&
-              node.jumpscare.character &&
-              characters[node.jumpscare.character]?.sprite
-            )
-              urls.add(characters[node.jumpscare.character].sprite);
-          }
-          if (node.speaker && characters[node.speaker]?.sprite)
-            urls.add(characters[node.speaker].sprite);
-          if (node.npc) {
-            const npcs = Array.isArray(node.npc) ? node.npc : [node.npc];
-            npcs.forEach((npcKey) => {
-              if (characters[npcKey]?.sprite)
-                urls.add(characters[npcKey].sprite);
-            });
-          }
-        }
-      }
-      if (characters?.player?.sprite) urls.add(characters.player.sprite);
-      if (selectedStory.thumbnail) urls.add(selectedStory.thumbnail);
-
-      const promises = [...urls].filter(Boolean).map((url) => {
-        return new Promise((resolve) => {
-          const img = new Image();
-          img.src = url;
-          img.onload = resolve;
-          img.onerror = resolve; // Resolve on error too, so one broken image doesn't block the game
-        });
-      });
-
-      await Promise.all(promises);
-
+    setTimeout(() => {
       if (selectedStory.cautionScreen?.enabled) {
         setAppState('caution');
       } else {
         proceedToGame();
       }
-    };
-
-    preloadChapterAssets();
+    }, 1000);
   }, [appState, selectedChapter, selectedStory, proceedToGame]);
 
   const handleContinueAfterDeath = (nodeKey) => {
@@ -741,7 +692,7 @@ export const App = () => {
     if (appState !== 'playing') return;
 
     if (currentUser && !currentUser.isGuest) {
-      await saveGame(true); // silent save
+      await saveGame(true);
     } else {
       showAlert(
         'As a guest, your progress will not be saved when you return to the chapter menu.',
@@ -759,7 +710,6 @@ export const App = () => {
     } else {
       localStorage.setItem(TOKEN_KEY, token);
       setAuthToken(token);
-      // Immediately set user state and transition to start screen
       setCurrentUser({ ...user, isGuest: false });
       if (user.settings) {
         setSettings({ ...defaultSettings, ...user.settings });
@@ -836,8 +786,6 @@ export const App = () => {
     const isNewStory = !storyData._id;
     const method = isNewStory ? 'POST' : 'PUT';
 
-    // Fix: Prefer id over _id because id is stable across seed resets.
-    // If we use _id, and the server was re-seeded, the _id on the client is stale and causes 404.
     const identifier = storyData.id || storyData._id;
 
     const endpoint = isNewStory
@@ -901,7 +849,6 @@ export const App = () => {
   const storyForTheme = appState === 'editor' ? editingStory : selectedStory;
   const storyAccentColor = storyForTheme?.accentColor || '#FFFFFF';
 
-  // Memoize combinedVoiceMap to ensure referential stability.
   const combinedVoiceMap = useMemo(() => {
     return { ...gameData?.voiceMap, ...selectedStory?.voices };
   }, [gameData, selectedStory]);
@@ -935,6 +882,17 @@ export const App = () => {
         />
       );
     }
+
+    if (appState === 'globalSettings') {
+      return (
+        <GlobalSettingsScreen
+          onBack={() => setAppState('startScreen')}
+          showAlert={showAlert}
+          authToken={authToken}
+        />
+      );
+    }
+
     switch (appState) {
       case 'startScreen':
         return (
@@ -945,6 +903,7 @@ export const App = () => {
             onSettingsClick={() => setSettingsVisible(true)}
             onEditorClick={onEditorClick}
             onUserManagementClick={() => setAppState('userManagement')}
+            onGlobalAssetsClick={() => setAppState('globalSettings')}
             onLogout={handleLogout}
             isAdmin={currentUser?.role === 'admin'}
             isMobile={isMobile}
@@ -1014,7 +973,6 @@ export const App = () => {
             onHomeClick={handleSaveAndGoHome}
             lastAction={lastAction}
             updatedStats={updatedStats}
-            // Props from server view model
             currentNode={currentNode}
             processedChoices={processedChoices}
             speakerKey={speakerKey}
