@@ -28,7 +28,7 @@ import { Jumpscare } from './components/Jumpscare.jsx';
 import { StatChangeIndicator } from './components/StatChangeIndicator.jsx';
 import { NotificationIndicator } from './components/NotificationIndicator.jsx';
 import { UserManagementScreen } from './components/UserManagementScreen.jsx';
-import { GlobalSettingsScreen } from './components/GlobalSettingsScreen.jsx'; // Import new component
+import { GlobalSettingsScreen } from './components/GlobalSettingsScreen.jsx';
 import { AlertModal } from './components/AlertModal.jsx';
 import { LoadingScreen } from './components/LoadingScreen.jsx';
 import { StoryEndScreen } from './components/StoryEndScreen.jsx';
@@ -69,7 +69,7 @@ const AutosaveIndicator = () => (
 );
 
 function hexToRgb(hex) {
-  if (!hex) return [255, 255, 255]; // fallback to white
+  if (!hex) return [255, 255, 255];
   let c;
   if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
     c = hex.substring(1).split('');
@@ -79,7 +79,6 @@ function hexToRgb(hex) {
     c = '0x' + c.join('');
     return [(c >> 16) & 255, (c >> 8) & 255, c & 255];
   }
-  // Fallback for invalid hex
   return [255, 255, 255];
 }
 
@@ -88,7 +87,7 @@ export const App = () => {
   const [authToken, setAuthToken] = useState(() =>
     localStorage.getItem(TOKEN_KEY),
   );
-  const [appState, setAppState] = useState('loading'); // loading, auth_check, auth, startScreen...
+  const [appState, setAppState] = useState('loading');
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [inventoryVisible, setInventoryVisible] = useState(false);
   const [journalVisible, setJournalVisible] = useState(false);
@@ -451,6 +450,13 @@ export const App = () => {
       BGM: gameData?.BGM,
       SFX: gameData?.SFX,
     });
+
+  // Ensure SFX stops when leaving game
+  useEffect(() => {
+    if (appState !== 'playing') {
+      stopAllSfx();
+    }
+  }, [appState, stopAllSfx]);
 
   useEffect(() => {
     if (appState !== 'playing' || !currentNode) {
@@ -1033,7 +1039,7 @@ export const App = () => {
       <audio ref={sfxAudioRef} />
       <AlertModal alerts={alerts} setAlerts={setAlerts} />
       <div
-        className={`game-viewport ${screenShake ? 'screen-shake' : ''}`}
+        className={`game-viewport ${screenShake ? 'screen-shake' : ''} ${currentNode?.visualEffect ? `effect-${currentNode.visualEffect}` : ''}`}
         style={viewportStyle}>
         {settings.filmGrainEnabled && <FilmGrainOverlay />}
         {settings.scanLinesEnabled && <ScanLinesOverlay />}

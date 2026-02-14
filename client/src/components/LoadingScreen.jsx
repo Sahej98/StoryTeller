@@ -36,6 +36,14 @@ const SYSTEM_MESSAGES = [
   'VALIDATING_USER_IDENTITY...',
 ];
 
+const CRITICAL_ASSETS = [
+  '/images/logo.png',
+  '/images/story_teller.jpg',
+  'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=2128&auto=format&fit=crop',
+  'https://www.transparenttextures.com/patterns/old-wall.png',
+  'https://www.transparenttextures.com/patterns/paper-fibers.png',
+];
+
 const Mote = ({ delay }) => {
   const size = useMemo(() => Math.random() * 4 + 1, []);
   const left = useMemo(() => Math.random() * 100, []);
@@ -75,8 +83,35 @@ export const LoadingScreen = ({ text }) => {
   );
   const [sysIndex, setSysIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [isAssetsLoaded, setIsAssetsLoaded] = useState(false);
 
   useEffect(() => {
+    // Actual asset preloading
+    let loadedCount = 0;
+    const totalAssets = CRITICAL_ASSETS.length;
+
+    const preload = () => {
+      CRITICAL_ASSETS.forEach((src) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+          loadedCount++;
+          const p = (loadedCount / totalAssets) * 100;
+          // Don't jump backward if simulated progress is higher
+          setProgress((prev) => Math.max(prev, Math.round(p)));
+          if (loadedCount === totalAssets) {
+            setIsAssetsLoaded(true);
+          }
+        };
+        img.onerror = () => {
+          loadedCount++; // Count as "done" even if failed to keep loading moving
+          if (loadedCount === totalAssets) setIsAssetsLoaded(true);
+        };
+      });
+    };
+
+    preload();
+
     // Cycle flavor texts automatically
     const textInterval = setInterval(() => {
       setFlavorIndex((prev) => (prev + 1) % FLAVOR_TEXTS.length);
@@ -87,16 +122,16 @@ export const LoadingScreen = ({ text }) => {
       setSysIndex((prev) => (prev + 1) % SYSTEM_MESSAGES.length);
     }, 1200);
 
-    // Simulate progress
+    // Simulated "Smooth" progress if assets load too fast
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) return 100;
         // Jittery progress for "realism"
         const jump =
-          Math.random() > 0.7 ? Math.random() * 12 : Math.random() * 3;
-        return Math.min(100, prev + jump);
+          Math.random() > 0.7 ? Math.random() * 5 : Math.random() * 1;
+        return Math.min(99, prev + jump);
       });
-    }, 600);
+    }, 300);
 
     return () => {
       clearInterval(textInterval);
@@ -115,12 +150,10 @@ export const LoadingScreen = ({ text }) => {
     <div
       className='loading-screen-container'
       style={{ position: 'relative', overflow: 'hidden' }}>
-      {/* Background Particles */}
       {[...Array(20)].map((_, i) => (
         <Mote key={i} delay={i * 0.8} />
       ))}
 
-      {/* Atmospheric Overlays */}
       <div className='loading-vignette' />
       <div className='loading-grain' />
 
@@ -146,7 +179,7 @@ export const LoadingScreen = ({ text }) => {
 
         <div className='loading-progress-outer'>
           <div className='loading-progress-label'>
-            <span>MANIFESTING REALITY</span>
+            <span>MANIFESTING ASSETS</span>
             <span>{Math.round(progress)}%</span>
           </div>
           <div className='loading-progress-container'>

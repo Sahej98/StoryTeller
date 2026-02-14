@@ -1,3 +1,4 @@
+
 import express from 'express';
 import { Story } from '../models/story.js';
 import { applyEffects, getViewModel } from '../engine/gameEngine.js';
@@ -37,6 +38,7 @@ router.post('/action', async (req, res) => {
             relationships: [],
             charactersDiscovered: []
         };
+        let isRevisit = false;
 
         const mergeChanges = (source) => {
             finalChanges.stats.push(...source.stats);
@@ -68,6 +70,8 @@ router.post('/action', async (req, res) => {
                     checkpoint: { chapter: firstChapterKey, key: startNodeKey },
                     relationships: initialRelationships,
                 };
+                // Initial start is never a revisit
+                isRevisit = false;
                 break;
             }
 
@@ -77,11 +81,15 @@ router.post('/action', async (req, res) => {
                     currentPosition: currentState.checkpoint,
                     playerStats: { ...currentState.playerStats, health: 100, stamina: 100 },
                 };
+                // Checkpoint reload usually implies retrying, so show main text (not revisit)
+                isRevisit = false;
                 break;
             }
 
             case 'load': {
                 finalState = loadedState;
+                // On load, safe default is show main text to re-orient player
+                isRevisit = false;
                 break;
             }
 
@@ -98,6 +106,7 @@ router.post('/action', async (req, res) => {
                     return res.status(400).json({ message: `Choice "${choiceText}" not found for the current node.` });
                 }
 
+                console.log(`[GameAPI] Applying effects for choice: "${choiceText}"`);
                 const { newState: stateAfterChoice, changes: choiceChanges } = applyEffects(currentState, story, serverChoice.effects);
                 mergeChanges(choiceChanges);
 
@@ -116,12 +125,17 @@ router.post('/action', async (req, res) => {
                     return;
                 }
 
+                console.log(`[GameAPI] Applying effects for entering node: "${nextNodeKey}"`);
                 const { newState: stateAfterNode, changes: nodeChanges } = applyEffects(stateAfterChoice, story, nextNode?.effects);
                 mergeChanges(nodeChanges);
 
                 const newVisitedNodes = [...stateAfterNode.visitedNodes];
-                const currentPosString = `${currentState.currentPosition.chapter}/${currentState.currentPosition.key}`;
-                if (!newVisitedNodes.includes(currentPosString)) {
+                const currentPosString = `${nextChapterKey}/${nextNodeKey}`;
+
+                // Determine Revisit Status BEFORE updating state
+                isRevisit = newVisitedNodes.includes(currentPosString);
+
+                if (!isRevisit) {
                     newVisitedNodes.push(currentPosString);
                 }
 
@@ -148,7 +162,7 @@ router.post('/action', async (req, res) => {
                 return res.status(400).json({ message: "Invalid action" });
         }
 
-        const gameContext = getViewModel(story, finalState);
+        const gameContext = getViewModel(story, finalState, isRevisit);
         res.json({ status: 'OK', gameContext, changes: finalChanges });
 
     } catch (err) {

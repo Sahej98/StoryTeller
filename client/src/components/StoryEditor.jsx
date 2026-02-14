@@ -24,6 +24,16 @@ import {
   PanelRight,
   Globe,
   GripVertical,
+  Download,
+  FileUp,
+  AlertTriangle,
+  BookOpen,
+  Timer,
+  Eye,
+  Heart,
+  StickyNote,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 import { TemplateModal } from './TemplateModal.jsx';
 import { templates } from '../data/editorTemplates.js';
@@ -32,195 +42,14 @@ import {
   StatsBuilder,
   InventoryBuilder,
   FlagsBuilder,
+  RelationshipBuilder,
+  RequirementsBuilder,
+  AmbientSfxBuilder,
+  TextEffectsBuilder,
 } from './LogicEditors.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
-const NEW_STORY_TEMPLATE = {
-  id: `custom_${Date.now()}`,
-  title: 'My First Story',
-  description: 'A short tutorial story created in the Storyteller editor.',
-  accentColor: '#FFFFFF',
-  language: 'en',
-  published: false,
-  thumbnail: 'https://images.unsplash.com/photo-1519681393784-d120267933ba',
-  cautionScreen: {
-    enabled: false,
-    title: 'WARNING',
-    text: 'This story contains content that may be disturbing. Player discretion is advised.',
-  },
-  storyDetails: {
-    title: 'My First Story',
-    chapters: {
-      chapter1: {
-        title: 'The Beginning',
-        number: 1,
-        flavorText: 'A short tutorial chapter.',
-      },
-    },
-  },
-  storyData: {
-    chapter1: {
-      start: {
-        speaker: 'Narrator',
-        text: 'Welcome to the Storyteller editor! This is your first node. You can edit this text in the "Dialogue" tab. Let\'s make a choice.',
-        choices: [{ text: 'Continue...', next: 'choice_node' }],
-      },
-      choice_node: {
-        speaker: 'Narrator',
-        text: 'Choices lead to other nodes. This choice has an "effect" that will change your stats. Check the "Branching" tab to see how it\'s set up.',
-        choices: [
-          {
-            text: 'Decrease my sanity by 10.',
-            next: 'effect_node',
-            effects: { stats: { sanity: -10 } },
-          },
-          { text: 'Just continue.', next: 'character_node' },
-        ],
-      },
-      effect_node: {
-        speaker: 'Narrator',
-        text: "It worked! Your sanity would have decreased. Effects can change stats, give items, or set story flags. Next, let's meet a character.",
-        choices: [{ text: 'Okay.', next: 'character_node' }],
-      },
-      character_node: {
-        speaker: 'old_man',
-        text: 'Hello there, traveler. To make me speak, my key "old_man" was put in the "Speaker Key". Go to the "Characters" tab to create your own characters and assign them voices!',
-        choices: [{ text: 'Interesting!', next: 'item_node' }],
-      },
-      item_node: {
-        speaker: 'Narrator',
-        text: 'This node gives you a "key" for your inventory. You can see this effect in the "Effects" tab. The item itself is defined in the "Items" tab.',
-        effects: { inventory: { add: 'tutorial_key' } },
-        choices: [{ text: 'Get the key!', next: 'jumpscare_node' }],
-      },
-      jumpscare_node: {
-        speaker: 'Narrator',
-        text: 'This node has a jumpscare! Go to the "Visuals" tab to see how it\'s configured. Brace yourself...',
-        jumpscare: { type: 'text', text: 'BOO!', sfx: 'jumpscare' },
-        choices: [{ text: '...that was scary.', next: 'requirement_node' }],
-      },
-      requirement_node: {
-        speaker: 'Narrator',
-        text: 'Now you\'ve reached a locked door. One choice requires the "tutorial_key" to be in your inventory. You can see this "requirement" in the "Branching" tab.',
-        choices: [
-          {
-            text: 'Use the key.',
-            next: 'end_node',
-            requires: { inventory: ['tutorial_key'] },
-            effects: { inventory: { remove: 'tutorial_key' } },
-          },
-          {
-            text: "This choice is disabled if you don't have the key.",
-            next: 'end_node',
-          },
-        ],
-      },
-      end_node: {
-        speaker: 'Narrator',
-        text: 'You\'ve learned the basics! Explore the "Add Template" button to see more examples!',
-        choices: [{ text: 'End the Tutorial Chapter.', next: null }],
-      },
-    },
-  },
-  voices: {},
-  characters: {
-    player: {
-      name: 'You',
-      sprite: '/images/the_asylum/main_char_sprite.png',
-      lore: 'The protagonist of this tale.',
-      voiceKey: '',
-    },
-    old_man: {
-      name: 'Old Man',
-      sprite: 'https://i.imgur.com/8aZ5Y7r.png',
-      lore: 'A mysterious inhabitant of the asylum.',
-      voiceKey: '',
-    },
-    ally: {
-      name: 'Ally',
-      sprite: '',
-      lore: 'A companion found during the journey.',
-      voiceKey: '',
-    },
-    stranger: {
-      name: 'Stranger',
-      sprite: '',
-      lore: 'A wary stranger.',
-      voiceKey: '',
-    },
-  },
-  items: {
-    tutorial_key: {
-      name: 'Tutorial Key',
-      description: 'A key used in the tutorial story.',
-      image: 'https://cdn-icons-png.flaticon.com/512/3233/3233005.png',
-    },
-    rusty_key: {
-      name: 'Rusty Key',
-      description: 'An old, rusty key.',
-      image: '',
-    },
-    holy_relic: {
-      name: 'Holy Relic',
-      description: 'A sacred object that glows faintly.',
-      image: '',
-    },
-    lore_diary: {
-      name: 'Old Diary',
-      description: 'A diary filled with secrets. Click to read in inventory.',
-      image: '',
-      lore: {
-        title: 'First Entry',
-        content:
-          "The walls are watching me. I see faces in the patterns on the wallpaper. They whisper my name when I try to sleep. The doctor says it's my imagination, but I know better. This place is alive, and it is hungry.",
-      },
-    },
-    allys_key: {
-      name: "Ally's Key",
-      description: 'A small, silver key given to you by your ally.',
-      image: '',
-    },
-    ancient_orb: {
-      name: 'Ancient Orb',
-      description: 'A mysterious orb that hums with a faint power.',
-    },
-    cursed_dagger: {
-      name: 'Cursed Dagger',
-      description: 'A wicked-looking dagger that feels cold to the touch.',
-    },
-  },
-};
-
-const TEXT_EFFECT_OPTIONS = [
-  'red',
-  'blue',
-  'green',
-  'shake',
-  'whisper',
-  'shock',
-  'anger',
-  'fear',
-  'tremble',
-  'rainbow',
-  'fire',
-  'glitch',
-  'ghostly',
-  'gold',
-  'blur',
-  'wavy',
-  'typewriter',
-  'magic',
-  'digital',
-  'ice',
-  'blood',
-  'neon',
-  'pixel',
-  'corrupted',
-  'divine',
-  'void',
-];
-const JUMPSCARE_TYPES = ['image', 'sprite', 'text', 'glitch'];
 const VISUAL_EFFECT_OPTIONS = [
   'rumble',
   'glitch',
@@ -228,8 +57,15 @@ const VISUAL_EFFECT_OPTIONS = [
   'shake',
   'blur',
   'darken',
+  'sepia',
+  'grayscale',
+  'invert',
+  'blur-pulse',
+  'red-tint',
+  'static-overlay',
 ];
 
+// Helper for JsonEditor component
 const JsonEditor = ({
   value,
   onChange,
@@ -243,24 +79,18 @@ const JsonEditor = ({
   useEffect(() => {
     try {
       const formatted = value ? JSON.stringify(value, null, 2) : '';
-      if (text !== formatted) {
-        setText(formatted);
-      }
-    } catch (e) {
-      // This might happen if value is invalid, though it shouldn't be
-    }
+      if (text !== formatted) setText(formatted);
+    } catch (e) {}
   }, [value]);
 
   const handleChange = (e) => {
     const newText = e.target.value;
     setText(newText);
-
     if (newText.trim() === '') {
       setError(null);
       onChange(null);
       return;
     }
-
     try {
       const parsed = JSON.parse(newText);
       setError(null);
@@ -270,18 +100,6 @@ const JsonEditor = ({
     }
   };
 
-  const textareaStyle = {
-    fontFamily: 'Courier New, Courier, monospace',
-    fontSize: '0.85rem',
-    backgroundColor: '#0c0a08',
-    borderColor: error ? 'var(--error-color)' : '#3a2a1a',
-    color: error ? '#ff8a80' : '#f2c97d',
-    lineHeight: 1.5,
-    whiteSpace: 'pre',
-    tabSize: 2,
-    minHeight: height,
-  };
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
       <textarea
@@ -289,12 +107,203 @@ const JsonEditor = ({
         value={text}
         onChange={handleChange}
         disabled={disabled}
-        style={textareaStyle}
+        style={{
+          fontFamily: 'Courier New, Courier, monospace',
+          fontSize: '0.85rem',
+          backgroundColor: '#0c0a08',
+          borderColor: error ? 'var(--error-color)' : '#3a2a1a',
+          color: error ? '#ff8a80' : '#f2c97d',
+          lineHeight: 1.5,
+          whiteSpace: 'pre',
+          tabSize: 2,
+          minHeight: height,
+        }}
       />
       {error && (
         <small style={{ color: 'var(--error-color)', fontSize: '0.7rem' }}>
           {error}
         </small>
+      )}
+    </div>
+  );
+};
+
+const CollapsibleChoice = ({
+  choice,
+  index,
+  updateChoice,
+  deleteChoice,
+  story,
+  activeChapterKey,
+  charKeys,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Safe access to nodes for the dropdown
+  const availableNodes = useMemo(() => {
+    if (
+      !story ||
+      !story.storyData ||
+      !activeChapterKey ||
+      !story.storyData[activeChapterKey]
+    ) {
+      return [];
+    }
+    return Object.keys(story.storyData[activeChapterKey]);
+  }, [story, activeChapterKey]);
+
+  return (
+    <div className='choice-builder'>
+      <div
+        className='choice-builder-header'
+        style={{ cursor: 'pointer', marginBottom: '0' }}
+        onClick={() => setIsOpen(!isOpen)}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          <h6
+            style={{
+              margin: 0,
+              color: '#e0d1b9',
+              display: 'flex',
+              gap: '1rem',
+            }}>
+            Choice {index + 1}:{' '}
+            <span style={{ fontWeight: 'normal', color: '#a38c6d' }}>
+              {choice.text || '...'}
+            </span>
+          </h6>
+        </div>
+        <button
+          className='btn-icon danger'
+          onClick={(e) => {
+            e.stopPropagation();
+            deleteChoice(index);
+          }}>
+          <Trash2 size={14} />
+        </button>
+      </div>
+
+      {isOpen && (
+        <div
+          style={{
+            marginTop: '1rem',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '1rem',
+          }}>
+          <div className='field-group' style={{ gridColumn: '1 / -1' }}>
+            <label>Label</label>
+            <input
+              placeholder='Label'
+              value={choice.text}
+              onChange={(e) => updateChoice(index, 'text', e.target.value)}
+            />
+          </div>
+          <div className='field-group'>
+            <label>Destination</label>
+            <select
+              value={choice.next || ''}
+              onChange={(e) => updateChoice(index, 'next', e.target.value)}>
+              <option value=''>(End Chapter)</option>
+              <option value='END_STORY'>(End Story)</option>
+              {availableNodes.map((k) => (
+                <option key={k} value={k}>
+                  {k}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className='field-group'>
+            <label>
+              <Eye size={12} /> Visibility
+            </label>
+            <select
+              value={choice.visibilityCondition || 'always'}
+              onChange={(e) =>
+                updateChoice(index, 'visibilityCondition', e.target.value)
+              }>
+              <option value='always'>Always Visible</option>
+              <option value='hide_if_unmet'>Hide if requirements unmet</option>
+              <option value='hide_if_met'>Hide if requirements met</option>
+            </select>
+          </div>
+          <div className='field-group' style={{ gridColumn: '1 / -1' }}>
+            <label>Requirement Logic</label>
+            <RequirementsBuilder
+              value={choice.requires}
+              characters={charKeys}
+              onChange={(v) => updateChoice(index, 'requires', v)}
+            />
+          </div>
+
+          <div
+            className='field-group'
+            style={{
+              gridColumn: '1 / -1',
+              marginTop: '0.5rem',
+              borderTop: '1px solid rgba(255,255,255,0.1)',
+              paddingTop: '0.5rem',
+            }}>
+            <label style={{ fontSize: '0.7rem', color: '#a38c6d' }}>
+              Choice Effects
+            </label>
+            <div style={{ fontSize: '0.7rem' }}>Stats:</div>
+            <StatsBuilder
+              value={choice.effects?.stats}
+              onChange={(v) =>
+                updateChoice(index, 'effects', { ...choice.effects, stats: v })
+              }
+            />
+            <div style={{ fontSize: '0.7rem' }}>Inventory Add:</div>
+            <InventoryBuilder
+              value={choice.effects?.inventory?.add}
+              onChange={(v) =>
+                updateChoice(index, 'effects', {
+                  ...choice.effects,
+                  inventory: { ...choice.effects?.inventory, add: v },
+                })
+              }
+            />
+            <div style={{ fontSize: '0.7rem' }}>Inventory Remove:</div>
+            <InventoryBuilder
+              value={choice.effects?.inventory?.remove}
+              mode='remove'
+              onChange={(v) =>
+                updateChoice(index, 'effects', {
+                  ...choice.effects,
+                  inventory: { ...choice.effects?.inventory, remove: v },
+                })
+              }
+            />
+            <div style={{ fontSize: '0.7rem' }}>Flags:</div>
+            <FlagsBuilder
+              value={choice.effects?.flags}
+              onChange={(v) =>
+                updateChoice(index, 'effects', { ...choice.effects, flags: v })
+              }
+            />
+            <div style={{ fontSize: '0.7rem' }}>Relationships:</div>
+            <RelationshipBuilder
+              value={choice.effects?.relationships}
+              characters={charKeys}
+              onChange={(v) =>
+                updateChoice(index, 'effects', {
+                  ...choice.effects,
+                  relationships: v,
+                })
+              }
+            />
+          </div>
+
+          <div className='field-group' style={{ gridColumn: '1 / -1' }}>
+            <label>Ending (JSON if End Story)</label>
+            <JsonEditor
+              value={choice.ending}
+              onChange={(v) => updateChoice(index, 'ending', v)}
+              placeholder='{"key":"end1","title":"The End","description":"..."}'
+            />
+          </div>
+        </div>
       )}
     </div>
   );
@@ -312,122 +321,103 @@ export const StoryEditor = ({
   const [isLoading, setIsLoading] = useState(true);
   const [activeChapterKey, setActiveChapterKey] = useState('');
   const [activeNodeKey, setActiveNodeKey] = useState('');
-  const [activeView, setActiveView] = useState('nodes'); // story, chapters, nodes
+  const [activeView, setActiveView] = useState('chapters');
   const [activeStorySubTab, setActiveStorySubTab] = useState('settings');
-  const [activeNodeSubTab, setActiveNodeSubTab] = useState('dialogue'); // dialogue, branching, etc.
+  const [activeNodeSubTab, setActiveNodeSubTab] = useState('dialogue');
   const [isTemplateModalVisible, setIsTemplateModalVisible] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
-  const [lastAddedTemplateKeys, setLastAddedTemplateKeys] = useState([]);
-  const originalStory = useRef(null);
-  const [mobileView, setMobileView] = useState('sidebar'); // 'sidebar' | 'editor'
-
-  // Drag and Drop state
-  const [draggedNode, setDraggedNode] = useState(null);
-
-  const categorizedVoices = useMemo(() => {
-    if (!systemVoices || systemVoices.length === 0) {
-      return { female: [], male: [], other: [] };
-    }
-    const femaleIndicators = [
-      'female',
-      'woman',
-      'girl',
-      'zira',
-      'samantha',
-      'fiona',
-      'moira',
-      'karen',
-      'tessa',
-      'eva',
-      'katja',
-      'iveta',
-      'anna',
-    ];
-    const maleIndicators = [
-      'male',
-      'man',
-      'boy',
-      'david',
-      'daniel',
-      'alex',
-      'fred',
-      'tom',
-      'mark',
-      'lee',
-      'oliver',
-      'ryan',
-    ];
-
-    const female = [];
-    const male = [];
-    const other = [];
-
-    systemVoices.forEach((voice) => {
-      const name = voice.name.toLowerCase();
-      if (femaleIndicators.some((ind) => name.includes(ind))) {
-        female.push(voice);
-      } else if (maleIndicators.some((ind) => name.includes(ind))) {
-        male.push(voice);
-      } else {
-        other.push(voice);
-      }
-    });
-
-    return { female, male, other };
-  }, [systemVoices]);
+  const [originalStory, setOriginalStory] = useState('');
+  const [mobileView, setMobileView] = useState('sidebar');
 
   useEffect(() => {
-    const initializeStory = async () => {
+    const initialize = async () => {
       setIsLoading(true);
-      let storyDataToSet;
+      let data;
+
       if (storyToEdit) {
-        if (!storyToEdit.storyData) {
+        // If story exists but data is missing (common with list-view objects), fetch full detail
+        if (!storyToEdit.storyData && storyToEdit.id) {
           try {
-            const identifier = storyToEdit.id || storyToEdit._id;
-            const url = `${API_URL}/api/stories/${encodeURIComponent(identifier)}`;
-            if (!identifier) {
-              throw new Error(
-                'No valid story identifier found (missing id and _id).',
-              );
-            }
-            const response = await fetch(url, {
-              headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-              },
-            });
-            if (!response.ok) {
-              throw new Error(`Failed to fetch full story data`);
-            }
-            storyDataToSet = await response.json();
-          } catch (error) {
-            showAlert(
-              `Error loading story for editing: ${error.message}`,
-              'error',
-              'Loading Error',
+            const token = localStorage.getItem('storyteller_token');
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            const res = await fetch(
+              `${API_URL}/api/stories/${storyToEdit.id}`,
+              { headers },
             );
-            onBack();
+            if (!res.ok) throw new Error('Failed to load story details');
+            data = await res.json();
+          } catch (e) {
+            console.error(e);
+            showAlert('Failed to load story content.', 'error');
+            setIsLoading(false);
             return;
           }
         } else {
-          storyDataToSet = JSON.parse(JSON.stringify(storyToEdit));
+          // Already have full data (e.g. newly created story not yet saved to DB but passed around)
+          data = JSON.parse(JSON.stringify(storyToEdit));
         }
       } else {
-        storyDataToSet = { ...NEW_STORY_TEMPLATE, id: `custom_${Date.now()}` };
+        // New Story Default State
+        data = {
+          title: 'Unnamed Manuscript',
+          id: `story_${Date.now()}`,
+          published: false,
+          thumbnail: '',
+          description: '',
+          accentColor: '#ffffff',
+          storyData: {
+            chapter1: { start: { text: 'The ink begins to flow...' } },
+          },
+          storyDetails: {
+            title: 'New Story',
+            chapters: {
+              chapter1: { title: 'Chapter 1', number: 1, flavorText: '' },
+            },
+          },
+          characters: { player: { name: 'You', sprite: '' } },
+          items: {},
+          voices: {},
+          cautionScreen: {
+            enabled: false,
+            title: 'WARNING',
+            text: 'Disturbing content ahead.',
+          },
+        };
       }
 
-      setStory(storyDataToSet);
-      originalStory.current = JSON.stringify(storyDataToSet);
-      setIsDirty(false);
+      // Ensure critical structures exist to prevent crashes
+      if (!data.storyData) data.storyData = {};
+      if (!data.storyDetails)
+        data.storyDetails = { title: data.title || 'Story', chapters: {} };
+      if (!data.storyDetails.chapters) data.storyDetails.chapters = {};
+      if (!data.characters) data.characters = {};
+      if (!data.items) data.items = {};
 
-      const firstChapterKey =
-        Object.keys(storyDataToSet.storyData || {})[0] || '';
-      setActiveChapterKey(firstChapterKey);
+      setStory(data);
+      setOriginalStory(JSON.stringify(data));
 
-      if (firstChapterKey) {
-        const firstNodeKey =
-          Object.keys(storyDataToSet.storyData[firstChapterKey] || {})[0] || '';
-        setActiveNodeKey(firstNodeKey);
+      // Auto-Select First Chapter
+      let firstCh = '';
+      if (data.storyDetails && data.storyDetails.chapters) {
+        // Sort by number to find the "first" logical chapter
+        const sortedChapters = Object.entries(data.storyDetails.chapters).sort(
+          (a, b) => (a[1].number || 0) - (b[1].number || 0),
+        );
+        if (sortedChapters.length > 0) firstCh = sortedChapters[0][0];
+      }
+
+      // Fallback if detail keys mismatch data keys
+      if (!firstCh && data.storyData) {
+        firstCh = Object.keys(data.storyData)[0];
+      }
+
+      setActiveChapterKey(firstCh || '');
+
+      // Auto-Select Node
+      if (firstCh && data.storyData[firstCh]) {
+        const nodes = Object.keys(data.storyData[firstCh]);
+        const nextNode = nodes.includes('start') ? 'start' : nodes[0] || '';
+        setActiveNodeKey(nextNode);
       } else {
         setActiveNodeKey('');
       }
@@ -435,525 +425,190 @@ export const StoryEditor = ({
       setIsLoading(false);
     };
 
-    initializeStory();
-  }, [storyToEdit, onBack, showAlert]);
+    initialize();
+  }, [storyToEdit]);
 
   const updateStory = (updater) => {
     setStory((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater;
-      if (JSON.stringify(next) !== originalStory.current) {
-        setIsDirty(true);
-      }
+      if (JSON.stringify(next) !== originalStory) setIsDirty(true);
       return next;
     });
   };
 
-  /* --- Drag and Drop Logic --- */
-  const handleNodeDragStart = (e, key) => {
-    setDraggedNode(key);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleNodeDragOver = (e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleNodeDrop = (e, targetKey) => {
-    e.preventDefault();
-    if (!draggedNode || draggedNode === targetKey) return;
-
-    const currentNodes = story.storyData[activeChapterKey];
-    const keys = Object.keys(currentNodes);
-    const fromIndex = keys.indexOf(draggedNode);
-    const toIndex = keys.indexOf(targetKey);
-
-    if (fromIndex < 0 || toIndex < 0) return;
-
-    const newKeys = [...keys];
-    newKeys.splice(fromIndex, 1);
-    newKeys.splice(toIndex, 0, draggedNode);
-
-    const newChapterData = {};
-    newKeys.forEach((key) => {
-      newChapterData[key] = currentNodes[key];
-    });
-
+  const updateNodeField = (field, value) => {
     updateStory((prev) => {
       const next = JSON.parse(JSON.stringify(prev));
-      next.storyData[activeChapterKey] = newChapterData;
+      // Guard against missing path
+      if (
+        next.storyData &&
+        next.storyData[activeChapterKey] &&
+        next.storyData[activeChapterKey][activeNodeKey]
+      ) {
+        if (value === undefined || value === null || value === '')
+          delete next.storyData[activeChapterKey][activeNodeKey][field];
+        else next.storyData[activeChapterKey][activeNodeKey][field] = value;
+      }
       return next;
     });
-    setDraggedNode(null);
   };
 
-  const handleSaveAndExit = async () => {
-    const success = await onSave(story);
-    if (success) {
-      originalStory.current = JSON.stringify(story);
-      setIsDirty(false);
-      onBack();
+  const deleteChapter = (chapterKey) => {
+    if (Object.keys(story.storyDetails.chapters).length <= 1) {
+      showAlert('Cannot delete the only chapter.', 'error');
+      return;
     }
-  };
-
-  const handleTogglePublish = () => {
-    updateStory((prev) => ({ ...prev, published: !prev.published }));
-  };
-
-  const handleAttemptBack = () => {
-    if (isDirty) {
-      showAlert(
-        'Your manuscript has been altered...',
-        'default',
-        "A Scribe's Dilemma",
-        null,
-        [
-          { text: 'Just Exit', action: onBack, class: 'danger' },
-          { text: 'Save & Exit', action: handleSaveAndExit, class: 'primary' },
-        ],
-      );
-    } else {
-      onBack();
-    }
-  };
-
-  const currentNode = story?.storyData?.[activeChapterKey]?.[activeNodeKey];
-
-  const handleAddTemplate = (templateKey) => {
-    if (!templates.nodes[templateKey]) return;
-    const timestamp = Date.now();
-    const template = templates.nodes[templateKey];
-    const newNodes = {};
-    const keyMap = {};
-    for (const oldKey in template.nodes) {
-      const newKey = `${oldKey}_${timestamp}`;
-      keyMap[oldKey] = newKey;
-      newNodes[newKey] = { ...template.nodes[oldKey] };
-    }
-    for (const newKey in newNodes) {
-      if (newNodes[newKey].choices) {
-        newNodes[newKey].choices = newNodes[newKey].choices.map((choice) => {
-          if (choice.next && keyMap[choice.next]) {
-            return { ...choice, next: keyMap[choice.next] };
-          }
-          return choice;
-        });
-      }
-    }
-    updateStory((prev) => {
-      const nextStory = JSON.parse(JSON.stringify(prev));
-      if (!nextStory.storyData[activeChapterKey]) {
-        nextStory.storyData[activeChapterKey] = {};
-      }
-      Object.assign(nextStory.storyData[activeChapterKey], newNodes);
-      return nextStory;
-    });
-    const addedKeys = Object.values(keyMap);
-    setLastAddedTemplateKeys(addedKeys);
-    if (Object.keys(keyMap)[0])
-      setActiveNodeKey(keyMap[Object.keys(keyMap)[0]]);
-    setIsTemplateModalVisible(false);
-  };
-
-  const handleRemoveLastTemplate = () => {
-    if (lastAddedTemplateKeys.length === 0) return;
-    updateStory((prev) => {
-      const next = JSON.parse(JSON.stringify(prev));
-      const chapter = next.storyData[activeChapterKey];
-      lastAddedTemplateKeys.forEach((key) => delete chapter[key]);
-      Object.values(chapter).forEach((node) => {
-        if (node.choices)
-          node.choices = node.choices.filter(
-            (c) => !lastAddedTemplateKeys.includes(c.next),
-          );
-      });
-      return next;
-    });
-    setLastAddedTemplateKeys([]);
-    if (lastAddedTemplateKeys.includes(activeNodeKey))
-      setActiveNodeKey('start');
-  };
-
-  const addChapter = () => {
     showAlert(
-      'Enter a unique key for the new chapter (e.g., chapter2).',
-      'default',
-      'New Chapter',
-      (key) => {
-        if (!key || story.storyData[key]) {
-          showAlert('Invalid or duplicate chapter key.', 'error', 'Error');
-          return;
-        }
-        updateStory((prev) => {
-          const next = JSON.parse(JSON.stringify(prev));
-          const newNum = Object.keys(next.storyDetails.chapters).length + 1;
-          next.storyDetails.chapters[key] = {
-            title: `New Chapter`,
-            number: newNum,
-            flavorText: '',
-          };
-          next.storyData[key] = {
-            start: {
-              speaker: 'Narrator',
-              text: 'New chapter begins.',
-              choices: [],
-            },
-          };
-          return next;
-        });
-        setActiveChapterKey(key);
-        setActiveNodeKey('start');
-      },
-      null,
-      { label: 'Chapter Key' },
-    );
-  };
-
-  const deleteChapter = (key) => {
-    showAlert(
-      `Are you sure you want to delete chapter "${key}"?`,
+      `Delete ${story.storyDetails.chapters[chapterKey].title}? This action is irreversible.`,
       'error',
-      'Confirm Deletion',
+      'Confirm',
       () => {
         updateStory((prev) => {
           const next = JSON.parse(JSON.stringify(prev));
-          delete next.storyDetails.chapters[key];
-          delete next.storyData[key];
+          delete next.storyDetails.chapters[chapterKey];
+          delete next.storyData[chapterKey];
           return next;
         });
-        if (activeChapterKey === key)
-          setActiveChapterKey(Object.keys(story.storyData)[0] || '');
+        if (activeChapterKey === chapterKey) {
+          const remaining = Object.keys(story.storyDetails.chapters).filter(
+            (k) => k !== chapterKey,
+          );
+          setActiveChapterKey(remaining[0] || '');
+        }
       },
     );
   };
 
-  const handleChapterUpdate = (key, field, value) => {
+  const addChapter = () => {
+    const k = `ch_${Date.now()}`;
+    updateStory((p) => ({
+      ...p,
+      storyDetails: {
+        ...p.storyDetails,
+        chapters: {
+          ...p.storyDetails.chapters,
+          [k]: {
+            title: 'New Chapter',
+            number: Object.keys(p.storyDetails.chapters).length + 1,
+          },
+        },
+      },
+      storyData: {
+        ...p.storyData,
+        [k]: { start: { text: 'Start writing...' } },
+      },
+    }));
+    setActiveChapterKey(k);
+    setActiveNodeKey('start');
+  };
+
+  const handleSave = async () => {
+    const success = await onSave(story);
+    if (success) {
+      setOriginalStory(JSON.stringify(story));
+      setIsDirty(false);
+      showAlert('Manuscript successfully bound.', 'success', 'Bound');
+    }
+  };
+
+  const exportJSON = (data, label) => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${label}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importJSON = (target) => {
+    showAlert(
+      `Paste valid JSON for ${target}:`,
+      'default',
+      'Import JSON',
+      (input) => {
+        if (!input) return;
+        try {
+          const parsed = JSON.parse(input);
+          updateStory((prev) => {
+            const next = JSON.parse(JSON.stringify(prev));
+            if (target === 'node')
+              next.storyData[activeChapterKey][activeNodeKey] = parsed;
+            else if (target === 'chapter')
+              next.storyData[activeChapterKey] = parsed;
+            else if (target === 'story') return parsed;
+            return next;
+          });
+          showAlert('Import successful.', 'success');
+        } catch (e) {
+          showAlert('Critical failure: Invalid JSON format.', 'error');
+        }
+      },
+      null,
+      { label: 'JSON Data', initialValue: '' },
+    );
+  };
+
+  const handleAddTemplate = (templateKey) => {
+    const template = templates.nodes[templateKey];
+    if (!template) return;
     updateStory((prev) => {
       const next = JSON.parse(JSON.stringify(prev));
-      if (field === 'number')
-        next.storyDetails.chapters[key][field] = parseInt(value, 10) || 0;
-      else next.storyDetails.chapters[key][field] = value;
+      Object.assign(
+        next.storyData[activeChapterKey],
+        JSON.parse(JSON.stringify(template.nodes)),
+      );
       return next;
     });
+    setIsTemplateModalVisible(false);
+    showAlert(`Template "${templateKey}" integrated.`, 'success');
   };
 
   const addNode = () => {
     showAlert(
-      'Enter a unique ID for the new node:',
+      'Enter Node ID:',
       'default',
       'New Node',
-      (key) => {
-        if (!key || story.storyData[activeChapterKey][key]) {
-          showAlert('Invalid or duplicate node ID.', 'error', 'Error');
-          return;
+      (k) => {
+        if (k) {
+          updateStory((p) => ({
+            ...p,
+            storyData: {
+              ...p.storyData,
+              [activeChapterKey]: {
+                ...p.storyData[activeChapterKey],
+                [k]: { text: '...' },
+              },
+            },
+          }));
+          setActiveNodeKey(k);
         }
-        updateStory((prev) => {
-          const next = JSON.parse(JSON.stringify(prev));
-          next.storyData[activeChapterKey][key] = {
-            speaker: 'Narrator',
-            text: '',
-            choices: [],
-          };
-          return next;
-        });
-        setActiveNodeKey(key);
       },
       null,
       { label: 'Node ID' },
     );
   };
 
-  const deleteNode = (key) => {
-    showAlert(
-      `Are you sure you want to delete node "${key}"?`,
-      'error',
-      'Confirm Deletion',
-      () => {
-        updateStory((prev) => {
-          const next = JSON.parse(JSON.stringify(prev));
-          delete next.storyData[activeChapterKey][key];
-          Object.values(next.storyData[activeChapterKey]).forEach((node) => {
-            if (node.choices)
-              node.choices = node.choices.filter((c) => c.next !== key);
-          });
-          return next;
-        });
-        if (activeNodeKey === key) setActiveNodeKey('start');
-      },
-    );
-  };
+  const currentNode = story?.storyData?.[activeChapterKey]?.[activeNodeKey];
+  const charKeys = useMemo(
+    () => (story ? Object.keys(story.characters || {}) : []),
+    [story],
+  );
 
-  const renameNode = (oldKey) => {
-    showAlert(
-      'Enter new unique ID for this node:',
-      'default',
-      'Rename Node',
-      (newKey) => {
-        if (
-          !newKey ||
-          newKey === oldKey ||
-          story.storyData[activeChapterKey][newKey]
-        ) {
-          showAlert('Invalid or duplicate node ID.', 'error', 'Error');
-          return;
-        }
-        updateStory((prev) => {
-          const next = JSON.parse(JSON.stringify(prev));
-          const nodeData = next.storyData[activeChapterKey][oldKey];
-          delete next.storyData[activeChapterKey][oldKey];
-          next.storyData[activeChapterKey][newKey] = nodeData;
-          Object.values(next.storyData[activeChapterKey]).forEach((node) => {
-            if (node.choices)
-              node.choices.forEach((c) => {
-                if (c.next === oldKey) c.next = newKey;
-              });
-          });
-          return next;
-        });
-        setActiveNodeKey(newKey);
-      },
-      null,
-      { label: 'New Node ID', initialValue: oldKey },
-    );
-  };
-
-  const updateNodeField = (field, value) => {
-    updateStory((prev) => {
-      const next = JSON.parse(JSON.stringify(prev));
-      if (!next.storyData[activeChapterKey][activeNodeKey]) return prev;
-      const updatedValue = value === null || value === '' ? undefined : value;
-      if (updatedValue === undefined)
-        delete next.storyData[activeChapterKey][activeNodeKey][field];
-      else
-        next.storyData[activeChapterKey][activeNodeKey][field] = updatedValue;
-      return next;
-    });
-  };
-
-  const addChoice = () =>
-    updateNodeField('choices', [
-      ...(currentNode.choices || []),
-      { text: 'New Choice', next: '' },
-    ]);
-  const updateChoice = (index, field, value) => {
-    const newChoices = [...(currentNode.choices || [])];
-    const updatedValue = value === null ? undefined : value;
-    if (updatedValue === undefined) delete newChoices[index][field];
-    else newChoices[index] = { ...newChoices[index], [field]: value };
-    updateNodeField('choices', newChoices);
-  };
-  const deleteChoice = (index) =>
-    updateNodeField(
-      'choices',
-      (currentNode.choices || []).filter((_, i) => i !== index),
-    );
-
-  const addTextEffect = () =>
-    updateNodeField('textEffects', [
-      ...(currentNode.textEffects || []),
-      { word: '', effect: '' },
-    ]);
-  const updateTextEffect = (index, field, value) => {
-    const newEffects = [...(currentNode.textEffects || [])];
-    newEffects[index] = { ...newEffects[index], [field]: value };
-    updateNodeField('textEffects', newEffects);
-  };
-  const deleteTextEffect = (index) =>
-    updateNodeField(
-      'textEffects',
-      (currentNode.textEffects || []).filter((_, i) => i !== index),
-    );
-
-  const addAmbientSfx = () =>
-    updateNodeField('ambientSfx', [
-      ...(currentNode.ambientSfx || []),
-      { triggerWord: '', sfx: '' },
-    ]);
-  const updateAmbientSfx = (index, field, value) => {
-    const newSfx = [...(currentNode.ambientSfx || [])];
-    newSfx[index] = { ...newSfx[index], [field]: value };
-    updateNodeField('ambientSfx', newSfx);
-  };
-  const deleteAmbientSfx = (index) =>
-    updateNodeField(
-      'ambientSfx',
-      (currentNode.ambientSfx || []).filter((_, i) => i !== index),
-    );
-
-  // --- Voice, Char, Item management ---
-  const addVoice = () => {
-    showAlert(
-      'Enter a unique key for the new voice profile (e.g., deep_voice).',
-      'default',
-      'New Voice',
-      (key) => {
-        if (
-          !key ||
-          (story.voices && story.voices[key]) ||
-          (gameData.voiceMap && gameData.voiceMap[key])
-        ) {
-          showAlert('Invalid or duplicate voice key.', 'error', 'Error');
-          return;
-        }
-        updateStory((prev) => {
-          const next = JSON.parse(JSON.stringify(prev));
-          if (!next.voices) next.voices = {};
-          next.voices[key] = { names: '', pitch: 1, rate: 1, lang: '' };
-          return next;
-        });
-      },
-      null,
-      { label: 'Voice Key' },
-    );
-  };
-
-  const updateVoice = (key, field, value) =>
-    updateStory((prev) => {
-      const next = JSON.parse(JSON.stringify(prev));
-      if (field === 'pitch' || field === 'rate')
-        next.voices[key][field] = parseFloat(value);
-      else next.voices[key][field] = value;
-      return next;
-    });
-
-  const deleteVoice = (key) =>
-    updateStory((prev) => {
-      const next = JSON.parse(JSON.stringify(prev));
-      delete next.voices[key];
-      // Clean up characters using this voice
-      for (const charKey in next.characters) {
-        if (next.characters[charKey].voiceKey === key) {
-          next.characters[charKey].voiceKey = '';
-        }
-      }
-      return next;
-    });
-
-  const addCharacter = () => {
-    showAlert(
-      'Enter a unique key for the new character (e.g., new_char).',
-      'default',
-      'New Character',
-      (key) => {
-        if (!key || story.characters[key]) {
-          showAlert('Invalid or duplicate character key.', 'error', 'Error');
-          return;
-        }
-        updateStory((prev) => {
-          const next = JSON.parse(JSON.stringify(prev));
-          next.characters[key] = {
-            name: 'New Character',
-            sprite: '',
-            lore: '',
-            voiceKey: '',
-          };
-          return next;
-        });
-      },
-      null,
-      { label: 'Character Key' },
-    );
-  };
-
-  const updateCharacter = (key, field, value) =>
-    updateStory((prev) => {
-      const next = JSON.parse(JSON.stringify(prev));
-      next.characters[key][field] = value;
-      return next;
-    });
-
-  const deleteCharacter = (key) => {
-    if (key === 'player') {
-      showAlert(
-        'The "player" character is essential and cannot be deleted.',
-        'info',
-        'Action Blocked',
-      );
-      return;
-    }
-    showAlert(
-      `Are you sure you want to delete character "${key}"?`,
-      'error',
-      'Confirm Deletion',
-      () => {
-        updateStory((prev) => {
-          const next = JSON.parse(JSON.stringify(prev));
-          delete next.characters[key];
-          return next;
-        });
-      },
-    );
-  };
-
-  const addItem = () => {
-    showAlert(
-      'Enter a unique key for the new item (e.g., new_item).',
-      'default',
-      'New Item',
-      (key) => {
-        if (!key || story.items[key]) {
-          showAlert('Invalid or duplicate item key.', 'error', 'Error');
-          return;
-        }
-        updateStory((prev) => {
-          const next = JSON.parse(JSON.stringify(prev));
-          next.items[key] = {
-            name: 'New Item',
-            description: '',
-            image: '',
-            lore: { title: '', content: '' },
-          };
-          return next;
-        });
-      },
-      null,
-      { label: 'Item Key' },
-    );
-  };
-
-  const updateItem = (key, field, value, isLore = false) =>
-    updateStory((prev) => {
-      const next = JSON.parse(JSON.stringify(prev));
-      if (isLore) {
-        if (!next.items[key].lore) next.items[key].lore = {};
-        next.items[key].lore[field] = value;
-      } else {
-        next.items[key][field] = value;
-      }
-      return next;
-    });
-
-  const deleteItem = (key) => {
-    showAlert(
-      `Are you sure you want to delete item "${key}"?`,
-      'error',
-      'Confirm Deletion',
-      () => {
-        updateStory((prev) => {
-          const next = JSON.parse(JSON.stringify(prev));
-          delete next.items[key];
-          return next;
-        });
-      },
-    );
-  };
+  const chapters = story?.storyDetails?.chapters || {};
 
   if (isLoading || !story)
     return (
       <div className='editor-container'>
-        <p>Loading...</p>
+        <div className='loading-title'>Gathering Ink...</div>
       </div>
     );
 
-  const allVoiceKeys = { ...gameData.voiceMap, ...story.voices };
-  const handleMobileViewSwitch = () =>
-    setMobileView((prev) => (prev === 'sidebar' ? 'editor' : 'sidebar'));
-
   return (
     <div className='editor-container'>
-      {/* Header logic same as before */}
       <header className='editor-header'>
-        {/* ... Header contents ... */}
         <div
           style={{
             display: 'flex',
@@ -962,8 +617,17 @@ export const StoryEditor = ({
             flex: 1,
           }}>
           <button
-            onClick={handleAttemptBack}
-            className='themed-button secondary mobile-icon-only'>
+            onClick={() =>
+              isDirty
+                ? showAlert(
+                    'Unsaved progress will be lost.',
+                    'default',
+                    'Exit Editor?',
+                    onBack,
+                  )
+                : onBack()
+            }
+            className='themed-button secondary'>
             <ArrowLeft size={18} /> <span>Back</span>
           </button>
           <input
@@ -975,22 +639,12 @@ export const StoryEditor = ({
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button
             className='themed-button secondary mobile-only'
-            onClick={handleMobileViewSwitch}>
-            {mobileView === 'sidebar' ? (
-              <PanelRight size={18} />
-            ) : (
-              <PanelLeft size={18} />
-            )}
+            onClick={() =>
+              setMobileView((v) => (v === 'sidebar' ? 'editor' : 'sidebar'))
+            }>
+            <PanelRight size={18} />
           </button>
-          <button
-            onClick={handleTogglePublish}
-            className={`themed-button ${story.published ? 'warning' : 'secondary'} mobile-icon-only`}>
-            <Globe size={18} />{' '}
-            <span>{story.published ? 'Published' : 'Draft'}</span>
-          </button>
-          <button
-            onClick={handleSaveAndExit}
-            className='themed-button primary mobile-icon-only'>
+          <button onClick={handleSave} className='themed-button primary'>
             <Save size={18} /> <span>Save</span>
           </button>
         </div>
@@ -998,90 +652,104 @@ export const StoryEditor = ({
 
       <main className={`editor-layout mobile-view-${mobileView}`}>
         <aside className='editor-sidebar'>
-          {/* Sidebar logic same as before */}
           <div className='sidebar-content'>
             <div className='sidebar-section'>
-              <h4 className='sidebar-section-title'>Active Chapter</h4>
-              <div className='field-group' style={{ marginBottom: '0' }}>
-                <select
-                  value={activeChapterKey}
-                  onChange={(e) => {
-                    setActiveChapterKey(e.target.value);
-                    setActiveNodeKey('start');
-                  }}>
-                  {Object.keys(story.storyDetails.chapters).map((key) => (
-                    <option key={key} value={key}>
-                      {story.storyDetails.chapters[key].title || key}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <h4 className='sidebar-section-title'>Select Chapter</h4>
+              <select
+                className='sidebar-select'
+                style={{ width: '100%', marginBottom: '1rem' }}
+                value={activeChapterKey}
+                onChange={(e) => {
+                  const newChapter = e.target.value;
+                  setActiveChapterKey(newChapter);
+
+                  // Auto-select the first node of the new chapter
+                  if (story.storyData && story.storyData[newChapter]) {
+                    const nodes = Object.keys(story.storyData[newChapter]);
+                    // Prefer 'start', otherwise take the first key, otherwise empty
+                    const nextNode = nodes.includes('start')
+                      ? 'start'
+                      : nodes[0] || '';
+                    setActiveNodeKey(nextNode);
+                  } else {
+                    setActiveNodeKey('');
+                  }
+                }}>
+                {Object.keys(chapters).map((k) => (
+                  <option key={k} value={k}>
+                    {chapters[k].title}
+                  </option>
+                ))}
+              </select>
             </div>
+
             <div
               className='sidebar-section'
               style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <h4 className='sidebar-section-title'>
                 Nodes
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '4px' }}>
                   <button
-                    onClick={() => {
-                      setIsTemplateModalVisible(true);
-                      setActiveView('nodes');
-                    }}
-                    className='themed-button secondary small'>
-                    <Code size={14} />
+                    onClick={() => setIsTemplateModalVisible(true)}
+                    className='themed-button secondary small'
+                    title='Inject Template'>
+                    <Zap size={12} />
                   </button>
                   <button
-                    onClick={() => {
-                      addNode();
-                      setActiveView('nodes');
-                    }}
+                    onClick={() => importJSON('chapter')}
+                    className='themed-button secondary small'
+                    title='Import Chapter JSON'>
+                    <FileUp size={12} />
+                  </button>
+                  <button
+                    onClick={addNode}
                     className='themed-button secondary small'>
-                    <Plus size={14} />
+                    <Plus size={12} />
                   </button>
                 </div>
               </h4>
-              <div className='node-list' style={{ flex: 1, overflowY: 'auto' }}>
-                {Object.keys(story.storyData[activeChapterKey] || {}).map(
-                  (key) => (
-                    <div
-                      key={key}
-                      className={`list-item ${activeNodeKey === key ? 'active' : ''} ${draggedNode === key ? 'dragging' : ''}`}
-                      draggable
-                      onDragStart={(e) => handleNodeDragStart(e, key)}
-                      onDragOver={handleNodeDragOver}
-                      onDrop={(e) => handleNodeDrop(e, key)}
-                      onClick={() => {
-                        setActiveNodeKey(key);
-                        setActiveView('nodes');
-                        if (window.innerWidth < 992) setMobileView('editor');
+              <div className='node-list'>
+                {/* Safe access to storyData with fallback */}
+                {Object.keys(
+                  (story.storyData || {})[activeChapterKey] || {},
+                ).map((k) => (
+                  <div
+                    key={k}
+                    className={`list-item ${activeNodeKey === k ? 'active' : ''}`}
+                    onClick={() => {
+                      setActiveNodeKey(k);
+                      setMobileView('editor');
+                    }}>
+                    <span
+                      style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
                       }}>
-                      <div className='list-item-content'>
-                        <div className='drag-handle'>
-                          <GripVertical size={14} />
-                        </div>
-                        <span>{key}</span>
-                      </div>
-                      <div className='list-item-actions'>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            renameNode(key);
-                          }}>
-                          <Edit size={14} />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteNode(key);
-                          }}
-                          className='danger'>
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
+                      {k}
+                    </span>
+                    <div className='list-item-actions'>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          exportJSON(story.storyData[activeChapterKey][k], k);
+                        }}>
+                        <Download size={12} />
+                      </button>
+                      <button
+                        className='danger'
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateStory((p) => {
+                            const n = JSON.parse(JSON.stringify(p));
+                            delete n.storyData[activeChapterKey][k];
+                            return n;
+                          });
+                        }}>
+                        <Trash2 size={12} />
+                      </button>
                     </div>
-                  ),
-                )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -1091,460 +759,517 @@ export const StoryEditor = ({
           <div className='editor-canvas'>
             <div className='tab-group'>
               {[
+                { id: 'chapters', label: 'Chapters', icon: BookOpen },
                 { id: 'story', label: 'Story', icon: Library },
-                { id: 'chapters', label: 'Chapters', icon: BookCopy },
                 { id: 'nodes', label: 'Nodes', icon: FileText },
-              ].map((tab) => (
+              ].map((t) => (
                 <button
-                  key={tab.id}
-                  className={`editor-tab ${activeView === tab.id ? 'active' : ''}`}
-                  onClick={() => setActiveView(tab.id)}>
-                  {React.createElement(tab.icon, { size: 16 })} {tab.label}
+                  key={t.id}
+                  className={`editor-tab ${activeView === t.id ? 'active' : ''}`}
+                  onClick={() => setActiveView(t.id)}>
+                  {React.createElement(t.icon, { size: 16 })} {t.label}
                 </button>
               ))}
             </div>
 
-            {/* Story Tabs */}
-            {activeView === 'story' && (
-              <>
-                <div className='tab-group'>
-                  {[
-                    { id: 'settings', label: 'Settings', icon: SettingsIcon },
-                    { id: 'voices', label: 'Voices', icon: Volume2 },
-                    { id: 'characters', label: 'Characters', icon: Users },
-                    { id: 'items', label: 'Items', icon: Box },
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      className={`editor-tab small ${activeStorySubTab === tab.id ? 'active' : ''}`}
-                      onClick={() => setActiveStorySubTab(tab.id)}>
-                      {React.createElement(tab.icon, { size: 14 })} {tab.label}
-                    </button>
-                  ))}
+            {activeView === 'chapters' && (
+              <div className='editor-card'>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}>
+                  <h5
+                    className='card-title'
+                    style={{ border: 'none', margin: 0 }}>
+                    Chapter Management
+                  </h5>
+                  <button
+                    onClick={addChapter}
+                    className='themed-button secondary small'>
+                    <Plus size={14} /> Add Chapter
+                  </button>
                 </div>
-                {/* ... Story settings ... */}
-                {activeStorySubTab === 'settings' && (
-                  <div className='editor-card'>
-                    <div className='field-group'>
-                      <label>Thumbnail URL</label>
-                      <input
-                        value={story.thumbnail}
-                        onChange={(e) =>
-                          updateStory({ ...story, thumbnail: e.target.value })
-                        }
-                      />
-                      <div style={{ marginTop: '0.5rem' }}>
-                        <AssetUploader
-                          type='image'
-                          onUploadComplete={(url) =>
-                            updateStory({ ...story, thumbnail: url })
-                          }
-                        />
+                {Object.entries(chapters).map(([key, chapter]) => (
+                  <div
+                    key={key}
+                    className='choice-builder'
+                    style={{
+                      marginBottom: '1rem',
+                      border: '1px solid #4a3a2a',
+                    }}>
+                    <div
+                      className='choice-builder-header'
+                      style={{ marginBottom: '0.5rem' }}>
+                      <h6
+                        style={{
+                          color:
+                            activeChapterKey === key
+                              ? 'var(--accent-color)'
+                              : '#a38c6d',
+                        }}>
+                        {chapter.title}{' '}
+                        <span style={{ opacity: 0.5 }}>({key})</span>
+                      </h6>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        {activeChapterKey !== key && (
+                          <button
+                            className='themed-button secondary small'
+                            onClick={() => {
+                              setActiveChapterKey(key);
+                              setActiveNodeKey('start');
+                            }}>
+                            Edit Nodes
+                          </button>
+                        )}
+                        <button
+                          className='btn-icon danger'
+                          onClick={() => deleteChapter(key)}>
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </div>
                     <div className='field-row'>
                       <div className='field-group'>
-                        <label>Accent Color</label>
-                        <div className='color-picker-container'>
-                          <div className='color-swatch-wrapper'>
-                            <div
-                              className='color-swatch'
-                              style={{
-                                backgroundColor: story.accentColor || '#FFFFFF',
-                              }}></div>
-                            <input
-                              type='color'
-                              className='color-picker-input'
-                              value={story.accentColor || '#FFFFFF'}
-                              onChange={(e) =>
-                                updateStory({
-                                  ...story,
-                                  accentColor: e.target.value,
-                                })
+                        <label>Title</label>
+                        <input
+                          value={chapter.title}
+                          onChange={(e) =>
+                            updateStory((p) => {
+                              const n = JSON.parse(JSON.stringify(p));
+                              if (
+                                n.storyDetails &&
+                                n.storyDetails.chapters &&
+                                n.storyDetails.chapters[key]
+                              ) {
+                                n.storyDetails.chapters[key].title =
+                                  e.target.value;
                               }
-                            />
-                          </div>
-                          <input
-                            type='text'
-                            value={story.accentColor || '#FFFFFF'}
-                            onChange={(e) =>
-                              updateStory({
-                                ...story,
-                                accentColor: e.target.value,
-                              })
-                            }
-                            placeholder='#FFFFFF'
-                            style={{ flex: 1 }}
-                          />
-                        </div>
+                              return n;
+                            })
+                          }
+                        />
                       </div>
                       <div className='field-group'>
-                        <label>Primary Language</label>
-                        <select
-                          value={story.language || 'en'}
-                          onChange={(e) =>
-                            updateStory({ ...story, language: e.target.value })
-                          }>
-                          <option value='en'>English</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className='field-group'>
-                      <label
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          textTransform: 'none',
-                          opacity: 1,
-                        }}>
+                        <label>Order Number</label>
                         <input
-                          type='checkbox'
-                          checked={story.cautionScreen?.enabled || false}
+                          type='number'
+                          value={chapter.number}
                           onChange={(e) =>
-                            updateStory((prev) => ({
-                              ...prev,
-                              cautionScreen: {
-                                ...prev.cautionScreen,
-                                enabled: e.target.checked,
-                              },
-                            }))
+                            updateStory((p) => {
+                              const n = JSON.parse(JSON.stringify(p));
+                              if (
+                                n.storyDetails &&
+                                n.storyDetails.chapters &&
+                                n.storyDetails.chapters[key]
+                              ) {
+                                n.storyDetails.chapters[key].number = parseInt(
+                                  e.target.value,
+                                );
+                              }
+                              return n;
+                            })
                           }
-                        />{' '}
-                        Enable Caution Screen
-                      </label>
-                    </div>
-                    {story.cautionScreen?.enabled && (
-                      <div
-                        style={{
-                          borderLeft: '2px solid #ffab40',
-                          paddingLeft: '1rem',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '1.5rem',
-                        }}>
-                        <div className='field-group'>
-                          <label>Caution Screen Title</label>
-                          <input
-                            value={story.cautionScreen.title || ''}
-                            onChange={(e) =>
-                              updateStory((prev) => ({
-                                ...prev,
-                                cautionScreen: {
-                                  ...prev.cautionScreen,
-                                  title: e.target.value,
-                                },
-                              }))
-                            }
-                          />
-                        </div>
-                        <div className='field-group'>
-                          <label>Caution Screen Text</label>
-                          <textarea
-                            value={story.cautionScreen.text || ''}
-                            onChange={(e) =>
-                              updateStory((prev) => ({
-                                ...prev,
-                                cautionScreen: {
-                                  ...prev.cautionScreen,
-                                  text: e.target.value,
-                                },
-                              }))
-                            }
-                          />
-                        </div>
+                        />
                       </div>
-                    )}
+                    </div>
+                    <div
+                      className='field-group'
+                      style={{ marginTop: '0.5rem' }}>
+                      <label>Flavor Text (Description)</label>
+                      <textarea
+                        value={chapter.flavorText}
+                        onChange={(e) =>
+                          updateStory((p) => {
+                            const n = JSON.parse(JSON.stringify(p));
+                            if (
+                              n.storyDetails &&
+                              n.storyDetails.chapters &&
+                              n.storyDetails.chapters[key]
+                            ) {
+                              n.storyDetails.chapters[key].flavorText =
+                                e.target.value;
+                            }
+                            return n;
+                          })
+                        }
+                        style={{ minHeight: '60px' }}
+                      />
+                    </div>
                   </div>
-                )}
+                ))}
+              </div>
+            )}
 
-                {/* ... Voices ... */}
-                {activeStorySubTab === 'voices' && (
+            {activeView === 'story' && (
+              <>
+                <div className='tab-group'>
+                  {[
+                    { id: 'settings', label: 'Global', icon: SettingsIcon },
+                    { id: 'cast', label: 'Cast', icon: Users },
+                    { id: 'db', label: 'Items', icon: Box },
+                    { id: 'warn', label: 'Caution', icon: AlertTriangle },
+                  ].map((t) => (
+                    <button
+                      key={t.id}
+                      className={`editor-tab small ${activeStorySubTab === t.id ? 'active' : ''}`}
+                      onClick={() => setActiveStorySubTab(t.id)}>
+                      {React.createElement(t.icon, { size: 14 })} {t.label}
+                    </button>
+                  ))}
+                </div>
+                {activeStorySubTab === 'settings' && (
                   <div className='editor-card'>
                     <div
-                      className='choices-header'
                       style={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        marginBottom: '1rem',
                       }}>
-                      <h5
-                        className='card-title'
-                        style={{ margin: 0, border: 'none' }}>
-                        Custom Voice Profiles
+                      <h5 className='card-title' style={{ border: 'none' }}>
+                        Metadata
                       </h5>
                       <button
-                        onClick={addVoice}
-                        className='themed-button secondary small'>
-                        <Plus size={14} /> Add Voice
+                        className='themed-button secondary small'
+                        onClick={() => importJSON('story')}>
+                        <FileUp size={14} /> Full Import
                       </button>
                     </div>
-                    {Object.entries(story.voices || {}).map(([key, voice]) => (
-                      <div key={key} className='choice-builder'>
-                        <div className='choice-builder-header'>
-                          <h6>{key}</h6>
+                    <div className='field-group'>
+                      <label>Manuscript Title</label>
+                      <input
+                        value={story.title}
+                        onChange={(e) =>
+                          updateStory({ ...story, title: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className='field-group'>
+                      <label>Library Description</label>
+                      <textarea
+                        value={story.description}
+                        onChange={(e) =>
+                          updateStory({ ...story, description: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div
+                      className='field-row'
+                      style={{ gridTemplateColumns: '1fr 4fr' }}>
+                      <div className='field-group'>
+                        <label>Accent Color</label>
+                        <input
+                          style={{ height: '100%', padding: '0.3rem' }}
+                          type='color'
+                          value={story.accentColor || '#ffffff'}
+                          onChange={(e) =>
+                            updateStory({
+                              ...story,
+                              accentColor: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className='field-group'>
+                        <label>Cover Image</label>
+                        <div
+                          style={{
+                            display: 'flex',
+                            gap: '0.5rem',
+                            alignItems: 'center',
+                          }}>
+                          <input
+                            value={story.thumbnail}
+                            onChange={(e) =>
+                              updateStory({
+                                ...story,
+                                thumbnail: e.target.value,
+                              })
+                            }
+                            style={{ flex: 1 }}
+                          />
+                          <AssetUploader
+                            type='image'
+                            onUploadComplete={(url) =>
+                              updateStory({ ...story, thumbnail: url })
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      className='themed-button secondary small'
+                      onClick={() => exportJSON(story, story.title)}>
+                      <Download size={14} /> Full Export JSON
+                    </button>
+                  </div>
+                )}
+                {activeStorySubTab === 'warn' && (
+                  <div className='editor-card'>
+                    <h5 className='card-title'>Initial Warning Screen</h5>
+                    <label className='switch-label'>
+                      Enable Warning{' '}
+                      <input
+                        type='checkbox'
+                        checked={story.cautionScreen.enabled}
+                        onChange={(e) =>
+                          updateStory((p) => ({
+                            ...p,
+                            cautionScreen: {
+                              ...p.cautionScreen,
+                              enabled: e.target.checked,
+                            },
+                          }))
+                        }
+                      />
+                    </label>
+                    <div className='field-group'>
+                      <label>Header</label>
+                      <input
+                        value={story.cautionScreen.title}
+                        onChange={(e) =>
+                          updateStory((p) => ({
+                            ...p,
+                            cautionScreen: {
+                              ...p.cautionScreen,
+                              title: e.target.value,
+                            },
+                          }))
+                        }
+                      />
+                    </div>
+                    <div className='field-group'>
+                      <label>Message</label>
+                      <textarea
+                        value={story.cautionScreen.text}
+                        onChange={(e) =>
+                          updateStory((p) => ({
+                            ...p,
+                            cautionScreen: {
+                              ...p.cautionScreen,
+                              text: e.target.value,
+                            },
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
+                )}
+                {activeStorySubTab === 'cast' && (
+                  <div className='editor-card'>
+                    <h5 className='card-title'>
+                      The Cast{' '}
+                      <button
+                        className='themed-button secondary small'
+                        onClick={() => {
+                          showAlert(
+                            'Enter Character Key:',
+                            'default',
+                            'New Character',
+                            (k) =>
+                              k &&
+                              updateStory((p) => ({
+                                ...p,
+                                characters: {
+                                  ...p.characters,
+                                  [k]: {
+                                    name: 'Unnamed NPC',
+                                    sprite: '',
+                                    lore: '',
+                                  },
+                                },
+                              })),
+                            null,
+                            { label: 'Character ID' },
+                          );
+                        }}>
+                        <Plus size={14} />
+                      </button>
+                    </h5>
+                    {Object.entries(story.characters || {}).map(([k, c]) => (
+                      <div key={k} className='choice-builder'>
+                        <div className='field-row'>
+                          <div className='field-group'>
+                            <label>ID: {k}</label>
+                            <input
+                              value={c.name}
+                              onChange={(e) =>
+                                updateStory((p) => {
+                                  const n = JSON.parse(JSON.stringify(p));
+                                  n.characters[k].name = e.target.value;
+                                  return n;
+                                })
+                              }
+                            />
+                          </div>
                           <button
-                            className='btn-danger'
-                            onClick={() => deleteVoice(key)}>
+                            className='btn-icon danger'
+                            onClick={() =>
+                              updateStory((p) => {
+                                const n = JSON.parse(JSON.stringify(p));
+                                delete n.characters[k];
+                                return n;
+                              })
+                            }>
                             <Trash2 size={16} />
                           </button>
                         </div>
                         <div className='field-group'>
-                          <label>System Voice</label>
-                          <select
-                            value={voice.names}
-                            onChange={(e) =>
-                              updateVoice(key, 'names', e.target.value)
-                            }>
-                            <option value=''>-- Select a Voice --</option>
-                            {categorizedVoices.female.length > 0 && (
-                              <optgroup label='Female Voices'>
-                                {categorizedVoices.female.map((v) => (
-                                  <option key={v.name} value={v.name}>
-                                    {v.name} ({v.lang})
-                                  </option>
-                                ))}
-                              </optgroup>
-                            )}
-                            {categorizedVoices.male.length > 0 && (
-                              <optgroup label='Male Voices'>
-                                {categorizedVoices.male.map((v) => (
-                                  <option key={v.name} value={v.name}>
-                                    {v.name} ({v.lang})
-                                  </option>
-                                ))}
-                              </optgroup>
-                            )}
-                            {categorizedVoices.other.length > 0 && (
-                              <optgroup label='Other Voices'>
-                                {categorizedVoices.other.map((v) => (
-                                  <option key={v.name} value={v.name}>
-                                    {v.name} ({v.lang})
-                                  </option>
-                                ))}
-                              </optgroup>
-                            )}
-                          </select>
+                          <label>Sprite</label>
+                          <div
+                            style={{
+                              display: 'flex',
+                              gap: '0.5rem',
+                              alignItems: 'center',
+                            }}>
+                            <input
+                              value={c.sprite}
+                              onChange={(e) =>
+                                updateStory((p) => {
+                                  const n = JSON.parse(JSON.stringify(p));
+                                  n.characters[k].sprite = e.target.value;
+                                  return n;
+                                })
+                              }
+                              style={{ flex: 1 }}
+                            />
+                            <AssetUploader
+                              type='image'
+                              onUploadComplete={(url) =>
+                                updateStory((p) => {
+                                  const n = JSON.parse(JSON.stringify(p));
+                                  n.characters[k].sprite = url;
+                                  return n;
+                                })
+                              }
+                            />
+                          </div>
                         </div>
-                        <div className='field-row'>
-                          <div className='field-group'>
-                            <label>Pitch ({voice.pitch})</label>
-                            <input
-                              type='range'
-                              min='0.1'
-                              max='2'
-                              step='0.1'
-                              value={voice.pitch}
-                              onChange={(e) =>
-                                updateVoice(key, 'pitch', e.target.value)
-                              }
-                            />
-                          </div>
-                          <div className='field-group'>
-                            <label>Rate ({voice.rate})</label>
-                            <input
-                              type='range'
-                              min='0.1'
-                              max='2'
-                              step='0.1'
-                              value={voice.rate}
-                              onChange={(e) =>
-                                updateVoice(key, 'rate', e.target.value)
-                              }
-                            />
-                          </div>
+                        <div className='field-group'>
+                          <label>Journal Lore</label>
+                          <textarea
+                            value={c.lore}
+                            onChange={(e) =>
+                              updateStory((p) => {
+                                const n = JSON.parse(JSON.stringify(p));
+                                n.characters[k].lore = e.target.value;
+                                return n;
+                              })
+                            }
+                          />
                         </div>
                       </div>
                     ))}
                   </div>
                 )}
-
-                {/* ... Characters ... */}
-                {activeStorySubTab === 'characters' && (
+                {activeStorySubTab === 'db' && (
                   <div className='editor-card'>
-                    <div
-                      className='choices-header'
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: '1rem',
-                      }}>
-                      <h5
-                        className='card-title'
-                        style={{ margin: 0, border: 'none' }}>
-                        Characters
-                      </h5>
+                    <h5 className='card-title'>
+                      World Items{' '}
                       <button
-                        onClick={addCharacter}
-                        className='themed-button secondary small'>
-                        <Plus size={14} /> Add Character
+                        className='themed-button secondary small'
+                        onClick={() => {
+                          showAlert(
+                            'Enter Item ID:',
+                            'default',
+                            'New Item',
+                            (k) =>
+                              k &&
+                              updateStory((p) => ({
+                                ...p,
+                                items: {
+                                  ...p.items,
+                                  [k]: {
+                                    name: 'New Item',
+                                    description: '',
+                                    lore: { title: '', content: '' },
+                                  },
+                                },
+                              })),
+                            null,
+                            { label: 'Item ID' },
+                          );
+                        }}>
+                        <Plus size={14} />
                       </button>
-                    </div>
-                    {Object.entries(story.characters || {}).map(
-                      ([key, char]) => (
-                        <div key={key} className='choice-builder'>
-                          <div className='choice-builder-header'>
-                            <h6>{key}</h6>
-                            {key !== 'player' && (
-                              <button
-                                className='btn-danger'
-                                onClick={() => deleteCharacter(key)}>
-                                <Trash2 size={16} />
-                              </button>
-                            )}
-                          </div>
-                          <div className='field-row'>
-                            <div className='field-group'>
-                              <label>Name</label>
-                              <input
-                                value={char.name}
-                                onChange={(e) =>
-                                  updateCharacter(key, 'name', e.target.value)
-                                }
-                              />
-                            </div>
-                            <div className='field-group'>
-                              <label>Sprite URL</label>
-                              <input
-                                value={char.sprite}
-                                onChange={(e) =>
-                                  updateCharacter(key, 'sprite', e.target.value)
-                                }
-                              />
-                              <div style={{ marginTop: '0.5rem' }}>
-                                <AssetUploader
-                                  type='image'
-                                  onUploadComplete={(url) =>
-                                    updateCharacter(key, 'sprite', url)
-                                  }
-                                />
-                              </div>
-                            </div>
-                          </div>
+                    </h5>
+                    {Object.entries(story.items || {}).map(([k, it]) => (
+                      <div key={k} className='choice-builder'>
+                        <div className='field-row'>
                           <div className='field-group'>
-                            <label>Voice Profile</label>
-                            <select
-                              value={char.voiceKey || ''}
+                            <label>ID: {k}</label>
+                            <input
+                              value={it.name}
                               onChange={(e) =>
-                                updateCharacter(key, 'voiceKey', e.target.value)
-                              }>
-                              <option value=''>(Default Narrator)</option>
-                              {Object.keys(allVoiceKeys)
-                                .sort()
-                                .map((voiceKey) => (
-                                  <option key={voiceKey} value={voiceKey}>
-                                    {voiceKey}
-                                  </option>
-                                ))}
-                            </select>
-                          </div>
-                          <div className='field-group'>
-                            <label>Journal Biography / Lore</label>
-                            <textarea
-                              value={char.lore || ''}
-                              placeholder="Tell the player about this character's history..."
-                              onChange={(e) =>
-                                updateCharacter(key, 'lore', e.target.value)
+                                updateStory((p) => {
+                                  const n = JSON.parse(JSON.stringify(p));
+                                  n.items[k].name = e.target.value;
+                                  return n;
+                                })
                               }
                             />
                           </div>
-                        </div>
-                      ),
-                    )}
-                  </div>
-                )}
-
-                {/* ... Items ... */}
-                {activeStorySubTab === 'items' && (
-                  <div className='editor-card'>
-                    <div
-                      className='choices-header'
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: '1rem',
-                      }}>
-                      <h5
-                        className='card-title'
-                        style={{ margin: 0, border: 'none' }}>
-                        Items & Lore
-                      </h5>
-                      <button
-                        onClick={addItem}
-                        className='themed-button secondary small'>
-                        <Plus size={14} /> Add Item
-                      </button>
-                    </div>
-                    {Object.entries(story.items || {}).map(([key, item]) => (
-                      <div key={key} className='choice-builder'>
-                        <div className='choice-builder-header'>
-                          <h6>{key}</h6>
                           <button
-                            className='btn-danger'
-                            onClick={() => deleteItem(key)}>
+                            className='btn-icon danger'
+                            onClick={() =>
+                              updateStory((p) => {
+                                const n = JSON.parse(JSON.stringify(p));
+                                delete n.items[k];
+                                return n;
+                              })
+                            }>
                             <Trash2 size={16} />
                           </button>
                         </div>
-                        <div className='field-row'>
-                          <div className='field-group'>
-                            <label>Name</label>
-                            <input
-                              value={item.name}
-                              onChange={(e) =>
-                                updateItem(key, 'name', e.target.value)
-                              }
-                            />
-                          </div>
-                          <div className='field-group'>
-                            <label>Image URL</label>
-                            <input
-                              value={item.image || ''}
-                              placeholder='PNG or JPEG of the item...'
-                              onChange={(e) =>
-                                updateItem(key, 'image', e.target.value)
-                              }
-                            />
-                            <div style={{ marginTop: '0.5rem' }}>
-                              <AssetUploader
-                                type='image'
-                                onUploadComplete={(url) =>
-                                  updateItem(key, 'image', url)
-                                }
-                              />
-                            </div>
-                          </div>
-                        </div>
                         <div className='field-group'>
-                          <label>Description</label>
-                          <textarea
-                            value={item.description}
+                          <label>Quick Description</label>
+                          <input
+                            value={it.description}
                             onChange={(e) =>
-                              updateItem(key, 'description', e.target.value)
+                              updateStory((p) => {
+                                const n = JSON.parse(JSON.stringify(p));
+                                n.items[k].description = e.target.value;
+                                return n;
+                              })
                             }
                           />
                         </div>
-                        <div className='field-row'>
-                          <div className='field-group'>
-                            <label>Lore Title (Optional)</label>
-                            <input
-                              value={item.lore?.title || ''}
-                              onChange={(e) =>
-                                updateItem(key, 'title', e.target.value, true)
-                              }
-                            />
-                          </div>
-                          <div className='field-group'>
-                            <label>Lore Content (Optional)</label>
-                            <textarea
-                              value={item.lore?.content || ''}
-                              onChange={(e) =>
-                                updateItem(key, 'content', e.target.value, true)
-                              }
-                            />
-                          </div>
+                        <div
+                          className='field-group'
+                          style={{
+                            marginTop: '0.5rem',
+                            padding: '0.6rem',
+                            background: 'rgba(0,0,0,0.2)',
+                            borderRadius: '4px',
+                          }}>
+                          <label
+                            style={{ fontSize: '0.65rem', color: '#8e6a39' }}>
+                            LORE BOOK ENTRY
+                          </label>
+                          <input
+                            placeholder='Entry Title'
+                            value={it.lore?.title}
+                            onChange={(e) =>
+                              updateStory((p) => {
+                                const n = JSON.parse(JSON.stringify(p));
+                                n.items[k].lore.title = e.target.value;
+                                return n;
+                              })
+                            }
+                            style={{ marginBottom: '0.5rem' }}
+                          />
+                          <textarea
+                            placeholder='Entry Body'
+                            value={it.lore?.content}
+                            onChange={(e) =>
+                              updateStory((p) => {
+                                const n = JSON.parse(JSON.stringify(p));
+                                n.items[k].lore.content = e.target.value;
+                                return n;
+                              })
+                            }
+                          />
                         </div>
                       </div>
                     ))}
@@ -1553,112 +1278,36 @@ export const StoryEditor = ({
               </>
             )}
 
-            {/* Chapters Tab (mostly same) */}
-            {activeView === 'chapters' && (
-              <div className='editor-card'>
-                <div
-                  className='choices-header'
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '1rem',
-                  }}>
-                  <h5
-                    className='card-title'
-                    style={{ margin: 0, border: 'none' }}>
-                    Manage Chapters
-                  </h5>
-                  <button
-                    onClick={addChapter}
-                    className='themed-button secondary small'>
-                    <Plus size={14} /> Add Chapter
-                  </button>
-                </div>
-                {Object.entries(story.storyDetails.chapters || {})
-                  .sort(([, a], [, b]) => a.number - b.number)
-                  .map(([key, chap]) => (
-                    <div key={key} className='choice-builder'>
-                      <div className='choice-builder-header'>
-                        <h6>{key}</h6>
-                        <button
-                          className='btn-danger'
-                          onClick={() => deleteChapter(key)}>
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                      <div className='field-row'>
-                        <div className='field-group'>
-                          <label>Title</label>
-                          <input
-                            value={chap.title}
-                            onChange={(e) =>
-                              handleChapterUpdate(key, 'title', e.target.value)
-                            }
-                          />
-                        </div>
-                        <div
-                          className='field-group'
-                          style={{ maxWidth: '100px' }}>
-                          <label>Number</label>
-                          <input
-                            type='number'
-                            value={chap.number}
-                            onChange={(e) =>
-                              handleChapterUpdate(key, 'number', e.target.value)
-                            }
-                          />
-                        </div>
-                      </div>
-                      <div className='field-group'>
-                        <label>Flavor Text (for chapter select screen)</label>
-                        <textarea
-                          value={chap.flavorText}
-                          onChange={(e) =>
-                            handleChapterUpdate(
-                              key,
-                              'flavorText',
-                              e.target.value,
-                            )
-                          }
-                        />
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            )}
-
-            {/* Node Editor - Logic Builders Integrated */}
-            {activeView === 'nodes' && activeNodeKey && currentNode && (
+            {activeView === 'nodes' && currentNode && (
               <>
                 <div className='tab-group'>
                   {[
                     { id: 'dialogue', label: 'Dialogue', icon: MessageSquare },
-                    { id: 'branching', label: 'Branching', icon: ListTree },
-                    { id: 'effects', label: 'Effects', icon: Zap },
+                    { id: 'branching', label: 'Flow', icon: ListTree },
+                    { id: 'effects', label: 'Engine', icon: Zap },
                     { id: 'visuals', label: 'Visuals', icon: Palette },
-                  ].map((tab) => (
+                  ].map((t) => (
                     <button
-                      key={tab.id}
-                      className={`editor-tab small ${activeNodeSubTab === tab.id ? 'active' : ''}`}
-                      onClick={() => setActiveNodeSubTab(tab.id)}>
-                      {React.createElement(tab.icon, { size: 14 })} {tab.label}
+                      key={t.id}
+                      className={`editor-tab small ${activeNodeSubTab === t.id ? 'active' : ''}`}
+                      onClick={() => setActiveNodeSubTab(t.id)}>
+                      {React.createElement(t.icon, { size: 14 })} {t.label}
                     </button>
                   ))}
                 </div>
 
                 {activeNodeSubTab === 'dialogue' && (
-                  <>
-                    <div className='editor-card'>
+                  <div className='editor-card'>
+                    <div className='field-row'>
                       <div className='field-group'>
-                        <label>Speaker Key</label>
+                        <label>Speaker</label>
                         <select
                           value={currentNode.speaker || ''}
                           onChange={(e) =>
                             updateNodeField('speaker', e.target.value)
                           }>
                           <option value=''>Narrator</option>
-                          {Object.keys(story.characters || {}).map((k) => (
+                          {charKeys.map((k) => (
                             <option key={k} value={k}>
                               {k}
                             </option>
@@ -1666,719 +1315,322 @@ export const StoryEditor = ({
                         </select>
                       </div>
                       <div className='field-group'>
-                        <label>Dialogue Text</label>
-                        <textarea
-                          value={currentNode.text || ''}
-                          onChange={(e) =>
-                            updateNodeField('text', e.target.value)
-                          }
-                        />
+                        <label>Node ID</label>
+                        <input value={activeNodeKey} disabled />
                       </div>
-                      <div className='field-group'>
-                        <label>Revisit Text (Optional)</label>
-                        <textarea
-                          value={currentNode.revisitText || ''}
-                          placeholder='Alternate text for when player re-enters this node.'
-                          onChange={(e) =>
-                            updateNodeField('revisitText', e.target.value)
-                          }
-                        />
-                      </div>
-                      <div className='field-group'>
-                        <label>Revisit Speaker Key (Optional)</label>
-                        <select
-                          value={currentNode.revisitSpeaker || ''}
-                          onChange={(e) =>
-                            updateNodeField('revisitSpeaker', e.target.value)
-                          }>
-                          <option value=''>(Same as original)</option>
-                          {Object.keys(story.characters || {}).map((k) => (
-                            <option key={k} value={k}>
+                    </div>
+                    <div className='field-group'>
+                      <label>NPCs present (Sprites)</label>
+                      <div className='npc-selector-grid'>
+                        {charKeys.map((k) => {
+                          const isSelected = (
+                            Array.isArray(currentNode.npc)
+                              ? currentNode.npc
+                              : [currentNode.npc]
+                          ).includes(k);
+                          return (
+                            <button
+                              key={k}
+                              className={`npc-toggle ${isSelected ? 'active' : ''}`}
+                              onClick={() => {
+                                const current = Array.isArray(currentNode.npc)
+                                  ? currentNode.npc
+                                  : currentNode.npc
+                                    ? [currentNode.npc]
+                                    : [];
+                                const next = isSelected
+                                  ? current.filter((c) => c !== k)
+                                  : [...current, k];
+                                updateNodeField('npc', next);
+                              }}>
                               {k}
-                            </option>
-                          ))}
-                        </select>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
-                    <div className='editor-card'>
-                      <div
-                        className='choices-header'
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                        }}>
-                        <h5
-                          className='card-title'
-                          style={{ margin: 0, border: 'none' }}>
-                          Text Effects
-                        </h5>
-                        <button
-                          onClick={addTextEffect}
-                          className='themed-button secondary small'>
-                          <Plus size={14} /> Add
-                        </button>
-                      </div>
-                      {(currentNode.textEffects || []).map((fx, i) => (
-                        <div key={i} className='choice-builder'>
-                          <div className='field-row'>
-                            <div className='field-group'>
-                              <label>Word/Phrase</label>
-                              <input
-                                value={fx.word}
-                                onChange={(e) =>
-                                  updateTextEffect(i, 'word', e.target.value)
-                                }
-                              />
-                            </div>
-                            <div className='field-group'>
-                              <label>Effect</label>
-                              <select
-                                value={fx.effect}
-                                onChange={(e) =>
-                                  updateTextEffect(i, 'effect', e.target.value)
-                                }>
-                                {TEXT_EFFECT_OPTIONS.map((opt) => (
-                                  <option key={opt} value={opt}>
-                                    {opt}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-                          <button
-                            className='btn-danger'
-                            onClick={() => deleteTextEffect(i)}
-                            style={{ alignSelf: 'flex-end' }}>
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      ))}
+                    <div className='field-group'>
+                      <label>Dialogue Text</label>
+                      <textarea
+                        value={currentNode.text}
+                        onChange={(e) =>
+                          updateNodeField('text', e.target.value)
+                        }
+                      />
                     </div>
-                  </>
+                    <div className='field-group'>
+                      <label>Revisit Text</label>
+                      <textarea
+                        value={currentNode.revisitText}
+                        onChange={(e) =>
+                          updateNodeField('revisitText', e.target.value)
+                        }
+                        placeholder='Text shown on subsequent visits...'
+                      />
+                    </div>
+                    <div className='field-group'>
+                      <label>Word-triggered SFX</label>
+                      <AmbientSfxBuilder
+                        value={currentNode.ambientSfx}
+                        onChange={(v) => updateNodeField('ambientSfx', v)}
+                        sfxOptions={gameData?.SFX}
+                      />
+                    </div>
+                    <div className='field-group'>
+                      <label>Text Effects</label>
+                      <TextEffectsBuilder
+                        value={currentNode.textEffects}
+                        onChange={(v) => updateNodeField('textEffects', v)}
+                      />
+                    </div>
+                  </div>
                 )}
 
                 {activeNodeSubTab === 'branching' && (
                   <div className='editor-card'>
                     <div
-                      className='choices-header'
+                      className='field-row'
                       style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: '1rem',
+                        paddingBottom: '1rem',
+                        borderBottom: '1px solid #333',
                       }}>
-                      <h5
-                        className='card-title'
-                        style={{ margin: 0, border: 'none' }}>
-                        Choices
-                      </h5>
+                      <div className='field-group'>
+                        <label>
+                          <Timer size={12} /> Seconds
+                        </label>
+                        <input
+                          type='number'
+                          value={currentNode.timer || 0}
+                          onChange={(e) =>
+                            updateNodeField('timer', parseInt(e.target.value))
+                          }
+                        />
+                      </div>
+                      <div className='field-group'>
+                        <label>Default Choice Index</label>
+                        <input
+                          type='number'
+                          value={currentNode.defaultChoiceIndex || 0}
+                          onChange={(e) =>
+                            updateNodeField(
+                              'defaultChoiceIndex',
+                              parseInt(e.target.value),
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                    <h5 className='card-title' style={{ border: 'none' }}>
+                      Choices{' '}
                       <button
-                        onClick={addChoice}
-                        className='themed-button secondary small'>
-                        <Plus size={14} /> Add Choice
+                        className='themed-button secondary small'
+                        onClick={() =>
+                          updateNodeField('choices', [
+                            ...(currentNode.choices || []),
+                            { text: 'New Path', next: '' },
+                          ])
+                        }>
+                        <Plus size={14} />
                       </button>
-                    </div>
-                    <div
-                      className='editor-card'
-                      style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
-                      <h5
-                        className='card-title'
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                        }}>
-                        <Clock size={16} /> Timed Event
-                      </h5>
-                      <div className='field-row'>
-                        <div className='field-group'>
-                          <label>Timer (seconds)</label>
-                          <input
-                            type='number'
-                            min='0'
-                            value={currentNode.timer || ''}
-                            placeholder='0'
-                            onChange={(e) =>
-                              updateNodeField(
-                                'timer',
-                                e.target.value
-                                  ? parseInt(e.target.value, 10)
-                                  : undefined,
-                              )
-                            }
-                          />
-                          <small
-                            style={{ color: '#6a5a4a', fontSize: '0.7rem' }}>
-                            Set to 0 to disable. If time runs out, the default
-                            choice is made.
-                          </small>
-                        </div>
-                        <div className='field-group'>
-                          <label>Default Choice Index</label>
-                          <input
-                            type='number'
-                            min='0'
-                            value={currentNode.defaultChoiceIndex || ''}
-                            placeholder='0'
-                            onChange={(e) =>
-                              updateNodeField(
-                                'defaultChoiceIndex',
-                                e.target.value
-                                  ? parseInt(e.target.value, 10)
-                                  : undefined,
-                              )
-                            }
-                          />
-                          <small
-                            style={{ color: '#6a5a4a', fontSize: '0.7rem' }}>
-                            0 for 1st choice, 1 for 2nd, etc.
-                          </small>
-                        </div>
-                      </div>
-                    </div>
-                    {(currentNode.choices || []).map((choice, i) => (
-                      <div key={i} className='choice-builder'>
-                        <div className='choice-builder-header'>
-                          <h6>Choice {i + 1}</h6>
-                          <button
-                            className='btn-danger'
-                            onClick={() => deleteChoice(i)}>
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                        <div className='field-group'>
-                          <label>Choice Text</label>
-                          <input
-                            value={choice.text}
-                            onChange={(e) =>
-                              updateChoice(i, 'text', e.target.value)
-                            }
-                          />
-                        </div>
-                        <div className='field-row'>
-                          <div className='field-group'>
-                            <label>Next Node</label>
-                            <select
-                              value={choice.next || ''}
-                              onChange={(e) =>
-                                updateChoice(i, 'next', e.target.value)
-                              }>
-                              <option value=''>(End Chapter)</option>
-                              <option value='END_STORY'>(End Story)</option>
-                              {Object.keys(
-                                story.storyData[activeChapterKey] || {},
-                              ).map((k) => (
-                                <option key={k} value={k}>
-                                  {k}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className='field-group'>
-                            <label>Visibility</label>
-                            <select
-                              value={choice.visibilityCondition || ''}
-                              onChange={(e) =>
-                                updateChoice(
-                                  i,
-                                  'visibilityCondition',
-                                  e.target.value || undefined,
-                                )
-                              }
-                              disabled={
-                                !choice.requires ||
-                                Object.keys(choice.requires).length === 0
-                              }
-                              title={
-                                !choice.requires ||
-                                Object.keys(choice.requires).length === 0
-                                  ? 'Visibility conditions require at least one requirement to be set.'
-                                  : ''
-                              }>
-                              <option value=''>
-                                Visible (Disabled if unmet)
-                              </option>
-                              <option value='hide_if_unmet'>
-                                Hidden if requirements unmet
-                              </option>
-                              <option value='hide_if_met'>
-                                Hidden if requirements met
-                              </option>
-                            </select>
-                          </div>
-                        </div>
-                        <div className='field-row'>
-                          <div className='field-group'>
-                            <label>Requirements</label>
-                            <div
-                              style={{
-                                marginBottom: '0.5rem',
-                                fontWeight: 'bold',
-                                fontSize: '0.8rem',
-                              }}>
-                              Stats:
-                            </div>
-                            <StatsBuilder
-                              value={choice.requires?.stats}
-                              onChange={(val) =>
-                                updateChoice(i, 'requires', {
-                                  ...choice.requires,
-                                  stats: val,
-                                })
-                              }
-                            />
-                            <div
-                              style={{
-                                marginBottom: '0.5rem',
-                                fontWeight: 'bold',
-                                fontSize: '0.8rem',
-                                marginTop: '0.5rem',
-                              }}>
-                              Inventory:
-                            </div>
-                            <InventoryBuilder
-                              value={choice.requires?.inventory}
-                              onChange={(val) =>
-                                updateChoice(i, 'requires', {
-                                  ...choice.requires,
-                                  inventory: val,
-                                })
-                              }
-                              mode='check'
-                            />
-                            <div
-                              style={{
-                                marginBottom: '0.5rem',
-                                fontWeight: 'bold',
-                                fontSize: '0.8rem',
-                                marginTop: '0.5rem',
-                              }}>
-                              Flags:
-                            </div>
-                            <FlagsBuilder
-                              value={choice.requires?.flags}
-                              onChange={(val) =>
-                                updateChoice(i, 'requires', {
-                                  ...choice.requires,
-                                  flags: val,
-                                })
-                              }
-                            />
-                          </div>
-                          <div className='field-group'>
-                            <label>Effects</label>
-                            <div
-                              style={{
-                                marginBottom: '0.5rem',
-                                fontWeight: 'bold',
-                                fontSize: '0.8rem',
-                              }}>
-                              Stats:
-                            </div>
-                            <StatsBuilder
-                              value={choice.effects?.stats}
-                              onChange={(val) =>
-                                updateChoice(i, 'effects', {
-                                  ...choice.effects,
-                                  stats: val,
-                                })
-                              }
-                            />
-                            <div
-                              style={{
-                                marginBottom: '0.5rem',
-                                fontWeight: 'bold',
-                                fontSize: '0.8rem',
-                                marginTop: '0.5rem',
-                              }}>
-                              Inventory:
-                            </div>
-                            <div style={{ fontSize: '0.7rem' }}>Add:</div>
-                            <InventoryBuilder
-                              value={choice.effects?.inventory?.add}
-                              onChange={(val) =>
-                                updateChoice(i, 'effects', {
-                                  ...choice.effects,
-                                  inventory: {
-                                    ...choice.effects?.inventory,
-                                    add: val,
-                                  },
-                                })
-                              }
-                            />
-                            <div style={{ fontSize: '0.7rem' }}>Remove:</div>
-                            <InventoryBuilder
-                              value={choice.effects?.inventory?.remove}
-                              onChange={(val) =>
-                                updateChoice(i, 'effects', {
-                                  ...choice.effects,
-                                  inventory: {
-                                    ...choice.effects?.inventory,
-                                    remove: val,
-                                  },
-                                })
-                              }
-                              mode='remove'
-                            />
-                            <div
-                              style={{
-                                marginBottom: '0.5rem',
-                                fontWeight: 'bold',
-                                fontSize: '0.8rem',
-                                marginTop: '0.5rem',
-                              }}>
-                              Flags:
-                            </div>
-                            <FlagsBuilder
-                              value={choice.effects?.flags}
-                              onChange={(val) =>
-                                updateChoice(i, 'effects', {
-                                  ...choice.effects,
-                                  flags: val,
-                                })
-                              }
-                            />
-                          </div>
-                        </div>
-                        <div className='field-group'>
-                          <label>Ending (JSON, if next is END_STORY)</label>
-                          <JsonEditor
-                            value={choice.ending}
-                            onChange={(val) => updateChoice(i, 'ending', val)}
-                            placeholder='{ "key": "good_end", "title": "Freedom", "description": "You escaped.", "thumbnail": "/url/to/image.png" }'
-                            disabled={choice.next !== 'END_STORY'}
-                          />
-                        </div>
-                      </div>
+                    </h5>
+                    {(currentNode.choices || []).map((c, i) => (
+                      <CollapsibleChoice
+                        key={i}
+                        choice={c}
+                        index={i}
+                        story={story}
+                        activeChapterKey={activeChapterKey}
+                        charKeys={charKeys}
+                        updateChoice={(idx, field, val) => {
+                          const n = [...currentNode.choices];
+                          if (val === undefined) delete n[idx][field];
+                          else n[idx][field] = val;
+                          updateNodeField('choices', n);
+                        }}
+                        deleteChoice={(idx) =>
+                          updateNodeField(
+                            'choices',
+                            currentNode.choices.filter((_, x) => x !== idx),
+                          )
+                        }
+                      />
                     ))}
                   </div>
                 )}
 
                 {activeNodeSubTab === 'effects' && (
-                  <>
-                    <div className='editor-card'>
-                      <h5 className='card-title'>On-Enter Effects</h5>
+                  <div className='editor-card'>
+                    <h5 className='card-title'>Node Properties</h5>
+                    <div className='field-row'>
+                      <label className='switch-label'>
+                        <Skull size={14} /> Is Death Node{' '}
+                        <input
+                          type='checkbox'
+                          checked={currentNode.isDeath}
+                          onChange={(e) =>
+                            updateNodeField('isDeath', e.target.checked)
+                          }
+                        />
+                      </label>
+                      <label className='switch-label'>
+                        <Undo2 size={14} /> Set Checkpoint{' '}
+                        <input
+                          type='checkbox'
+                          checked={currentNode.effects?.setCheckpoint}
+                          onChange={(e) =>
+                            updateNodeField('effects', {
+                              ...currentNode.effects,
+                              setCheckpoint: e.target.checked,
+                            })
+                          }
+                        />
+                      </label>
+                    </div>
+                    {currentNode.isDeath && (
                       <div className='field-group'>
+                        <label>Redirect on "Continue"</label>
+                        <select
+                          value={currentNode.nextOnDeath || ''}
+                          onChange={(e) =>
+                            updateNodeField('nextOnDeath', e.target.value)
+                          }>
+                          <option value=''>(Restart Chapter)</option>
+                          {Object.keys(story.storyData[activeChapterKey]).map(
+                            (k) => (
+                              <option key={k} value={k}>
+                                {k}
+                              </option>
+                            ),
+                          )}
+                        </select>
+                      </div>
+                    )}
+                    <h5
+                      className='card-title'
+                      style={{ border: 'none', marginTop: '1rem' }}>
+                      On-Entry Effects
+                    </h5>
+                    <div className='logic-builder-container'>
+                      <div className='logic-row'>
                         <label>Stats</label>
                         <StatsBuilder
                           value={currentNode.effects?.stats}
-                          onChange={(val) =>
+                          onChange={(v) =>
                             updateNodeField('effects', {
                               ...currentNode.effects,
-                              stats: val,
+                              stats: v,
                             })
                           }
                         />
                       </div>
-                      <div className='field-group'>
-                        <label>Inventory Add</label>
+                      <div className='logic-row'>
+                        <label>Relations</label>
+                        <RelationshipBuilder
+                          value={currentNode.effects?.relationships}
+                          characters={charKeys}
+                          onChange={(v) =>
+                            updateNodeField('effects', {
+                              ...currentNode.effects,
+                              relationships: v,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className='logic-row'>
+                        <label>Add Item</label>
                         <InventoryBuilder
                           value={currentNode.effects?.inventory?.add}
-                          onChange={(val) =>
+                          onChange={(v) =>
                             updateNodeField('effects', {
                               ...currentNode.effects,
                               inventory: {
                                 ...currentNode.effects?.inventory,
-                                add: val,
+                                add: v,
                               },
                             })
                           }
                         />
                       </div>
-                      <div className='field-group'>
-                        <label>Flags Set</label>
-                        <FlagsBuilder
-                          value={currentNode.effects?.flags}
-                          onChange={(val) =>
+                      <div className='logic-row'>
+                        <label>Rem Item</label>
+                        <InventoryBuilder
+                          value={currentNode.effects?.inventory?.remove}
+                          mode='remove'
+                          onChange={(v) =>
                             updateNodeField('effects', {
                               ...currentNode.effects,
-                              flags: val,
+                              inventory: {
+                                ...currentNode.effects?.inventory,
+                                remove: v,
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                      <div className='logic-row'>
+                        <label>Set Flags</label>
+                        <FlagsBuilder
+                          value={currentNode.effects?.flags}
+                          onChange={(v) =>
+                            updateNodeField('effects', {
+                              ...currentNode.effects,
+                              flags: v,
                             })
                           }
                         />
                       </div>
                     </div>
-                    <div
-                      className='editor-card'
-                      style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
-                      <h5
-                        className='card-title'
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                        }}>
-                        <Skull size={16} /> Node Behavior
-                      </h5>
-                      <div className='field-group'>
-                        <label
-                          style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            textTransform: 'none',
-                            opacity: 1,
-                          }}>
-                          <input
-                            type='checkbox'
-                            checked={!!currentNode.isDeath}
-                            onChange={(e) =>
-                              updateNodeField(
-                                'isDeath',
-                                e.target.checked ? true : undefined,
-                              )
-                            }
-                          />{' '}
-                          This is a Death Node (Ends the game)
-                        </label>
-                      </div>
-                      {currentNode.isDeath && (
-                        <div className='field-group'>
-                          <label>Node on "Continue" (Optional)</label>
-                          <select
-                            value={currentNode.nextOnDeath || ''}
-                            onChange={(e) =>
-                              updateNodeField('nextOnDeath', e.target.value)
-                            }>
-                            <option value=''>(Restart from checkpoint)</option>
-                            {Object.keys(
-                              story.storyData[activeChapterKey] || {},
-                            ).map((k) => (
-                              <option key={k} value={k}>
-                                {k}
-                              </option>
-                            ))}
-                          </select>
-                          <small
-                            style={{ color: '#6a5a4a', fontSize: '0.7rem' }}>
-                            If set, player will go to this node instead of
-                            reloading after death.
-                          </small>
-                        </div>
-                      )}
-                    </div>
-                  </>
+                  </div>
                 )}
 
                 {activeNodeSubTab === 'visuals' && (
-                  <>
-                    <div className='editor-card'>
-                      <h5 className='card-title'>Scene Visuals</h5>
-                      <div className='field-group'>
-                        <label>Background</label>
-                        <div
-                          style={{
-                            display: 'flex',
-                            gap: '0.5rem',
-                            alignItems: 'center',
-                          }}>
-                          <input
-                            value={currentNode.background || ''}
-                            onChange={(e) =>
-                              updateNodeField('background', e.target.value)
-                            }
-                            style={{ flex: 1 }}
-                          />
-                          <AssetUploader
-                            type='image'
-                            onUploadComplete={(url) =>
-                              updateNodeField('background', url)
-                            }
-                          />
-                        </div>
-                      </div>
-                      <div className='field-group'>
-                        <label>Visual Effect (On Enter)</label>
-                        <select
-                          value={currentNode.visualEffect || ''}
+                  <div className='editor-card'>
+                    <h5 className='card-title'>Atmos & Scenery</h5>
+                    <div className='field-group'>
+                      <label>Background Image</label>
+                      <div
+                        style={{
+                          display: 'flex',
+                          gap: '0.5rem',
+                          alignItems: 'center',
+                        }}>
+                        <input
+                          value={currentNode.background}
                           onChange={(e) =>
-                            updateNodeField('visualEffect', e.target.value)
-                          }>
-                          <option value=''>(None)</option>
-                          {VISUAL_EFFECT_OPTIONS.map((opt) => (
-                            <option key={opt} value={opt}>
-                              {opt}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className='field-group'>
-                        <label>Characters in Scene (NPCs)</label>
-                        <div
-                          style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: '0.5rem',
-                          }}>
-                          {Object.keys(story.characters || {}).map(
-                            (charKey) => {
-                              const isSelected = (
-                                currentNode.npc || []
-                              ).includes(charKey);
-                              return (
-                                <button
-                                  key={charKey}
-                                  className={`themed-button small ${isSelected ? 'primary' : 'secondary'}`}
-                                  onClick={() => {
-                                    const currentNPCs = Array.isArray(
-                                      currentNode.npc,
-                                    )
-                                      ? currentNode.npc
-                                      : currentNode.npc
-                                        ? [currentNode.npc]
-                                        : [];
-                                    let newNPCs;
-                                    if (isSelected) {
-                                      newNPCs = currentNPCs.filter(
-                                        (k) => k !== charKey,
-                                      );
-                                    } else {
-                                      newNPCs = [...currentNPCs, charKey];
-                                    }
-                                    updateNodeField(
-                                      'npc',
-                                      newNPCs.length > 0 ? newNPCs : undefined,
-                                    );
-                                  }}>
-                                  {charKey}
-                                </button>
-                              );
-                            },
-                          )}
-                        </div>
-                        <small style={{ color: '#6a5a4a', fontSize: '0.7rem' }}>
-                          Select characters to display (e.g. monsters) even if
-                          they aren't speaking.
-                        </small>
+                            updateNodeField('background', e.target.value)
+                          }
+                          style={{ flex: 1 }}
+                        />
+                        <AssetUploader
+                          type='image'
+                          onUploadComplete={(url) =>
+                            updateNodeField('background', url)
+                          }
+                        />
                       </div>
                     </div>
-
-                    <div className='editor-card'>
-                      <h5 className='card-title'>Audio Atmosphere</h5>
+                    <div className='field-row'>
                       <div className='field-group'>
-                        <label>Background Music (BGM)</label>
+                        <label>BGM Key</label>
                         <div
                           style={{
                             display: 'flex',
                             gap: '0.5rem',
-                            alignItems: 'center',
+                            flexDirection: 'column',
                           }}>
-                          <input
+                          <select
                             value={currentNode.bgm || ''}
                             onChange={(e) =>
                               updateNodeField('bgm', e.target.value)
-                            }
-                            style={{ flex: 1 }}
-                            placeholder='URL or Key'
-                          />
-                          <AssetUploader
-                            type='audio'
-                            onUploadComplete={(url) =>
-                              updateNodeField('bgm', url)
-                            }
-                          />
-                        </div>
-                        <select
-                          onChange={(e) =>
-                            updateNodeField('bgm', e.target.value)
-                          }
-                          value=''
-                          style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
-                          <option value=''>Select from Game Data...</option>
-                          {gameData &&
-                            Object.keys(gameData.BGM)
-                              .sort()
-                              .map((bgmKey) => (
-                                <option
-                                  key={bgmKey}
-                                  value={gameData.BGM[bgmKey]}>
-                                  {bgmKey}
+                            }>
+                            <option value=''>(None)</option>
+                            {gameData?.BGM &&
+                              Object.keys(gameData.BGM).map((k) => (
+                                <option key={k} value={gameData.BGM[k]}>
+                                  {k}
                                 </option>
                               ))}
-                        </select>
-                      </div>
-                      <div className='field-group'>
-                        <label>One-Shot SFX</label>
-                        <div
-                          style={{
-                            display: 'flex',
-                            gap: '0.5rem',
-                            alignItems: 'center',
-                          }}>
-                          <input
-                            value={currentNode.sfx || ''}
-                            onChange={(e) =>
-                              updateNodeField('sfx', e.target.value)
-                            }
-                            style={{ flex: 1 }}
-                            placeholder='URL or Key'
-                          />
-                          <AssetUploader
-                            type='audio'
-                            onUploadComplete={(url) =>
-                              updateNodeField('sfx', url)
-                            }
-                          />
-                        </div>
-                        <select
-                          onChange={(e) =>
-                            updateNodeField('sfx', e.target.value)
-                          }
-                          value=''
-                          style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
-                          <option value=''>Select from Game Data...</option>
-                          {gameData &&
-                            Object.keys(gameData.SFX)
-                              .sort()
-                              .map((sfxKey) => (
-                                <option
-                                  key={sfxKey}
-                                  value={gameData.SFX[sfxKey]}>
-                                  {sfxKey}
-                                </option>
-                              ))}
-                        </select>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {/* Ambient SFX Logic Replaced */}
-                <div className='editor-card'>
-                  <div
-                    className='choices-header'
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}>
-                    <h5
-                      className='card-title'
-                      style={{ margin: 0, border: 'none' }}>
-                      Ambient SFX Triggers
-                    </h5>
-                    <button
-                      onClick={addAmbientSfx}
-                      className='themed-button secondary small'>
-                      <Plus size={14} /> Add
-                    </button>
-                  </div>
-                  {(currentNode.ambientSfx || []).map((sfx, i) => (
-                    <div key={i} className='choice-builder'>
-                      <div className='field-row'>
-                        <div className='field-group'>
-                          <label>Trigger Word/Phrase</label>
-                          <input
-                            value={sfx.triggerWord}
-                            onChange={(e) =>
-                              updateAmbientSfx(i, 'triggerWord', e.target.value)
-                            }
-                            placeholder='e.g. scream'
-                          />
-                        </div>
-                        <div className='field-group'>
-                          <label>SFX Source</label>
+                          </select>
                           <div
                             style={{
                               display: 'flex',
@@ -2386,169 +1638,167 @@ export const StoryEditor = ({
                               alignItems: 'center',
                             }}>
                             <input
-                              value={sfx.sfx}
+                              value={currentNode.bgm}
                               onChange={(e) =>
-                                updateAmbientSfx(i, 'sfx', e.target.value)
+                                updateNodeField('bgm', e.target.value)
                               }
-                              style={{ flex: 1 }}
                               placeholder='URL or Key'
+                              style={{ flex: 1 }}
                             />
                             <AssetUploader
                               type='audio'
                               onUploadComplete={(url) =>
-                                updateAmbientSfx(i, 'sfx', url)
+                                updateNodeField('bgm', url)
                               }
                             />
                           </div>
-                          <select
-                            onChange={(e) =>
-                              updateAmbientSfx(i, 'sfx', e.target.value)
-                            }
-                            value=''
-                            style={{ marginTop: '0.2rem', fontSize: '0.8rem' }}>
-                            <option value=''>Select from Game Data...</option>
-                            {gameData &&
-                              Object.keys(gameData.SFX)
-                                .sort()
-                                .map((sfxKey) => (
-                                  <option
-                                    key={sfxKey}
-                                    value={gameData.SFX[sfxKey]}>
-                                    {sfxKey}
-                                  </option>
-                                ))}
-                          </select>
                         </div>
                       </div>
-                      <button
-                        className='btn-danger'
-                        onClick={() => deleteAmbientSfx(i)}
-                        style={{ alignSelf: 'flex-end', marginTop: '0.5rem' }}>
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                <div className='editor-card'>
-                  <h5 className='card-title'>Jumpscare</h5>
-                  <div
-                    className='field-group'
-                    style={{ justifyContent: 'center' }}>
-                    <label
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                      }}>
-                      <input
-                        type='checkbox'
-                        checked={!!currentNode.jumpscare}
-                        onChange={(e) =>
-                          updateNodeField(
-                            'jumpscare',
-                            e.target.checked
-                              ? { type: 'glitch', sfx: '' }
-                              : null,
-                          )
-                        }
-                      />{' '}
-                      Enable Jumpscare
-                    </label>
-                  </div>
-                  {currentNode.jumpscare && (
-                    <div className='jumpscare-config-panel'>
                       <div className='field-group'>
-                        <label>Type</label>
-                        <select
-                          value={currentNode.jumpscare.type || 'glitch'}
+                        <label>SFX Key</label>
+                        <div
+                          style={{
+                            display: 'flex',
+                            gap: '0.5rem',
+                            flexDirection: 'column',
+                          }}>
+                          <select
+                            value={currentNode.sfx || ''}
+                            onChange={(e) =>
+                              updateNodeField('sfx', e.target.value)
+                            }>
+                            <option value=''>(None)</option>
+                            {gameData?.SFX &&
+                              Object.keys(gameData.SFX).map((k) => (
+                                <option key={k} value={gameData.SFX[k]}>
+                                  {k}
+                                </option>
+                              ))}
+                          </select>
+                          <div
+                            style={{
+                              display: 'flex',
+                              gap: '0.5rem',
+                              alignItems: 'center',
+                            }}>
+                            <input
+                              value={currentNode.sfx}
+                              onChange={(e) =>
+                                updateNodeField('sfx', e.target.value)
+                              }
+                              placeholder='URL or Key'
+                              style={{ flex: 1 }}
+                            />
+                            <AssetUploader
+                              type='audio'
+                              onUploadComplete={(url) =>
+                                updateNodeField('sfx', url)
+                              }
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className='field-group'>
+                      <label>Visual Overlay</label>
+                      <select
+                        value={currentNode.visualEffect || ''}
+                        onChange={(e) =>
+                          updateNodeField('visualEffect', e.target.value)
+                        }>
+                        <option value=''>None</option>
+                        {VISUAL_EFFECT_OPTIONS.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <h5
+                      className='card-title'
+                      style={{ border: 'none', marginTop: '1rem' }}>
+                      Jumpscare suite
+                    </h5>
+                    <div className='field-group'>
+                      <label>Type</label>
+                      <select
+                        value={currentNode.jumpscare?.type || ''}
+                        onChange={(e) =>
+                          updateNodeField('jumpscare', {
+                            ...currentNode.jumpscare,
+                            type: e.target.value,
+                          })
+                        }>
+                        <option value=''>None</option>
+                        <option value='image'>Image URL</option>
+                        <option value='sprite'>NPC Sprite</option>
+                        <option value='text'>Flash Text</option>
+                        <option value='glitch'>Full Glitch</option>
+                      </select>
+                    </div>
+                    {currentNode.jumpscare?.type === 'image' && (
+                      <div className='field-group'>
+                        <label>URL</label>
+                        <input
+                          value={currentNode.jumpscare.image}
                           onChange={(e) =>
                             updateNodeField('jumpscare', {
                               ...currentNode.jumpscare,
-                              type: e.target.value,
+                              image: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                    )}
+                    {currentNode.jumpscare?.type === 'text' && (
+                      <div className='field-group'>
+                        <label>Flash Text</label>
+                        <input
+                          value={currentNode.jumpscare.text}
+                          onChange={(e) =>
+                            updateNodeField('jumpscare', {
+                              ...currentNode.jumpscare,
+                              text: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                    )}
+                    {currentNode.jumpscare?.type === 'sprite' && (
+                      <div className='field-group'>
+                        <label>NPC</label>
+                        <select
+                          value={currentNode.jumpscare.character}
+                          onChange={(e) =>
+                            updateNodeField('jumpscare', {
+                              ...currentNode.jumpscare,
+                              character: e.target.value,
                             })
                           }>
-                          {JUMPSCARE_TYPES.map((t) => (
-                            <option key={t} value={t}>
-                              {t}
+                          {charKeys.map((k) => (
+                            <option key={k} value={k}>
+                              {k}
                             </option>
                           ))}
                         </select>
                       </div>
-                      {currentNode.jumpscare.type === 'image' && (
-                        <div className='field-group'>
-                          <label>Image URL</label>
-                          <input
-                            value={currentNode.jumpscare.image || ''}
-                            onChange={(e) =>
-                              updateNodeField('jumpscare', {
-                                ...currentNode.jumpscare,
-                                image: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                      )}
-                      {currentNode.jumpscare.type === 'sprite' && (
-                        <div className='field-group'>
-                          <label>Character Key</label>
-                          <select
-                            value={currentNode.jumpscare.character || ''}
-                            onChange={(e) =>
-                              updateNodeField('jumpscare', {
-                                ...currentNode.jumpscare,
-                                character: e.target.value,
-                              })
-                            }>
-                            <option value=''>Select Character...</option>
-                            {Object.keys(story.characters || {}).map((k) => (
-                              <option key={k} value={k}>
-                                {k}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
-                      {currentNode.jumpscare.type === 'text' && (
-                        <div className='field-group'>
-                          <label>Text</label>
-                          <input
-                            value={currentNode.jumpscare.text || ''}
-                            onChange={(e) =>
-                              updateNodeField('jumpscare', {
-                                ...currentNode.jumpscare,
-                                text: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                      )}
+                    )}
+                    {currentNode.jumpscare?.type && (
                       <div className='field-group'>
                         <label>SFX Key</label>
-                        <select
-                          value={currentNode.jumpscare.sfx || ''}
+                        <input
+                          value={currentNode.jumpscare.sfx}
                           onChange={(e) =>
                             updateNodeField('jumpscare', {
                               ...currentNode.jumpscare,
                               sfx: e.target.value,
                             })
-                          }>
-                          <option value=''>Select SFX...</option>
-                          {gameData &&
-                            Object.keys(gameData.SFX)
-                              .sort()
-                              .map((sfxKey) => (
-                                <option
-                                  key={sfxKey}
-                                  value={gameData.SFX[sfxKey]}>
-                                  {sfxKey}
-                                </option>
-                              ))}
-                        </select>
+                          }
+                        />
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
               </>
             )}
           </div>

@@ -131,7 +131,6 @@ export function applyEffects(state, story, effects) {
     }
 
     // --- Checkpoint ---
-    // In client-side engine, checkpoints are kept in memory for death retries
     if (effects.setCheckpoint) {
         newState.checkpoint = { ...state.currentPosition };
     }
@@ -181,7 +180,7 @@ export function checkRequirements(reqs, gameState) {
     return { disabled: false };
 }
 
-export function getViewModel(story, gameState) {
+export function getViewModel(story, gameState, isRevisit = false) {
     if (!gameState || !gameState.currentPosition) {
         return { gameState, view: null };
     }
@@ -209,8 +208,10 @@ export function getViewModel(story, gameState) {
         return acc;
     }, []);
 
-    const currentPosString = `${chapter}/${key}`;
-    const hasRevisitText = gameState.visitedNodes.includes(currentPosString) && currentNode.revisitText;
+    // Logic: If isRevisit is passed (true), use revisit text.
+    // This allows the caller (handleChoice) to determine if this is a revisit based on history
+    // BEFORE the history was updated for this specific move.
+    const hasRevisitText = isRevisit && currentNode.revisitText;
 
     const getSpeakerKey = () => {
         const sKey = hasRevisitText && currentNode.revisitSpeaker ? currentNode.revisitSpeaker : currentNode.speaker;

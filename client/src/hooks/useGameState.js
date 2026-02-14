@@ -28,7 +28,6 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
         try {
           setStoryData(JSON.parse(cached));
           setIsLoadingStory(false);
-          // Background update check can happen here if needed
         } catch (e) {
           console.warn("Corrupt story cache", e);
         }
@@ -40,7 +39,6 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
         if (!res.ok) throw new Error("Failed to fetch story");
         const data = await res.json();
 
-        // Save to LocalStorage for offline use
         try {
           localStorage.setItem(`${STORY_CACHE_KEY}_${storyId}`, JSON.stringify(data));
         } catch (e) {
@@ -72,13 +70,12 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
     const nextNodeKey = (typeof choice.next === 'object' && choice.next !== null) ? choice.next.key : choice.next;
 
     // Handle End of Chapter/Story
-    // FIX: Check for both null and empty string to trigger To Be Continued
     if (nextNodeKey === null || nextNodeKey === '') {
       onChapterEnd();
-      return; // Transition handled by UI
+      return;
     }
     if (nextNodeKey === 'END_STORY') {
-      return; // Transition handled by UI
+      return;
     }
 
     // Get Next Node Data
@@ -111,7 +108,11 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
 
     // Update Visited & Position
     const newPosString = `${nextChapterKey}/${nextNodeKey}`;
-    if (!stateAfterNode.visitedNodes.includes(newPosString)) {
+
+    // Determine Revisit Status BEFORE updating state
+    const isRevisit = stateAfterNode.visitedNodes.includes(newPosString);
+
+    if (!isRevisit) {
       stateAfterNode.visitedNodes.push(newPosString);
     }
     stateAfterNode.currentPosition = { chapter: nextChapterKey, key: nextNodeKey };
@@ -122,12 +123,11 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
       if (nextChapterDetails?.number) {
         stateAfterNode.highestChapterUnlocked = Math.max(stateAfterNode.highestChapterUnlocked, nextChapterDetails.number);
       }
-      // CRITICAL: We only persistent-save when moving to a new chapter to enforce "Restart Chapter" rule
       savePersistent(storyId, stateAfterNode);
     }
 
-    // Update View
-    const newContext = getViewModel(storyData, stateAfterNode);
+    // Update View with explicit revisit flag
+    const newContext = getViewModel(storyData, stateAfterNode, isRevisit);
     setGameContext(newContext);
     setLastChanges({ ...finalChanges, id: Date.now() });
 
@@ -135,14 +135,12 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
 
   // 3. Save/Load Helpers
   const savePersistent = (sId, state) => {
-    // Saves to local storage. This is the "Safety Save" at start of chapter.
     try {
       localStorage.setItem(`${LOCAL_SAVE_KEY}_${sId}`, JSON.stringify(state));
     } catch (e) {
       console.error("Save to local storage failed", e);
     }
 
-    // Also sync to cloud if logged in
     if (currentUser && !currentUser.isGuest) {
       const token = localStorage.getItem(TOKEN_KEY);
       fetch(`${API_URL}/api/users/save/${sId}`, {
@@ -162,7 +160,6 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
   const startGameAt = useCallback((chapterKey, nodeKey = 'start') => {
     if (!storyData) return;
 
-    // Fresh start for a chapter
     const initialRelationships = {};
     if (storyData.characters) {
       Object.keys(storyData.characters).forEach(k => initialRelationships[k] = 0);
@@ -177,15 +174,15 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
       characters: [],
       highestChapterUnlocked: 1,
       currentPosition: { chapter: chapterKey, key: nodeKey },
-      checkpoint: { chapter: chapterKey, key: nodeKey }, // In-memory checkpoint
+      checkpoint: { chapter: chapterKey, key: nodeKey },
       relationships: initialRelationships,
     };
 
-    const context = getViewModel(storyData, initialState);
+    // First time start is never a revisit
+    const context = getViewModel(storyData, initialState, false);
     setGameContext(context);
     setLastChanges(null);
 
-    // Initial Save for this run
     savePersistent(storyId, initialState);
 
   }, [storyId, storyData]);
@@ -193,10 +190,8 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
   const loadGame = useCallback(async () => {
     if (!storyData) return false;
 
-    // Try Local First
     let savedState = loadPersistent(storyId);
 
-    // Try Cloud if no local
     if (!savedState && currentUser && !currentUser.isGuest) {
       try {
         const token = localStorage.getItem(TOKEN_KEY);
@@ -205,15 +200,14 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
         });
         if (res.ok) {
           savedState = await res.json();
-          // Sync to local
           localStorage.setItem(`${LOCAL_SAVE_KEY}_${storyId}`, JSON.stringify(savedState));
         }
       } catch (e) { console.error(e); }
     }
 
     if (savedState) {
-      // Logic: If loading, we assume the saved state IS the chapter start because we don't save mid-chapter.
-      const context = getViewModel(storyData, savedState);
+      // When loading, default to false for revisit to show full text context for the player returning to the game
+      const context = getViewModel(storyData, savedState, false);
       setGameContext(context);
       setLastChanges(null);
       return true;
@@ -222,7 +216,6 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
   }, [storyId, storyData, currentUser]);
 
   const saveGame = useCallback(async (isSilent = false) => {
-    // Manual Save is disabled for mid-chapter state to enforce "Restart Chapter" difficulty
     if (!isSilent) {
       alert("Progress is only saved at the start of each chapter. Complete the chapter to secure your progress.");
     }
@@ -230,13 +223,13 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
 
   const loadCheckpoint = useCallback(() => {
     if (!gameContext?.gameState) return;
-    // This loads the in-memory checkpoint (e.g., right before a boss fight or death node)
     const checkpointState = {
       ...gameContext.gameState,
       currentPosition: gameContext.gameState.checkpoint || gameContext.gameState.currentPosition,
-      playerStats: { ...gameContext.gameState.playerStats, health: 100, stamina: 100 } // Mercy heal
+      playerStats: { ...gameContext.gameState.playerStats, health: 100, stamina: 100 }
     };
-    const context = getViewModel(storyData, checkpointState);
+    // Checkpoint reload - assume false for revisit to show text again
+    const context = getViewModel(storyData, checkpointState, false);
     setGameContext(context);
   }, [gameContext, storyData]);
 

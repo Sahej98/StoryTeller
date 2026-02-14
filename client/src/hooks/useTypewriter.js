@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 // Helper functions outside component
@@ -12,25 +13,21 @@ const findVoice = (voices, preferences) => {
 
   const nameList = getNames(preferences.names);
 
-  // 1. Try to find by language code first (loose matching, e.g., 'en-US' matches 'en')
   if (preferences.lang) {
     const langCode = preferences.lang.split('-')[0];
     const langVoices = voices.filter((v) => v.lang.startsWith(langCode));
 
     if (langVoices.length > 0) {
-      // If names are also provided, try to find a matching name within the language-specific voices
       if (nameList.length > 0) {
         for (const name of nameList) {
           const found = langVoices.find((v) => v.name.includes(name));
           if (found) return found;
         }
       }
-      // If no name matches or no names provided, return the first voice for that language
       return langVoices[0];
     }
   }
 
-  // 2. Fallback to searching by name across all voices
   if (nameList.length > 0) {
     for (const name of nameList) {
       const found = voices.find((v) => v.name.includes(name));
@@ -41,7 +38,6 @@ const findVoice = (voices, preferences) => {
   return null;
 };
 
-// Hook
 export const useTypewriter = ({
   node,
   fullText,
@@ -62,7 +58,6 @@ export const useTypewriter = ({
   const onFinishedRef = useRef(onFinished);
   const firedTriggersRef = useRef(new Set());
 
-  // Keep onFinished callback fresh without causing re-runs
   useEffect(() => {
     onFinishedRef.current = onFinished;
   }, [onFinished]);
@@ -108,7 +103,7 @@ export const useTypewriter = ({
     setDisplayedText('');
     firedTriggersRef.current.clear();
 
-    if (!isReady || !node || !fullText || !voiceMap) {
+    if (!isReady || !node || !fullText) {
       setNarratorState('idle');
       return;
     }
@@ -130,17 +125,28 @@ export const useTypewriter = ({
       }
     };
 
-    const voicePrefs = voiceMap[speakerKey] || voiceMap['narrator'];
+    // If narration is DISABLED, trigger all SFX immediately at start of dialogue
+    // This allows sound design to work even for players who prefer reading speed
+    if (!narrationEnabled || isMuted) {
+      if (node.ambientSfx && onAmbientSfx) {
+        node.ambientSfx.forEach(trigger => {
+          // Simple check if word exists in text
+          if (fullText.includes(trigger.triggerWord)) {
+            onAmbientSfx(trigger.sfx);
+          }
+        });
+      }
+    }
+
+    const voicePrefs = voiceMap ? (voiceMap[speakerKey] || voiceMap['narrator']) : null;
     let voice = findVoice(voices, voicePrefs);
 
     let canSpeak = narrationEnabled && !isMuted && 'speechSynthesis' in window && voices.length > 0 && !!voice;
 
-    // Final check: if a language is required, but the found voice doesn't match, fall back to typewriter.
     if (canSpeak && voicePrefs?.lang && !voice.lang.startsWith(voicePrefs.lang.split('-')[0])) {
       canSpeak = false;
     }
 
-    // --- Speech Synthesis Logic ---
     if (canSpeak) {
       const utterance = new SpeechSynthesisUtterance(fullText);
       utteranceRef.current = utterance;
@@ -155,7 +161,6 @@ export const useTypewriter = ({
 
       utterance.onboundary = (event) => {
         if (event.name === 'word') {
-          // Look ahead for punctuation so it appears with the word
           let endIndex = event.charIndex + event.charLength;
           while (endIndex < fullText.length && /[.,!?;:"')\]}]/.test(fullText[endIndex])) {
             endIndex++;
@@ -163,6 +168,7 @@ export const useTypewriter = ({
 
           const spokenText = fullText.substring(0, endIndex);
           setDisplayedText(spokenText);
+          // Only trigger timed SFX if speaking, otherwise we did it at start
           triggerSfxIfNeeded(spokenText);
         }
       };
@@ -177,13 +183,12 @@ export const useTypewriter = ({
       setDisplayedText('');
       speechSynthesis.speak(utterance);
     } else {
-      // --- Typewriter Logic ---
+      // Typewriter Mode (No Audio)
       const lineLanguage = voicePrefs?.lang ? voicePrefs.lang.split('-')[0] : 'en';
 
-      // Fallback for Intl.Segmenter if not supported
       if (!('Segmenter' in Intl)) {
         let i = 0;
-        const typewriterSpeed = 60 - volumes.textSpeed * 50;
+        const typewriterSpeed = 30 - volumes.textSpeed * 25; // Faster for read-only
         typewriterIntervalRef.current = setInterval(() => {
           if (i < fullText.length) {
             setDisplayedText(fullText.substring(0, i + 1));
@@ -192,7 +197,7 @@ export const useTypewriter = ({
             clearInterval(typewriterIntervalRef.current);
             handleFinish();
           }
-        }, typewriterSpeed);
+        }, Math.max(5, typewriterSpeed));
         return;
       }
 
@@ -200,23 +205,22 @@ export const useTypewriter = ({
         const segmenter = new Intl.Segmenter(lineLanguage, { granularity: 'grapheme' });
         const graphemes = [...segmenter.segment(fullText)].map(s => s.segment);
         let graphemeIndex = 0;
-        const typewriterSpeed = 60 - volumes.textSpeed * 50;
+        const typewriterSpeed = 30 - volumes.textSpeed * 25;
 
         typewriterIntervalRef.current = window.setInterval(() => {
           if (graphemeIndex < graphemes.length) {
             const currentText = graphemes.slice(0, graphemeIndex + 1).join('');
             setDisplayedText(currentText);
-            triggerSfxIfNeeded(currentText);
+            // No SFX trigger here because we did it at the start for non-narration
             graphemeIndex++;
           } else {
             clearInterval(typewriterIntervalRef.current);
             typewriterIntervalRef.current = null;
             handleFinish();
           }
-        }, typewriterSpeed);
+        }, Math.max(5, typewriterSpeed));
       } catch (e) {
-        console.error("Typewriter error (Intl.Segmenter failed):", e);
-        // If Segmenter fails for any reason, fall back to showing full text immediately.
+        console.error("Typewriter error:", e);
         setDisplayedText(fullText);
         handleFinish();
       }
