@@ -30,6 +30,9 @@ app.use('/api/stories', storyRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/game', gameRoutes);
 app.use('/api/gamedata', gamedataRoutes);
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "alive" });
+});
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/storyteller';
 
