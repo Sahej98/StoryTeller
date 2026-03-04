@@ -3,20 +3,22 @@
   "short_name": "StoryTeller",
   "description": "An Interactive Story app consisting of novels.",
   "start_url": "/",
+  "orientation": "portrait",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#00c2c7",
   "icons": [
     {
-      "src": "/images/logo.png",
+      "src": "/images/story_teller.jpg",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/images/logo.png",
+      "src": "/images/story_teller.jpg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
