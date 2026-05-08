@@ -3,6 +3,9 @@ import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import { Story } from '../models/story.js';
 import { User } from '../models/user.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your_default_jwt_secret';
@@ -16,7 +19,7 @@ const auth = (req, res, next) => {
         req.user = decoded.user;
         next();
     } catch (e) {
-        res.status(400).json({ message: 'Token is not valid' });
+        res.status(401).json({ message: 'Token is not valid' });
     }
 };
 

@@ -8,7 +8,7 @@ import React, {
 import { useGameState } from './hooks/useGameState.js';
 import { useSoundManager } from './hooks/useSoundManager.js';
 import { useSmartPreload } from './hooks/useSmartPreload.js';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import { Vignette } from './components/Vignette.jsx';
 import { StartScreen } from './components/StartScreen.jsx';
@@ -17,6 +17,7 @@ import { SettingsModal } from './components/SettingsModal.jsx';
 import { InventoryModal } from './components/InventoryModal.jsx';
 import { JournalModal } from './components/JournalModal.jsx';
 import { ToBeContinuedScreen } from './components/ToBeContinuedScreen.jsx';
+import { ChapterEndScreen } from './components/ChapterEndScreen.jsx';
 import { ChapterSelectScreen } from './components/ChapterSelectScreen.jsx';
 import { CautionScreen } from './components/CautionScreen.jsx';
 import { DeathScreen } from './components/DeathScreen.jsx';
@@ -24,7 +25,6 @@ import { BackgroundImageFader } from './components/BackgroundImageFader.jsx';
 import { StorySelectScreen } from './components/StorySelectScreen.jsx';
 import { AuthScreen } from './components/AuthScreen.jsx';
 import { StoryEditor } from './components/StoryEditor.jsx';
-import { Jumpscare } from './components/Jumpscare.jsx';
 import { StatChangeIndicator } from './components/StatChangeIndicator.jsx';
 import { NotificationIndicator } from './components/NotificationIndicator.jsx';
 import { UserManagementScreen } from './components/UserManagementScreen.jsx';
@@ -33,9 +33,9 @@ import { AlertModal } from './components/AlertModal.jsx';
 import { LoadingScreen } from './components/LoadingScreen.jsx';
 import { StoryEndScreen } from './components/StoryEndScreen.jsx';
 import { LoreModal } from './components/LoreModal.jsx';
+import { Jumpscare } from './components/Jumpscare.jsx';
 import { FilmGrainOverlay } from './components/FilmGrainOverlay.jsx';
-import { ScanLinesOverlay } from './components/ScanLinesOverlay.jsx';
-import { ArrowLeft } from 'lucide-react';
+import { ScanLinesOverlay } from './components/ScanLinesOverlay.jsx'; // Keep if scanlines are still a feature
 
 const TOKEN_KEY = 'storyteller_token';
 const SETTINGS_KEY = 'storyteller_settings';
@@ -44,12 +44,11 @@ const API_URL = import.meta.env.VITE_API_URL || '';
 const defaultSettings = {
   master: 1,
   bgm: 0.3,
-  sfx: 0.6,
-  narration: 0.8,
-  narrationEnabled: true,
+  sfx: 0.6, // Keep SFX
   textSpeed: 0.5,
   screenShakeEnabled: true,
   filmGrainEnabled: true,
+  typewriterSfxEnabled: true,
   scanLinesEnabled: false,
   keybindings: {
     continue: ' ', // Spacebar
@@ -116,6 +115,9 @@ export const App = () => {
   const [jumpscare, setJumpscare] = useState(null);
   const [statChanges, setStatChanges] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [bloodSplatter, setBloodSplatter] = useState(false);
+  const [sanityDrop, setSanityDrop] = useState(false);
+  const [staminaDrop, setStaminaDrop] = useState(false);
   const [screenShake, setScreenShake] = useState(false);
   const [updatedStats, setUpdatedStats] = useState([]);
   const [gameData, setGameData] = useState(null);
@@ -123,12 +125,12 @@ export const App = () => {
   const [deathInfo, setDeathInfo] = useState(null);
   const [achievedEnding, setAchievedEnding] = useState(null);
   const [viewingLore, setViewingLore] = useState(null);
-  const [systemVoices, setSystemVoices] = useState([]);
-  const [isMobile, setIsMobile] = useState(false);
-  const [narrationAvailable, setNarrationAvailable] = useState(true);
+  const [isMobile, setIsMobile] = useState(false); // Keep mobile check for other UI adjustments
   const [loadingText, setLoadingText] = useState('Loading...');
 
   const lastJumpscareNodeRef = useRef(null);
+  const sanityWhisperAudioRef = useRef(null);
+  const heartbeatAudioRef = useRef(null);
 
   const showAlert = useCallback(
     (
@@ -153,33 +155,6 @@ export const App = () => {
         navigator.userAgent,
       );
     setIsMobile(mobileCheck);
-
-    if (mobileCheck) {
-      setNarrationAvailable(false);
-      setSettings((s) => ({ ...s, narrationEnabled: false }));
-
-      const hasShownWarning = localStorage.getItem('narration_warning_shown');
-      if (!hasShownWarning) {
-        showAlert(
-          'Narration features are not supported on mobile devices.',
-          'info',
-          'Audio Notice',
-        );
-        localStorage.setItem('narration_warning_shown', 'true');
-      }
-    } else {
-      const loadVoices = () => {
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length > 0) {
-          setSystemVoices(voices);
-          setNarrationAvailable(true);
-        }
-      };
-      loadVoices();
-      if (window.speechSynthesis.onvoiceschanged !== undefined) {
-        window.speechSynthesis.onvoiceschanged = loadVoices;
-      }
-    }
   }, [showAlert]);
 
   useEffect(() => {
@@ -386,9 +361,9 @@ export const App = () => {
     }
   };
 
-  const onChapterEnd = useCallback(() => {
-    setTimeout(() => goToChapterSelect(), 100);
-  }, []);
+  const onChapterEnd = useCallback((finalState) => {
+    setAppState('chapterEnd');
+  }, [selectedStoryId]);
 
   const {
     gameContext,
@@ -517,9 +492,25 @@ export const App = () => {
     if (lastChanges.stats && lastChanges.stats.length > 0) {
       const newStatChanges = lastChanges.stats.map((change) => ({
         ...change,
+        isNegative: change.change < 0,
         id: Date.now() + Math.random(),
       }));
       setStatChanges((prev) => [...prev, ...newStatChanges]);
+
+      if (lastChanges.stats.some(s => s.stat === 'health' && s.change < 0)) {
+        setBloodSplatter(true);
+        setTimeout(() => setBloodSplatter(false), 2000);
+      }
+      
+      if (lastChanges.stats.some(s => s.stat === 'sanity' && s.change < 0)) {
+        setSanityDrop(true);
+        setTimeout(() => setSanityDrop(false), 1500);
+      }
+
+      if (lastChanges.stats.some(s => s.stat === 'stamina' && s.change < 0)) {
+        setStaminaDrop(true);
+        setTimeout(() => setStaminaDrop(false), 1500);
+      }
 
       const statsThatChanged = lastChanges.stats.map((c) => c.stat);
       setUpdatedStats(statsThatChanged);
@@ -584,6 +575,67 @@ export const App = () => {
     }
   }, [lastChanges, selectedStory]);
 
+  // Handle Stat-Reactive Audio Loops (Whispers & Heartbeat)
+  useEffect(() => {
+    if (appState !== 'playing' || !playerStats || !gameData?.SFX) {
+      if (sanityWhisperAudioRef.current) {
+        sanityWhisperAudioRef.current.pause();
+        sanityWhisperAudioRef.current = null;
+      }
+      if (heartbeatAudioRef.current) {
+        heartbeatAudioRef.current.pause();
+        heartbeatAudioRef.current = null;
+      }
+      return;
+    }
+
+    const { health, sanity, stamina } = playerStats;
+    const masterVol = settings.master;
+    const sfxVol = settings.sfx;
+
+    // 1. Sanity Whispers Logic
+    if (!sanityWhisperAudioRef.current && gameData.SFX.sanity_whispers) {
+      const audio = new Audio(gameData.SFX.sanity_whispers);
+      audio.loop = true;
+      sanityWhisperAudioRef.current = audio;
+    }
+
+    if (sanityWhisperAudioRef.current) {
+      // Volume starts scaling up when sanity is below 50%
+      const whisperIntensity = Math.max(0, (50 - sanity) / 50);
+      sanityWhisperAudioRef.current.volume = whisperIntensity * sfxVol * masterVol;
+      
+      if (whisperIntensity > 0 && sanityWhisperAudioRef.current.paused && hasInteracted) {
+        sanityWhisperAudioRef.current.play().catch(() => {});
+      } else if (whisperIntensity <= 0 && !sanityWhisperAudioRef.current.paused) {
+        sanityWhisperAudioRef.current.pause();
+      }
+    }
+
+    // 2. Heartbeat Logic (Health or Stamina)
+    if (!heartbeatAudioRef.current && gameData.SFX.heartbeat) {
+      const audio = new Audio(gameData.SFX.heartbeat);
+      audio.loop = true;
+      heartbeatAudioRef.current = audio;
+    }
+
+    if (heartbeatAudioRef.current) {
+      // Triggered by either critical health or critical stamina (below 30%)
+      const lowestPhysicalStat = Math.min(health, stamina);
+      const heartbeatIntensity = Math.max(0, (30 - lowestPhysicalStat) / 30);
+      heartbeatAudioRef.current.volume = heartbeatIntensity * sfxVol * masterVol;
+      
+      // Scale playback speed from 1.0 (at 30% health/stamina) up to 2.0 (at 0% health/stamina)
+      heartbeatAudioRef.current.playbackRate = 1.0 + heartbeatIntensity;
+
+      if (heartbeatIntensity > 0 && heartbeatAudioRef.current.paused && hasInteracted) {
+        heartbeatAudioRef.current.play().catch(() => {});
+      } else if (heartbeatIntensity <= 0 && !heartbeatAudioRef.current.paused) {
+        heartbeatAudioRef.current.pause();
+      }
+    }
+  }, [appState, playerStats, settings, gameData, hasInteracted]);
+
   useEffect(() => {
     const handleGlobalClick = (event) => {
       const target = event.target.closest('button');
@@ -617,10 +669,6 @@ export const App = () => {
   };
   const handleChoice = async (choice) => {
     stopAllSfx();
-    if (choice.next === null || choice.next === '') {
-      setAppState('toBeContinued');
-      return;
-    }
     if (choice.next === 'END_STORY') {
       if (choice.ending) {
         setAchievedEnding(choice.ending);
@@ -788,10 +836,14 @@ export const App = () => {
     }
   };
   const handleSaveStory = async (storyData) => {
-    if (!authToken) return;
+    if (!authToken) {
+      showAlert('You must be logged in to save stories.', 'error', 'Authentication Required');
+      handleLogout();
+      return false;
+    }
+
     const isNewStory = !storyData._id;
     const method = isNewStory ? 'POST' : 'PUT';
-
     const identifier = storyData.id || storyData._id;
 
     const endpoint = isNewStory
@@ -808,6 +860,11 @@ export const App = () => {
         body: JSON.stringify(storyData),
       });
       if (!response.ok) {
+        if (response.status === 401 || response.status === 400) { // 400 for current server behavior before fix
+          showAlert('Your session has expired. Please log in again.', 'error', 'Session Expired');
+          handleLogout();
+          return false;
+        }
         const errText = await response.text();
         console.error('Save error response:', errText);
         let err;
@@ -825,6 +882,10 @@ export const App = () => {
           ? [...prev, savedStory]
           : prev.map((s) => (s.id === savedStory.id ? savedStory : s)),
       );
+      // Update the active gameplay story if it's the one we just saved
+      if (selectedStoryId === savedStory.id || selectedStoryId === savedStory._id) {
+        setSelectedStory(savedStory);
+      }
       setAppState('storySelect');
       setEditingStory(null);
       return true; // Indicate success
@@ -856,8 +917,10 @@ export const App = () => {
   const storyAccentColor = storyForTheme?.accentColor || '#FFFFFF';
 
   const combinedVoiceMap = useMemo(() => {
-    return { ...gameData?.voiceMap, ...selectedStory?.voices };
-  }, [gameData, selectedStory]);
+    // This was removed in a previous step, but the variable was still declared.
+    // If voice narration is completely removed, this can be deleted.
+    return {}; 
+  }, []);
 
   const renderContent = () => {
     if (appState === 'loading' || !gameData)
@@ -882,9 +945,6 @@ export const App = () => {
           storyToEdit={editingStory}
           onBack={handleEditorBack}
           onSave={handleSaveStory}
-          gameData={gameData}
-          showAlert={showAlert}
-          systemVoices={systemVoices}
         />
       );
     }
@@ -986,12 +1046,20 @@ export const App = () => {
             textToDisplay={textToDisplay}
             isPlayerInScene={isPlayerInScene}
             npcToDisplay={npcToDisplay}
-            voiceMap={combinedVoiceMap}
           />
         );
-      case 'toBeContinued':
+      case 'chapterEnd':
+        const chapterDetails = selectedStory?.storyDetails?.chapters?.[gameState?.currentPosition?.chapter];
         return (
-          <ToBeContinuedScreen onMainMenu={() => setAppState('storySelect')} />
+          <ChapterEndScreen 
+            chapter={chapterDetails}
+            stats={playerStats}
+            relationships={relationships}
+            characterDefs={selectedStory.characters}
+            discoveredCharacters={characters}
+            inventoryCount={inventory.length}
+            onNext={() => goToChapterSelect()} 
+          />
         );
       case 'deathScreen':
         return (
@@ -1017,9 +1085,17 @@ export const App = () => {
     }
   };
 
+  // Calculate intensities for horror effects
+  const sanityValue = playerStats?.sanity ?? 100;
+  const isInsane = sanityValue < 40;
+  const flickerClass = isInsane ? `sanity-flicker-${sanityValue < 15 ? 'heavy' : 'light'}` : '';
+  const isCriticalHealth = playerStats?.health < 25;
+  const sanityOffset = Math.max(0, (70 - sanityValue) / 10);
+
   const viewportStyle = {
     '--accent-color': storyAccentColor,
     '--accent-color-rgb': hexToRgb(storyAccentColor).join(', '),
+    '--sanity-offset': `${sanityOffset}px`,
   };
 
   const settingsContext = [
@@ -1039,8 +1115,38 @@ export const App = () => {
       <audio ref={sfxAudioRef} />
       <AlertModal alerts={alerts} setAlerts={setAlerts} />
       <div
-        className={`game-viewport ${screenShake ? 'screen-shake' : ''} ${currentNode?.visualEffect ? `effect-${currentNode.visualEffect}` : ''}`}
+        className={`game-viewport ${screenShake ? 'screen-shake' : ''} ${flickerClass} ${sanityOffset > 0 ? 'sanity-chromatic' : ''} ${isCriticalHealth ? "critical-health-pulse" : ""} ${currentNode?.visualEffect ? `effect-${currentNode.visualEffect}` : ''}`}
         style={viewportStyle}>
+          <AnimatePresence>
+          {bloodSplatter && (
+            <motion.div 
+              key="blood-splatter"
+              initial={{ opacity: 0, scale: 1.2 }}
+              animate={{ opacity: 0.8, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ exit: { duration: 3 } }}
+              className="blood-splatter-overlay" 
+            />
+          )}
+          {sanityDrop && (
+            <motion.div 
+              key="sanity-drop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="sanity-drop-overlay" 
+            />
+          )}
+          {staminaDrop && (
+            <motion.div 
+              key="stamina-drop"
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className="stamina-drop-overlay" 
+            />
+          )}
+        </AnimatePresence>
         {settings.filmGrainEnabled && <FilmGrainOverlay />}
         {settings.scanLinesEnabled && <ScanLinesOverlay />}
         <AnimatePresence>
@@ -1053,7 +1159,7 @@ export const App = () => {
           )}
         </AnimatePresence>
         <BackgroundImageFader imageUrl={activeBackground} />
-        <Vignette isLowSanity={playerStats?.sanity < 30} />
+        <Vignette sanity={playerStats?.sanity ?? 100} />
         {renderContent()}
         <div className='stat-change-container'>
           <AnimatePresence>
@@ -1110,7 +1216,6 @@ export const App = () => {
               }
               showAlert={showAlert}
               context={settingsContext}
-              narrationAvailable={narrationAvailable}
             />
           )}
         </AnimatePresence>

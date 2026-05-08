@@ -4,6 +4,8 @@ import { CharacterSprite } from './CharacterSprite.jsx';
 import { DialogueBox } from './DialogueBox.jsx';
 import { ChoicesModal } from './ChoicesModal.jsx';
 import { HUD } from './HUD.jsx';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Volume2 } from 'lucide-react';
 
 export const GameUI = ({
   characters,
@@ -28,7 +30,6 @@ export const GameUI = ({
   textToDisplay,
   isPlayerInScene,
   npcToDisplay,
-  voiceMap,
 }) => {
   const [uiState, setUiState] = useState({
     dialogueVisible: false,
@@ -38,14 +39,19 @@ export const GameUI = ({
   const [dialogueFadingOut, setDialogueFadingOut] = useState(false);
   const choiceHandlerRef = useRef(null);
 
-  const characterVoiceKey = characters[speakerKey]?.voiceKey;
-  const finalVoiceKey = characterVoiceKey || speakerKey || 'narrator';
+  const playTypewriterTick = useCallback(() => {
+    if (settings.typewriterSfxEnabled && settings.master > 0 && settings.sfx > 0) {
+      const audio = new Audio('/audio/sfx/typewriter_tick.mp3');
+      audio.volume = settings.sfx * settings.master * 0.4;
+      audio.play().catch(() => {});
+    }
+  }, [settings]);
 
   const handleContinueClick = () => {
-    if (narratorState === 'narrating') {
+    if (isTyping) {
       skip();
     } else if (
-      narratorState === 'finished' &&
+      !isTyping &&
       !uiState.choicesVisible &&
       !dialogueFadingOut
     ) {
@@ -66,16 +72,14 @@ export const GameUI = ({
     }
   };
 
-  const { displayedText, narratorState, skip } = useTypewriter({
+  const { displayedText, isTyping, skip } = useTypewriter({
     fullText: textToDisplay,
     node: currentNode,
     volumes: settings,
-    narrationEnabled: settings.narrationEnabled,
     onFinished: onDialogueEnd,
     onAmbientSfx: onAmbientSfx,
+    onCharTyped: playTypewriterTick,
     isReady: uiState.dialogueVisible,
-    speakerKey: finalVoiceKey,
-    voiceMap,
   });
 
   const handleChoiceClick = (choice) => {
@@ -145,10 +149,7 @@ export const GameUI = ({
 
   return (
     <>
-      {(narratorState === 'narrating' ||
-        (narratorState === 'finished' &&
-          !uiState.choicesVisible &&
-          !dialogueFadingOut)) && (
+      {(isTyping || (!isTyping && !uiState.choicesVisible && !dialogueFadingOut)) && (
         <div className='continue-click-area' onClick={handleContinueClick} />
       )}
 
@@ -175,24 +176,38 @@ export const GameUI = ({
               <DialogueBox
                 speakerName={speakerName}
                 displayedText={displayedText}
-                narratorState={narratorState}
+                isTyping={isTyping}
+                sanity={playerStats?.sanity}
                 textEffects={currentNode?.textEffects}
               />
             </div>
           </div>
 
           <div className='scene-column right'>
-            {(npcToDisplay || []).map((npcKey) =>
-              characters[npcKey] ? (
-                <CharacterSprite
-                  key={npcKey}
-                  sprite={characters[npcKey].sprite}
-                  name={characters[npcKey].name}
-                  className='npc'
-                  isActive={speakerKey === npcKey}
-                />
-              ) : null,
-            )}
+            <AnimatePresence mode="popLayout">
+              {(npcToDisplay || []).map((npcKey) =>
+                characters[npcKey] ? (
+                  <motion.div
+                    key={npcKey}
+                    initial={{ opacity: 0, x: 40, filter: 'blur(5px)' }}
+                    animate={{ 
+                      opacity: 1, 
+                      x: 0, 
+                      filter: 'blur(0px)',
+                      transition: { duration: 0.8, ease: "easeOut" }
+                    }}
+                    exit={{ opacity: 0, x: 20, filter: 'blur(5px)', transition: { duration: 0.5 } }}
+                  >
+                    <CharacterSprite
+                      sprite={characters[npcKey].sprite}
+                      name={characters[npcKey].name}
+                      className='npc'
+                      isActive={speakerKey === npcKey}
+                    />
+                  </motion.div>
+                ) : null,
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>

@@ -9,6 +9,7 @@ const SettingsSchema = new mongoose.Schema({
     textSpeed: { type: Number, default: 0.5 },
     screenShakeEnabled: { type: Boolean, default: true },
     filmGrainEnabled: { type: Boolean, default: true },
+    typewriterSfxEnabled: { type: Boolean, default: true },
     scanLinesEnabled: { type: Boolean, default: false },
     visualEffectsEnabled: { type: Boolean, default: true },
 }, { _id: false });

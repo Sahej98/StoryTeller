@@ -10,6 +10,11 @@ export const intro = {
     text: 'The first thing you feel is a hammering in your skull, a symphony of agony conducted with ice picks. The first thing you taste is copper and bile.',
     background: BG.start_room,
     bgm: BGM.ambient,
+    visualEffect: 'blur-pulse',
+    textEffects: [
+      { word: 'hammering', effect: 'shake' },
+      { word: 'agony', effect: 'tremble' }
+    ],
     ambientSfx: [{ triggerWord: 'hammering', sfx: SFX.headThrob }],
     choices: [{ text: '...', next: 'start_b' }],
   },
@@ -23,6 +28,10 @@ export const intro = {
     speaker: 'Narrator',
     text: "Your eyelids peel open with a sticky, tearing sound. You're looking at a stained, peeling ceiling that seems to sweat a greasy film in the dim, flickering light.",
     background: BG.start_room,
+    textEffects: [
+      { word: 'sticky, tearing', effect: 'whisper' },
+      { word: 'flickering', effect: 'glitch' }
+    ],
     ambientSfx: [{ triggerWord: 'flickering', sfx: SFX.lightBuzz }],
     choices: [{ text: '...', next: 'start_2_b' }],
   },
@@ -66,7 +75,8 @@ export const intro = {
     text: 'It looks like the number was burned into your skin, cauterizing the flesh into a puckered, angry wound. The flesh around it is red and weeping a clear, sticky fluid.',
     background: BG.start_room,
     ambientSfx: [{ triggerWord: 'weeping', sfx: SFX.fleshTear }],
-    effects: { stats: { health: -5 } },
+    visualEffect: 'flash',
+    effects: { stats: { health: -10 } },
     choices: [{ text: 'This is wrong. Get up. Now.', next: 'getUp' }],
   },
   getUp: {

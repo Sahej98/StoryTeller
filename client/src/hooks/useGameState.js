@@ -71,7 +71,9 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
 
     // Handle End of Chapter/Story
     if (nextNodeKey === null || nextNodeKey === '') {
-      onChapterEnd();
+      savePersistent(storyId, stateAfterChoice);
+      setGameContext(prev => ({ ...prev, gameState: stateAfterChoice }));
+      onChapterEnd(stateAfterChoice);
       return;
     }
     if (nextNodeKey === 'END_STORY') {
@@ -92,6 +94,19 @@ export const useGameState = (storyId, onChapterEnd, currentUser) => {
 
     // Apply Node Entry Effects
     const { newState: stateAfterNode, changes: nodeChanges } = applyEffects(stateAfterChoice, storyData, nextNode.effects);
+    
+    // --- ATTRITION LOGIC ---
+    // If Sanity or Stamina is 0, drop health by 2
+    if (stateAfterNode.playerStats.sanity <= 0 || stateAfterNode.playerStats.stamina <= 0) {
+      stateAfterNode.playerStats.health = Math.max(0, stateAfterNode.playerStats.health - 2);
+      nodeChanges.stats.push({ stat: 'health', change: -2 });
+    }
+
+    // --- FINAL DEATH CHECK ---
+    if (stateAfterNode.playerStats.health <= 0) {
+      savePersistent(storyId, stateAfterNode); // Save the death state
+      return { status: 'DEATH', text: "Your body can no longer sustain the trauma. Everything fades to a cold, silent dark.", nextOnDeath: null };
+    }
 
     // Merge Changes for UI
     const finalChanges = {

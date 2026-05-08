@@ -273,6 +273,24 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
     50% { transform: scale(1.05); text-shadow: 0 0 30px #ff5252, 0 0 60px #ff5252; }
 }
 
+@keyframes blood-pulse-anim {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.03); opacity: 1; }
+}
+
+@keyframes sanity-jitter-anim {
+    0% { transform: translate(0,0); }
+    25% { transform: translate(calc(var(--sanity-offset) * 0.1), calc(var(--sanity-offset) * 0.1)); }
+    50% { transform: translate(calc(var(--sanity-offset) * -0.1), calc(var(--sanity-offset) * 0.1)); }
+    75% { transform: translate(calc(var(--sanity-offset) * 0.1), calc(var(--sanity-offset) * -0.1)); }
+}
+
+@keyframes critical-pulse {
+    0% { box-shadow: inset 0 0 0px rgba(183, 28, 28, 0); }
+    50% { box-shadow: inset 0 0 100px rgba(183, 28, 28, 0.4); }
+    100% { box-shadow: inset 0 0 0px rgba(183, 28, 28, 0); }
+}
+
 @keyframes book-open {
     from { transform: scale(0.8) rotateY(20deg); opacity: 0; }
     to { transform: scale(1) rotateY(0deg); opacity: 1; }
@@ -294,6 +312,55 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
 @keyframes scan-lines-anim {
   0% { transform: translateY(0); }
   100% { transform: translateY(100%); }
+}
+
+.blood-splatter-overlay{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/images/effects/blood.png');
+    background-size: cover;
+    background-position: center;
+    pointer-events: none;
+    z-index: 200;
+    animation: blood-pulse-anim 2s ease-in-out infinite;
+}
+
+.sanity-chromatic {
+    filter: drop-shadow(var(--sanity-offset) 0px 0px rgba(255, 0, 0, 0.4)) 
+            drop-shadow(calc(var(--sanity-offset) * -1) 0px 0px rgba(0, 255, 255, 0.4));
+    animation: sanity-jitter-anim 0.2s infinite;
+    transition: filter 0.5s ease-out;
+}
+
+.critical-sanity-glitch {
+    animation: glitch-shake 0.1s infinite;
+    filter: contrast(1.5) brightness(1.2) hue-rotate(45deg);
+}
+
+.sanity-drop-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, transparent 30%, rgba(100, 0, 150, 0.2) 100%);
+    pointer-events: none;
+    z-index: 190;
+    mix-blend-mode: color-burn;
+}
+
+.stamina-drop-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(4px);
+    mask-image: radial-gradient(circle, transparent 20%, black 100%);
+    -webkit-mask-image: radial-gradient(circle, transparent 20%, black 100%);
+    pointer-events: none;
+    z-index: 190;
+    opacity: 0.6;
 }
 
 /* Base Styles */
@@ -326,6 +393,15 @@ textarea::-webkit-scrollbar, .inventory-modal-list::-webkit-scrollbar, .journal-
 
 .game-viewport.effect-rumble {
     animation: rumble-anim 0.4s ease-in-out both;
+}
+
+.critical-health-pulse::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    animation: critical-pulse 2s ease-in-out infinite;
+    z-index: 2;
 }
 
 /* Background */
@@ -2957,7 +3033,6 @@ input[type="range"] {
     border-radius: 6px;
     border: 1px solid #4a3a2a;
     display: flex;
-    flex-direction: column;
     gap: 1rem;
 }
 

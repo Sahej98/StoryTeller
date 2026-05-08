@@ -75,6 +75,14 @@ const StorySchema = new mongoose.Schema({
     description: String,
     thumbnail: String,
     accentColor: String,
+    genre: { type: String, default: 'Uncategorized' },
+    categories: [{ type: String }],
+    contentRating: String,
+    audienceRating: { type: Number, default: 0 },
+    isTrending: { type: Boolean, default: false },
+    isNew: { type: Boolean, default: true },
+    featured: { type: Boolean, default: false },
+    estimatedLength: String,
     language: { type: String, default: 'en', enum: ['en'] },
     author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     published: { type: Boolean, default: false },
@@ -93,7 +101,6 @@ const StorySchema = new mongoose.Schema({
             of: NodeSchema,
         }
     },
-    voices: { type: Map, of: VoiceProfileSchema, default: {} },
     characters: { type: Map, of: CharacterSchema, default: {} },
     items: { type: mongoose.Schema.Types.Mixed, default: {} },
 }, { id: false });

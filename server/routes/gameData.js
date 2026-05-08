@@ -3,6 +3,9 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import { GameData } from '../models/GameData.js';
 import { User } from '../models/user.js'; // Needed for admin check if referencing role directly
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your_default_jwt_secret';
@@ -17,7 +20,7 @@ const auth = (req, res, next) => {
         req.user = decoded.user;
         next();
     } catch (e) {
-        res.status(400).json({ message: 'Token is not valid' });
+        res.status(401).json({ message: 'Token is not valid' });
     }
 };
 
@@ -36,13 +39,12 @@ router.get('/', async (req, res) => {
 
         if (!gameData) {
             // Fallback empty structure if seeding failed (though seed should handle this)
-            return res.json({ BGM: {}, SFX: {}, voiceMap: {} });
+            return res.json({ BGM: {}, SFX: {} });
         }
 
         res.json({
             BGM: gameData.BGM || {},
-            SFX: gameData.SFX || {},
-            voiceMap: gameData.voiceMap || {}
+            SFX: gameData.SFX || {}
         });
     } catch (err) {
         console.error('Error fetching game data:', err);
@@ -53,7 +55,7 @@ router.get('/', async (req, res) => {
 // PUT /api/gamedata (Admin Only)
 router.put('/', auth, adminAuth, async (req, res) => {
     try {
-        const { BGM, SFX, voiceMap } = req.body;
+        const { BGM, SFX } = req.body;
 
         // updateOne with upsert to ensure it exists
         const result = await GameData.findOneAndUpdate(
@@ -61,8 +63,7 @@ router.put('/', auth, adminAuth, async (req, res) => {
             {
                 $set: {
                     BGM: BGM,
-                    SFX: SFX,
-                    voiceMap: voiceMap
+                    SFX: SFX
                 }
             },
             { new: true, upsert: true, setDefaultsOnInsert: true }

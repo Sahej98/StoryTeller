@@ -15,6 +15,7 @@ import {
   Signal,
   Trash2,
   Database,
+  Type,
 } from 'lucide-react';
 import { KeybindInput } from './KeybindInput.jsx';
 
@@ -93,7 +94,6 @@ export const SettingsModal = ({
   onDeleteAccount,
   showAlert,
   context = 'game',
-  narrationAvailable,
 }) => {
   const handleKeybindChange = (action, newKey) => {
     const newKeybindings = { ...settings.keybindings, [action]: newKey };
@@ -198,28 +198,6 @@ export const SettingsModal = ({
                 onSettingsChange('sfx', parseFloat(e.target.value))
               }
             />
-            <VolumeSlider
-              label='Narration'
-              icon={Volume2}
-              value={settings.narration}
-              onChange={(e) =>
-                onSettingsChange('narration', parseFloat(e.target.value))
-              }
-            />
-            <ToggleSwitch
-              icon={Headphones}
-              label='Enable Narration'
-              checked={settings.narrationEnabled}
-              onChange={(e) =>
-                onSettingsChange('narrationEnabled', e.target.checked)
-              }
-              disabled={!narrationAvailable}
-              disabledText={
-                !narrationAvailable
-                  ? 'Narration is not available on this device/browser.'
-                  : ''
-              }
-            />
           </div>
           <div className='settings-section'>
             <h3>
@@ -239,6 +217,14 @@ export const SettingsModal = ({
               checked={settings.filmGrainEnabled}
               onChange={(e) =>
                 onSettingsChange('filmGrainEnabled', e.target.checked)
+              }
+            />
+            <ToggleSwitch
+              icon={Type}
+              label='Typewriter Sound'
+              checked={settings.typewriterSfxEnabled}
+              onChange={(e) =>
+                onSettingsChange('typewriterSfxEnabled', e.target.checked)
               }
             />
             <ToggleSwitch
