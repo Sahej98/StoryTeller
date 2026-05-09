@@ -3033,6 +3033,7 @@ input[type="range"] {
     border-radius: 6px;
     border: 1px solid #4a3a2a;
     display: flex;
+    flex-direction: column;
     gap: 1rem;
 }
 

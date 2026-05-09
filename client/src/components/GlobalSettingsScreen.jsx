@@ -251,7 +251,7 @@ export const GlobalSettingsScreen = ({ onBack, showAlert, authToken }) => {
                   (key) => {
                     const url = data[activeTab === 'bgm' ? 'BGM' : 'SFX'][key];
                     return (
-                      <div key={key} className='choice-builder asset-row'>
+                      <div key={key} className='choice-builder asset-row' style={{ flexDirection: 'row' }}>
                         <div className='asset-key-group'>
                           <label>ID</label>
                           <input
